@@ -246,11 +246,11 @@ wheels = [
 
 [[package]]
 name = "coola"
-version = "1.1.7"
+version = "1.1.8a0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2a/0d/96f96ea06662033d3a08843a1006c319a4cdce42149bac5a79f611bcb287/coola-1.1.7.tar.gz", hash = "sha256:14dac0a1202191ac4ca904999e6b6bea8046fed091aa09c2f147657e77bdcf1c", size = 93587, upload-time = "2026-05-23T03:06:15.564Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/06/75/14f045e149c41c7c5ad9ba03c3765f5210cfdb67366dbae072923a969da9/coola-1.1.8a0.tar.gz", hash = "sha256:e3cd6cefc1f066c3b092dda23f4308ee71603928c2a1176660f67ae1fc04a0f7", size = 98955, upload-time = "2026-06-26T06:21:03.935Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fa/88/6954eb9747f03b38f2806d0dfd3ecd35b11fca90d819473a55d36b04e358/coola-1.1.7-py3-none-any.whl", hash = "sha256:d5829a905f77ad378e90e506a2179d7603871e3401255864bce82d6727dd6b84", size = 168345, upload-time = "2026-05-23T03:06:16.863Z" },
+    { url = "https://files.pythonhosted.org/packages/6e/ec/444e3e6b9900b1198d2b825f4a17d3cc69f381399cd7e194712719aac508/coola-1.1.8a0-py3-none-any.whl", hash = "sha256:12c5334d075fb365fedcfa8ae2778a9a3eb6da58f742eb5f6a702b831b04c6ad", size = 179385, upload-time = "2026-06-26T06:21:02.74Z" },
 ]
 
 [[package]]
@@ -405,15 +405,16 @@ wheels = [
 
 [[package]]
 name = "feu"
-version = "0.6.2"
+version = "0.7.0a1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6d/c5/6fe0cb82178b0611dab21eed6d14b4f15d6a447e91bf810b50e4f3516eb8/feu-0.6.2.tar.gz", hash = "sha256:9307aa145278ffc3a2ee7cafb349cd6852a59406fe5ae6b354b54bc85a1078db", size = 27241, upload-time = "2026-01-23T08:44:04.172Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/62/5e/493e13713e7af3b3d4e51f5493f2d0e7ea6a220e93538ef06497ef95d342/feu-0.7.0a1.tar.gz", hash = "sha256:be9b667c161fedf6d08138c8ca9e2cb080c4867130306f28f1156e38c7d0b1bf", size = 33307, upload-time = "2026-06-26T06:00:34.411Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/59/88/660d0c973e082896059cc61cbf02557c129330970d2365c016487cb2d1bc/feu-0.6.2-py3-none-any.whl", hash = "sha256:c2b7f00d8b3239e3af7af14dc09eacc677a722843ea66c9d72ffb08c27f10502", size = 37368, upload-time = "2026-01-23T08:44:02.717Z" },
+    { url = "https://files.pythonhosted.org/packages/1c/1e/360c8032e18c2522c29e41ac83886a676e2a233b63d7b490de78a0df1ed2/feu-0.7.0a1-py3-none-any.whl", hash = "sha256:82a231e8175463160d69279fa7981b6dba432fbc04ee30311ee53dd7b96467f4", size = 47794, upload-time = "2026-06-26T06:00:33.184Z" },
 ]
 
 [package.optional-dependencies]
@@ -2143,7 +2144,7 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "coola", specifier = ">=1.1.7,<2.0" },
+    { name = "coola", specifier = ">=1.1.8a0,<2.0" },
     { name = "langchain", specifier = ">=1.3,<2.0" },
     { name = "langchain-core", specifier = ">=1.4,<2.0" },
 ]
@@ -2153,7 +2154,7 @@ dev = [
     { name = "black", specifier = ">=26.5.1" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.14,<8.0" },
     { name = "docformatter", extras = ["tomli"], specifier = ">=1.7.8,<2.0" },
-    { name = "feu", extras = ["all"], specifier = ">=0.6.2,<1.0" },
+    { name = "feu", extras = ["all"], specifier = ">=0.7.0a0,<1.0" },
     { name = "invoke", specifier = ">=3.0,<4.0" },
     { name = "pre-commit", specifier = ">=4.6,<5.0" },
     { name = "pygments", specifier = ">=2.20,<3.0" },
