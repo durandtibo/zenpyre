@@ -11,8 +11,6 @@ from feu.utils.mapping import sort_by_keys
 from feu.version import (
     fetch_latest_major_versions_map,
     fetch_latest_minor_versions_map,
-    fetch_sampled_latest_minor_versions,
-    get_package_bounds,
     partition_package_bounds,
     read_pyproject_dependencies,
     read_pyproject_optional_dependencies,
@@ -38,8 +36,8 @@ def fetch_package_versions(base_dir: Path) -> dict[str, list[str]]:
     major_deps, minor_deps = partition_package_bounds(deps, [])
 
     return sort_by_keys(
-        fetch_latest_major_versions_map(major_deps)
-        | fetch_latest_minor_versions_map(minor_deps)
+        fetch_latest_major_versions_map(major_deps, include_lower_bound=True)
+        | fetch_latest_minor_versions_map(minor_deps, include_lower_bound=True)
     )
 
 
