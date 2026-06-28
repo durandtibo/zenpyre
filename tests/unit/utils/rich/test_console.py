@@ -48,7 +48,7 @@ def test_print_markdown_multiline() -> None:
     ],
 )
 def test_print_markdown_renders_panel(msg: str, title: str | None) -> None:
-    with patch(f"{MODULE}.console.print") as mock_print:
+    with patch(f"{MODULE}._console.print") as mock_print:
         print_markdown(msg, title=title)
     panel: Panel = mock_print.call_args.args[0]
     assert isinstance(panel, Panel)
@@ -91,7 +91,7 @@ def test_print_pretty_empty_dict() -> None:
     ],
 )
 def test_print_pretty_renders_panel(data: object, title: str | None) -> None:
-    with patch(f"{MODULE}.console.print") as mock_print:
+    with patch(f"{MODULE}._console.print") as mock_print:
         print_pretty(data, title=title)
     panel: Panel = mock_print.call_args.args[0]
     assert isinstance(panel, Panel)

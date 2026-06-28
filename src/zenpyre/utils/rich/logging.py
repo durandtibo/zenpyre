@@ -9,7 +9,7 @@ from typing import Any
 
 from rich.logging import RichHandler
 
-from zenpyre.utils.rich.console import console
+from zenpyre.utils.rich.console import _console
 
 
 def configure_rich_logging(
@@ -100,7 +100,7 @@ def configure_rich_logging(
         format=fmt,
         datefmt=datefmt,
         handlers=[
-            RichHandler(console=console, rich_tracebacks=rich_tracebacks, markup=markup, **kwargs)
+            RichHandler(console=_console, rich_tracebacks=rich_tracebacks, markup=markup, **kwargs)
         ],
         force=force,
     )
