@@ -16,6 +16,8 @@ __all__ = [
     "langchain_ollama_not_available",
     "langchain_openai_available",
     "langchain_openai_not_available",
+    "langchain_text_splitters_available",
+    "langchain_text_splitters_not_available",
 ]
 
 import pytest
@@ -26,6 +28,7 @@ from zenpyre.utils.imports import (
     is_langchain_huggingface_available,
     is_langchain_ollama_available,
     is_langchain_openai_available,
+    is_langchain_text_splitters_available,
 )
 
 langchain_anthropic_available: pytest.MarkDecorator = pytest.mark.skipif(
@@ -61,4 +64,11 @@ langchain_openai_available: pytest.MarkDecorator = pytest.mark.skipif(
 )
 langchain_openai_not_available: pytest.MarkDecorator = pytest.mark.skipif(
     is_langchain_openai_available(), reason="Skip if langchain_openai is available"
+)
+
+langchain_text_splitters_available: pytest.MarkDecorator = pytest.mark.skipif(
+    not is_langchain_text_splitters_available(), reason="Requires langchain_text_splitters"
+)
+langchain_text_splitters_not_available: pytest.MarkDecorator = pytest.mark.skipif(
+    is_langchain_text_splitters_available(), reason="Skip if langchain_text_splitters is available"
 )
