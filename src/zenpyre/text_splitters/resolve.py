@@ -6,13 +6,13 @@ from __future__ import annotations
 __all__ = ["resolve_text_splitter"]
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from objectory import factory
 
 from zenpyre.utils.imports import is_langchain_text_splitters_available
 
-if is_langchain_text_splitters_available():
+if TYPE_CHECKING or is_langchain_text_splitters_available():
     from langchain_text_splitters import TextSplitter
 else:  # pragma: no cover
     from zenpyre.utils.fallback.langchain_text_splitters import TextSplitter
