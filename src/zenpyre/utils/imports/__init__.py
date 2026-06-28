@@ -8,21 +8,25 @@ __all__ = [
     "check_langchain_huggingface",
     "check_langchain_ollama",
     "check_langchain_openai",
+    "check_langchain_text_splitters",
     "is_langchain_anthropic_available",
     "is_langchain_google_genai_available",
     "is_langchain_huggingface_available",
     "is_langchain_ollama_available",
     "is_langchain_openai_available",
+    "is_langchain_text_splitters_available",
     "langchain_anthropic_available",
     "langchain_google_genai_available",
     "langchain_huggingface_available",
     "langchain_ollama_available",
     "langchain_openai_available",
+    "langchain_text_splitters_available",
     "raise_langchain_anthropic_missing_error",
     "raise_langchain_google_genai_missing_error",
     "raise_langchain_huggingface_missing_error",
     "raise_langchain_ollama_missing_error",
     "raise_langchain_openai_missing_error",
+    "raise_langchain_text_splitters_missing_error",
 ]
 
 from zenpyre.utils.imports.langchain_anthropic import (
@@ -54,4 +58,10 @@ from zenpyre.utils.imports.langchain_openai import (
     is_langchain_openai_available,
     langchain_openai_available,
     raise_langchain_openai_missing_error,
+)
+from zenpyre.utils.imports.langchain_text_splitters import (
+    check_langchain_text_splitters,
+    is_langchain_text_splitters_available,
+    langchain_text_splitters_available,
+    raise_langchain_text_splitters_missing_error,
 )
