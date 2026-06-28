@@ -5,16 +5,19 @@ from __future__ import annotations
 import logging
 
 import pytest
-from langchain_text_splitters import CharacterTextSplitter, TextSplitter
 
 from zenpyre.testing.fixtures import (
     langchain_text_splitters_available,
     langchain_text_splitters_not_available,
 )
 from zenpyre.text_splitters import resolve_text_splitter
+from zenpyre.utils.imports import is_langchain_text_splitters_available
+
+if is_langchain_text_splitters_available():
+    from langchain_text_splitters import CharacterTextSplitter, TextSplitter
+
 
 CHARACTER_TEXT_SPLITTER_TARGET = "langchain_text_splitters.CharacterTextSplitter"
-
 
 ##############################################
 #     Tests for resolve_text_splitter        #

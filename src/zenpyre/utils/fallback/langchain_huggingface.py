@@ -3,7 +3,7 @@ dependency is not available."""
 
 from __future__ import annotations
 
-__all__ = ["langchain_huggingface"]
+__all__ = ["HuggingFaceEmbeddings", "langchain_huggingface"]
 
 from types import ModuleType
 from typing import Any
@@ -27,6 +27,8 @@ class FakeClass:
         raise_langchain_huggingface_missing_error()
 
 
+HuggingFaceEmbeddings = FakeClass
+
 # Create a fake langchain_huggingface package
 langchain_huggingface: ModuleType = ModuleType("langchain_huggingface")
-langchain_huggingface.HuggingFaceEmbeddings = FakeClass
+langchain_huggingface.HuggingFaceEmbeddings = HuggingFaceEmbeddings
