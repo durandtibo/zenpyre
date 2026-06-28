@@ -42,6 +42,10 @@ def resolve_text_splitter(text_splitter: TextSplitter | dict[str, Any]) -> TextS
         A configured :class:`~langchain_text_splitters.TextSplitter`
         instance.
 
+    Raises:
+        TypeError: If the resolved object is not a
+            :class:`~langchain_text_splitters.TextSplitter` instance.
+
     Example:
         ```pycon
         >>> from zenpyre.text_splitters import resolve_text_splitter
@@ -59,8 +63,6 @@ def resolve_text_splitter(text_splitter: TextSplitter | dict[str, Any]) -> TextS
         logger.info("Initializing a TextSplitter instance from its configuration...")
         text_splitter = factory(**text_splitter)
     if not isinstance(text_splitter, TextSplitter):
-        logger.warning(
-            "Received object is not a TextSplitter instance (received: %s)",
-            type(text_splitter),
-        )
+        msg = f"Received object is not a TextSplitter instance (received: {type(text_splitter)})"
+        raise TypeError(msg)
     return text_splitter

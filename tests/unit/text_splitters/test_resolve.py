@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import logging
-
 import pytest
 
 from zenpyre.testing.fixtures import (
@@ -66,15 +64,6 @@ def test_resolve_text_splitter_without_langchain_text_splitters() -> None:
 
 
 @langchain_text_splitters_available
-def test_resolve_text_splitter_invalid_type_returns_value() -> None:
-    result = resolve_text_splitter("not-a-text-splitter")
-    assert result == "not-a-text-splitter"
-
-
-@langchain_text_splitters_available
-def test_resolve_text_splitter_invalid_type_logs_warning(
-    caplog: pytest.LogCaptureFixture,
-) -> None:
-    with caplog.at_level(logging.WARNING):
+def test_resolve_embeddings_invalid_type_raises_type_error() -> None:
+    with pytest.raises(TypeError, match="Received object is not a TextSplitter instance"):
         resolve_text_splitter("not-a-text-splitter")
-    assert any("not a TextSplitter instance" in m for m in caplog.messages)
