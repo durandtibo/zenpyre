@@ -56,7 +56,8 @@ def test_resolve_text_splitter_from_dict_returns_correct_type() -> None:
 @langchain_text_splitters_not_available
 def test_resolve_text_splitter_without_langchain_text_splitters() -> None:
     with pytest.raises(
-        RuntimeError, match=r"'langchain_text_splitters' package is required but not installed."
+        RuntimeError,
+        match=r"The target object does not exist: langchain_text_splitters.CharacterTextSplitter",
     ):
         resolve_text_splitter({"_target_": CHARACTER_TEXT_SPLITTER_TARGET})
 

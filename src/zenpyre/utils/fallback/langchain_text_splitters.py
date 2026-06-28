@@ -3,7 +3,7 @@ r"""Contain fallback implementations used when
 
 from __future__ import annotations
 
-__all__ = ["langchain_text_splitters", "TextSplitter"]
+__all__ = ["TextSplitter", "langchain_text_splitters"]
 
 from types import ModuleType
 from typing import Any
