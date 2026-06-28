@@ -1,0 +1,34 @@
+name: Cyclic Imports
+on:
+  workflow_call:
+  workflow_dispatch:  # to trigger manually
+
+permissions:
+  contents: read
+
+jobs:
+  cyclic-import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup python environment
+        uses: durandtibo/setup-venv-uv-action@v0.0.3
+
+      - name: check zenpyre
+        run: |
+          python -c "import zenpyre"
+
+      - name: check zenpyre.hashing
+        run: |
+          python -c "from zenpyre import hashing"
+
+      - name: check zenpyre.testing
+        run: |
+          python -c "from zenpyre import testing"
+
+      - name: check zenpyre.utils
+        run: |
+          python -c "from zenpyre import utils"

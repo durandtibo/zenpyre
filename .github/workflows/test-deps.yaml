@@ -1,0 +1,88 @@
+# Dependency compatibility testing workflow.
+# Tests the package with different versions of optional dependencies.
+# Ensures compatibility across supported dependency version ranges.
+
+name: Test - Dependencies
+on:
+  workflow_call:
+  workflow_dispatch:  # to trigger manually
+
+permissions:
+  contents: read
+
+jobs:
+  # Get dependency version information from config file
+  get-versions:
+    uses: ./.github/workflows/get-versions.yaml
+
+  ########################
+  #     Dependencies     #
+  ########################
+
+  coola:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: coola
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).coola) }}
+
+  langchain-core:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: langchain-core
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain_core) }}
+
+  langchain:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: langchain
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain) }}
+
+  langgraph:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: langgraph
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langgraph) }}
+
+  rich:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: rich
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).rich) }}
+
+
+  #################################
+  #     Optional dependencies     #
+  #################################
+
+  langchain-anthropic:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: langchain-anthropic
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain_anthropic) }}
+
+  langchain-google-genai:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: langchain-google-genai
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain_google_genai) }}
+
+  langchain-ollama:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: langchain-ollama
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain_ollama) }}
+
+  langchain-openai:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: langchain-openai
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain_openai) }}
