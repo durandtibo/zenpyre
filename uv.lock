@@ -572,16 +572,16 @@ wheels = [
 
 [[package]]
 name = "feu"
-version = "0.7.0"
+version = "0.7.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/09/67/2446bd5a9d732811aed0cafd271a5cb3c5f56d6a70deb8f318b278f4392f/feu-0.7.0.tar.gz", hash = "sha256:75a8ae7c36ca0effb704e1d5774a81161ac373bb00be1085873d29cd8a7a438d", size = 33688, upload-time = "2026-06-28T01:15:44.24Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fe/b3/8209a837f083f35e4a6f8107619970b62c58b629da29344599384658df20/feu-0.7.1.tar.gz", hash = "sha256:48a7494df00f56ee18bcb300305493c261ee22b1d96a7be5ecb1189e8e39224a", size = 33705, upload-time = "2026-06-28T05:56:48.692Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4d/0c/b4901ea9542f88e5d34848fdcad526c5a4994db6f27429b61b0d8c487b15/feu-0.7.0-py3-none-any.whl", hash = "sha256:c0244b62b4c777bfc3190f5beb760b32b9bb0e7072eacd095bcd25425abc9789", size = 48171, upload-time = "2026-06-28T01:15:43.137Z" },
+    { url = "https://files.pythonhosted.org/packages/fa/5a/1d0f0b680188291473e91c21919f1c2c5e259f0120e8debad50b3547b98f/feu-0.7.1-py3-none-any.whl", hash = "sha256:ed3f6259677167aa7230f5a88b3d6bb4704ecaedf1160f23e52b2871373a7ae3", size = 48201, upload-time = "2026-06-28T05:56:47.61Z" },
 ]
 
 [package.optional-dependencies]
@@ -1379,6 +1379,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/24/bf/d1bda4f6168e0b2e9e5958945e01910052158313224ada5ce1fb2e1113b8/nodeenv-1.10.0.tar.gz", hash = "sha256:996c191ad80897d076bdfba80a41994c2b47c68e224c542b48feba42ba00f8bb", size = 55611, upload-time = "2025-12-20T14:08:54.006Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/88/b2/d0896bdcdc8d28a7fc5717c305f1a861c26e18c05047949fb371034d98bd/nodeenv-1.10.0-py2.py3-none-any.whl", hash = "sha256:5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827", size = 23438, upload-time = "2025-12-20T14:08:52.782Z" },
+]
+
+[[package]]
+name = "objectory"
+version = "0.3.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/20/38/f46a0603c7f59ffea5c44d0bd2f484c1ed2ecbd44a0c3b6cd61ef41d781e/objectory-0.3.1.tar.gz", hash = "sha256:c3b4f387db31470058d8b34d930daeaacb25eb09384c1e266eaf62ca5b15fc8b", size = 16595, upload-time = "2025-12-19T09:13:32.658Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/4d/35db369f225cc44df8fd1a7b06b332da3aefe5ed5b9db512046bf195d0a8/objectory-0.3.1-py3-none-any.whl", hash = "sha256:663a433c7c8ac4971617a61be4f0a9c258bd518bea00bf9eb3f337504ac4c7ce", size = 20701, upload-time = "2025-12-19T09:13:33.809Z" },
 ]
 
 [[package]]
@@ -2782,6 +2791,7 @@ dependencies = [
     { name = "langchain" },
     { name = "langchain-core" },
     { name = "langgraph" },
+    { name = "objectory" },
     { name = "rich" },
 ]
 
@@ -2832,6 +2842,7 @@ requires-dist = [
     { name = "langchain-ollama", marker = "extra == 'ollama'", specifier = ">=1.1,<2.0" },
     { name = "langchain-openai", marker = "extra == 'openai'", specifier = ">=1.2,<2.0" },
     { name = "langgraph", specifier = ">=1.2,<2.0" },
+    { name = "objectory", specifier = ">=0.3.0,<1.0" },
     { name = "rich", specifier = ">=15.0,<16.0" },
 ]
 provides-extras = ["anthropic", "google-genai", "ollama", "openai"]
@@ -2841,7 +2852,7 @@ dev = [
     { name = "black", specifier = ">=26.5.1" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.14,<8.0" },
     { name = "docformatter", extras = ["tomli"], specifier = ">=1.7.8,<2.0" },
-    { name = "feu", extras = ["all"], specifier = ">=0.7.0,<1.0" },
+    { name = "feu", extras = ["all"], specifier = ">=0.7.1,<1.0" },
     { name = "invoke", specifier = ">=3.0,<4.0" },
     { name = "pre-commit", specifier = ">=4.6,<5.0" },
     { name = "pygments", specifier = ">=2.20,<3.0" },
