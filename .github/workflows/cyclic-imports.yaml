@@ -21,6 +21,16 @@ jobs:
         run: |
           python -c "import zenpyre"
 
+      - name: check zenpyre.document_loaders
+        run: |
+          python -c "from zenpyre import document_loaders"
+          python -c "from zenpyre.document_loaders import factory"
+
+      - name: check zenpyre.embeddings
+        run: |
+          python -c "from zenpyre import embeddings"
+          python -c "from zenpyre.embeddings import factory"
+
       - name: check zenpyre.hashing
         run: |
           python -c "from zenpyre import hashing"
@@ -29,6 +39,19 @@ jobs:
         run: |
           python -c "from zenpyre import testing"
 
+      - name: check zenpyre.text_splitters
+        run: |
+          python -c "from zenpyre import text_splitters"
+          python -c "from zenpyre.text_splitters import factory"
+
       - name: check zenpyre.utils
         run: |
           python -c "from zenpyre import utils"
+          python -c "from zenpyre.utils import fallback"
+          python -c "from zenpyre.utils import imports"
+          python -c "from zenpyre.utils import rich"
+
+      - name: check zenpyre.vectorstores
+        run: |
+          python -c "from zenpyre import vectorstores"
+          python -c "from zenpyre.vectorstores import factory"
