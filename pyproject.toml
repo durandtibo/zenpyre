@@ -49,9 +49,15 @@ dependencies = [
     "coola >=1.1.8a0,<2.0",
     "langchain-core>=1.4,<2.0",
     "langchain>=1.3,<2.0",
+    "langgraph>=1.2,<2.0",
+    "rich >=15.0,<16.0",
 ]
 
 [project.optional-dependencies]
+anthropic = [ "langchain-anthropic >= 1.4,<2.0" ]
+google-genai = [ "langchain-google-genai >= 4.2,<5.0" ]
+ollama = [ "langchain-ollama >= 1.1,<2.0" ]
+openai = [ "langchain-openai >=1.2,<2.0" ]
 
 [dependency-groups]
 dev = [
