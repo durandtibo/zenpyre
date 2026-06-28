@@ -3,7 +3,7 @@ r"""Contain fallback implementations used when
 
 from __future__ import annotations
 
-__all__ = ["langchain_text_splitters"]
+__all__ = ["TextSplitter", "langchain_text_splitters"]
 
 from types import ModuleType
 from typing import Any
@@ -27,6 +27,8 @@ class FakeClass:
         raise_langchain_text_splitters_missing_error()
 
 
+TextSplitter = FakeClass
+
 # Create a fake langchain_text_splitters package
 langchain_text_splitters: ModuleType = ModuleType("langchain_text_splitters")
-langchain_text_splitters.TextSplitter = FakeClass
+langchain_text_splitters.TextSplitter = TextSplitter
