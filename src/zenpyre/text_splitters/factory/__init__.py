@@ -1,0 +1,7 @@
+r"""Contains factory functions for text splitters."""
+
+from __future__ import annotations
+
+__all__ = ["BaseTextSplitterFactory"]
+
+from zenpyre.text_splitters.factory.base import BaseTextSplitterFactory
