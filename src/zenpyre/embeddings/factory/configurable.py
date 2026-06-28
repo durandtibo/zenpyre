@@ -6,7 +6,7 @@ __all__ = ["ConfigurableEmbeddingsFactory"]
 
 from typing import TYPE_CHECKING, Any
 
-from coola.utils.format import repr_indent, repr_mapping, str_indent, str_mapping
+from coola.display import MultilineDisplayMixin
 
 from zenpyre.embeddings.factory.base import BaseEmbeddingsFactory
 from zenpyre.embeddings.resolve import resolve_embeddings
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from langchain_core.embeddings import Embeddings
 
 
-class ConfigurableEmbeddingsFactory(BaseEmbeddingsFactory):
+class ConfigurableEmbeddingsFactory(BaseEmbeddingsFactory, MultilineDisplayMixin):
     """A concrete embedding factory that accepts either a pre-built
     :class:`~langchain_core.embeddings.Embeddings` instance or a
     configuration dictionary.
@@ -44,14 +44,6 @@ class ConfigurableEmbeddingsFactory(BaseEmbeddingsFactory):
 
     def __init__(self, embeddings: Embeddings | dict[str, Any]) -> None:
         self._embeddings = embeddings
-
-    def __repr__(self) -> str:
-        args = repr_indent(repr_mapping(self._get_repr_kwargs()))
-        return f"{self.__class__.__qualname__}(\n  {args}\n)"
-
-    def __str__(self) -> str:
-        args = str_indent(str_mapping(self._get_repr_kwargs()))
-        return f"{self.__class__.__qualname__}(\n  {args}\n)"
 
     def make_embeddings(self) -> Embeddings:
         return resolve_embeddings(self._embeddings)
