@@ -80,6 +80,13 @@ jobs:
       package-name: langchain-google-genai
       package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain_google_genai) }}
 
+  langchain-huggingface:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: langchain-huggingface
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain-huggingface) }}
+
   langchain-ollama:
     needs: get-versions
     uses: ./.github/workflows/test-code-dep.yaml
