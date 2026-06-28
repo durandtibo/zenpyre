@@ -8,6 +8,8 @@ from __future__ import annotations
 __all__ = [
     "langchain_anthropic_available",
     "langchain_anthropic_not_available",
+    "langchain_chroma_available",
+    "langchain_chroma_not_available",
     "langchain_google_genai_available",
     "langchain_google_genai_not_available",
     "langchain_huggingface_available",
@@ -24,6 +26,7 @@ import pytest
 
 from zenpyre.utils.imports import (
     is_langchain_anthropic_available,
+    is_langchain_chroma_available,
     is_langchain_google_genai_available,
     is_langchain_huggingface_available,
     is_langchain_ollama_available,
@@ -36,6 +39,13 @@ langchain_anthropic_available: pytest.MarkDecorator = pytest.mark.skipif(
 )
 langchain_anthropic_not_available: pytest.MarkDecorator = pytest.mark.skipif(
     is_langchain_anthropic_available(), reason="Skip if langchain_anthropic is available"
+)
+
+langchain_chroma_available: pytest.MarkDecorator = pytest.mark.skipif(
+    not is_langchain_chroma_available(), reason="Requires langchain_chroma"
+)
+langchain_chroma_not_available: pytest.MarkDecorator = pytest.mark.skipif(
+    is_langchain_chroma_available(), reason="Skip if langchain_chroma is available"
 )
 
 langchain_google_genai_available: pytest.MarkDecorator = pytest.mark.skipif(
