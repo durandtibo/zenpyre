@@ -7,6 +7,8 @@ from zenpyre.testing.fixtures import (
     langchain_anthropic_not_available,
     langchain_google_genai_available,
     langchain_google_genai_not_available,
+    langchain_huggingface_available,
+    langchain_huggingface_not_available,
     langchain_ollama_available,
     langchain_ollama_not_available,
     langchain_openai_available,
@@ -15,10 +17,12 @@ from zenpyre.testing.fixtures import (
 from zenpyre.utils.imports import (
     check_langchain_anthropic,
     check_langchain_google_genai,
+    check_langchain_huggingface,
     check_langchain_ollama,
     check_langchain_openai,
     is_langchain_anthropic_available,
     is_langchain_google_genai_available,
+    is_langchain_huggingface_available,
     is_langchain_ollama_available,
     is_langchain_openai_available,
 )
@@ -77,6 +81,34 @@ def test_is_langchain_google_genai_available_true() -> None:
 @langchain_google_genai_not_available
 def test_is_langchain_google_genai_available_false() -> None:
     assert not is_langchain_google_genai_available()
+
+
+#################################
+#     langchain_huggingface     #
+#################################
+
+
+@langchain_huggingface_available
+def test_check_langchain_huggingface_with_package() -> None:
+    check_langchain_huggingface()
+
+
+@langchain_huggingface_not_available
+def test_check_langchain_huggingface_without_package() -> None:
+    with pytest.raises(
+        RuntimeError, match=r"'langchain_huggingface' package is required but not installed."
+    ):
+        check_langchain_huggingface()
+
+
+@langchain_huggingface_available
+def test_is_langchain_huggingface_available_true() -> None:
+    assert is_langchain_huggingface_available()
+
+
+@langchain_huggingface_not_available
+def test_is_langchain_huggingface_available_false() -> None:
+    assert not is_langchain_huggingface_available()
 
 
 ############################
