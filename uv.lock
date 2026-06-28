@@ -2841,7 +2841,7 @@ dev = [
     { name = "black", specifier = ">=26.5.1" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.14,<8.0" },
     { name = "docformatter", extras = ["tomli"], specifier = ">=1.7.8,<2.0" },
-    { name = "feu", extras = ["all"], specifier = ">=0.7.0a2,<1.0" },
+    { name = "feu", extras = ["all"], specifier = ">=0.7.0,<1.0" },
     { name = "invoke", specifier = ">=3.0,<4.0" },
     { name = "pre-commit", specifier = ">=4.6,<5.0" },
     { name = "pygments", specifier = ">=2.20,<3.0" },
