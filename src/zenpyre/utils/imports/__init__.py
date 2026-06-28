@@ -4,24 +4,28 @@ from __future__ import annotations
 
 __all__ = [
     "check_langchain_anthropic",
+    "check_langchain_chroma",
     "check_langchain_google_genai",
     "check_langchain_huggingface",
     "check_langchain_ollama",
     "check_langchain_openai",
     "check_langchain_text_splitters",
     "is_langchain_anthropic_available",
+    "is_langchain_chroma_available",
     "is_langchain_google_genai_available",
     "is_langchain_huggingface_available",
     "is_langchain_ollama_available",
     "is_langchain_openai_available",
     "is_langchain_text_splitters_available",
     "langchain_anthropic_available",
+    "langchain_chroma_available",
     "langchain_google_genai_available",
     "langchain_huggingface_available",
     "langchain_ollama_available",
     "langchain_openai_available",
     "langchain_text_splitters_available",
     "raise_langchain_anthropic_missing_error",
+    "raise_langchain_chroma_missing_error",
     "raise_langchain_google_genai_missing_error",
     "raise_langchain_huggingface_missing_error",
     "raise_langchain_ollama_missing_error",
@@ -34,6 +38,12 @@ from zenpyre.utils.imports.langchain_anthropic import (
     is_langchain_anthropic_available,
     langchain_anthropic_available,
     raise_langchain_anthropic_missing_error,
+)
+from zenpyre.utils.imports.langchain_chroma import (
+    check_langchain_chroma,
+    is_langchain_chroma_available,
+    langchain_chroma_available,
+    raise_langchain_chroma_missing_error,
 )
 from zenpyre.utils.imports.langchain_google_genai import (
     check_langchain_google_genai,
