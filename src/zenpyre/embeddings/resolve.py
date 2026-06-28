@@ -11,7 +11,7 @@ from typing import Any
 from langchain_core.embeddings import Embeddings
 from objectory import factory
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 def resolve_embeddings(embeddings: Embeddings | dict[str, Any]) -> Embeddings:
