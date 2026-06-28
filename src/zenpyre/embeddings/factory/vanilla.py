@@ -46,9 +46,4 @@ class EmbeddingsFactory(BaseEmbeddingsFactory, MultilineDisplayMixin):
         return self._embeddings
 
     def _get_repr_kwargs(self) -> dict[str, Any]:
-        """Return a display-friendly dict of constructor arguments.
-
-        Returns:
-            A dict with the ``"embeddings"`` key.
-        """
         return {"embeddings": self._embeddings}

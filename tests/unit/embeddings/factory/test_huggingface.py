@@ -1,5 +1,3 @@
-"""Unit tests for HuggingFaceEmbeddingsFactory."""
-
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
