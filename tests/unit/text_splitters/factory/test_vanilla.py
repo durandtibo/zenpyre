@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from coola.equality import objects_are_equal
+
 from zenpyre.testing.fixtures import langchain_text_splitters_available
 from zenpyre.text_splitters.factory import BaseTextSplitterFactory, TextSplitterFactory
 from zenpyre.utils.imports import is_langchain_text_splitters_available
@@ -56,16 +58,10 @@ def test_text_splitter_factory_different_instances_independent() -> None:
 
 
 @langchain_text_splitters_available
-def test_text_splitter_factory_get_repr_kwargs_contains_text_splitter_key() -> None:
-    factory = TextSplitterFactory(CharacterTextSplitter())
-    assert "text_splitter" in factory._get_repr_kwargs()
-
-
-@langchain_text_splitters_available
-def test_text_splitter_factory_get_repr_kwargs_text_splitter_value() -> None:
+def test_text_splitter_factory_get_repr_kwargs() -> None:
     splitter = CharacterTextSplitter()
     factory = TextSplitterFactory(splitter)
-    assert factory._get_repr_kwargs()["text_splitter"] is splitter
+    assert objects_are_equal(factory._get_repr_kwargs(), {"text_splitter": splitter})
 
 
 # --- __repr__ and __str__ ---
