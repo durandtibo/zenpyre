@@ -36,6 +36,10 @@ def resolve_embeddings(embeddings: Embeddings | dict[str, Any]) -> Embeddings:
         A configured :class:`~langchain_core.embeddings.Embeddings`
         instance.
 
+    Raises:
+        TypeError: If the resolved object is not a
+            :class:`~langchain_core.embeddings.Embeddings` instance.
+
     Example:
         ```pycon
         >>> from zenpyre.embeddings import resolve_embeddings
@@ -53,8 +57,6 @@ def resolve_embeddings(embeddings: Embeddings | dict[str, Any]) -> Embeddings:
         logger.info("Initializing an Embeddings instance from its configuration...")
         embeddings = factory(**embeddings)
     if not isinstance(embeddings, Embeddings):
-        logger.warning(
-            "Received object is not an Embeddings instance (received: %s)",
-            type(embeddings),
-        )
+        msg = f"Received object is not an Embeddings instance (received: {type(embeddings)})"
+        raise TypeError(msg)
     return embeddings

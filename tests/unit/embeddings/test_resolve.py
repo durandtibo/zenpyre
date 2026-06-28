@@ -2,16 +2,11 @@
 
 from __future__ import annotations
 
-import logging
-from typing import TYPE_CHECKING
-
+import pytest
 from langchain_core.embeddings import Embeddings
 from langchain_core.embeddings.fake import FakeEmbeddings
 
 from zenpyre.embeddings import resolve_embeddings
-
-if TYPE_CHECKING:
-    import pytest
 
 MODULE = "zenpyre.embeddings.resolve"
 
@@ -53,12 +48,6 @@ def test_resolve_embeddings_from_dict_returns_correct_type() -> None:
 # --- Invalid input ---
 
 
-def test_resolve_embeddings_invalid_type_returns_value() -> None:
-    result = resolve_embeddings("not-an-embeddings")
-    assert result == "not-an-embeddings"
-
-
-def test_resolve_embeddings_invalid_type_logs_warning(caplog: pytest.LogCaptureFixture) -> None:
-    with caplog.at_level(logging.WARNING, logger=MODULE):
+def test_resolve_embeddings_invalid_type_raises_type_error() -> None:
+    with pytest.raises(TypeError, match="Received object is not an Embeddings instance"):
         resolve_embeddings("not-an-embeddings")
-    assert any("not an Embeddings instance" in m for m in caplog.messages)
