@@ -73,6 +73,13 @@ jobs:
       package-name: langchain-anthropic
       package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain_anthropic) }}
 
+  langchain-chroma:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: langchain-chroma
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-chroma']) }}
+
   langchain-google-genai:
     needs: get-versions
     uses: ./.github/workflows/test-code-dep.yaml
@@ -85,7 +92,7 @@ jobs:
     uses: ./.github/workflows/test-code-dep.yaml
     with:
       package-name: langchain-huggingface
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain-huggingface) }}
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain_huggingface) }}
 
   langchain-ollama:
     needs: get-versions
@@ -100,3 +107,10 @@ jobs:
     with:
       package-name: langchain-openai
       package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain_openai) }}
+
+  langchain-text-splitters:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: langchain-text-splitters
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-text-splitters']) }}
