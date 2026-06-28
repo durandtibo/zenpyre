@@ -15,12 +15,12 @@ def test_langchain_huggingface_module_name() -> None:
     assert langchain_huggingface.__name__ == "langchain_huggingface"
 
 
-def test_langchain_huggingface_array_class_exists() -> None:
-    assert hasattr(langchain_huggingface, "Array")
+def test_langchain_huggingface_embeddings_class_exists() -> None:
+    assert hasattr(langchain_huggingface, "HuggingFaceEmbeddings")
 
 
-def test_langchain_huggingface_array_is_class() -> None:
-    assert isinstance(langchain_huggingface.Array, type)
+def test_langchain_huggingface_embeddings_is_class() -> None:
+    assert isinstance(langchain_huggingface.HuggingFaceEmbeddings, type)
 
 
 def test_langchain_huggingface_array_instantiation() -> None:
