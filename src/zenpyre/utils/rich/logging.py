@@ -9,7 +9,7 @@ from typing import Any
 
 from rich.logging import RichHandler
 
-from zenpyre.utils.rich.console import _console
+from zenpyre.utils.rich.console import get_console
 
 
 def configure_rich_logging(
@@ -84,8 +84,6 @@ def configure_rich_logging(
             :class:`~rich.logging.RichHandler` does not accept.
 
     Example:
-        Basic setup — call once at application entry point, then obtain
-        module-level loggers with :func:`logging.getLogger` everywhere else::
         ```pycon
         >>> import logging
         >>> from zenpyre.utils.rich import configure_rich_logging
@@ -100,7 +98,9 @@ def configure_rich_logging(
         format=fmt,
         datefmt=datefmt,
         handlers=[
-            RichHandler(console=_console, rich_tracebacks=rich_tracebacks, markup=markup, **kwargs)
+            RichHandler(
+                console=get_console(), rich_tracebacks=rich_tracebacks, markup=markup, **kwargs
+            )
         ],
         force=force,
     )
