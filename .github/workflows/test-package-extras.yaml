@@ -25,6 +25,7 @@ jobs:
           'all',
           'anthropic',
           'google-genai',
+          'huggingface',
           'ollama',
           'openai',
         ]
