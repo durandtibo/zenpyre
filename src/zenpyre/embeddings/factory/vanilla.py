@@ -5,7 +5,9 @@ from __future__ import annotations
 
 __all__ = ["EmbeddingsFactory"]
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
+
+from coola.utils.format import repr_indent, repr_mapping, str_indent, str_mapping
 
 from zenpyre.embeddings.factory.base import BaseEmbeddingsFactory
 
@@ -38,7 +40,23 @@ class EmbeddingsFactory(BaseEmbeddingsFactory):
     """
 
     def __init__(self, embeddings: Embeddings) -> None:
-        self.embeddings = embeddings
+        self._embeddings = embeddings
+
+    def __repr__(self) -> str:
+        args = repr_indent(repr_mapping(self._get_repr_kwargs()))
+        return f"{self.__class__.__qualname__}(\n  {args}\n)"
+
+    def __str__(self) -> str:
+        args = str_indent(str_mapping(self._get_repr_kwargs()))
+        return f"{self.__class__.__qualname__}(\n  {args}\n)"
 
     def make_embeddings(self) -> Embeddings:
-        return self.embeddings
+        return self._embeddings
+
+    def _get_repr_kwargs(self) -> dict[str, Any]:
+        """Return a display-friendly dict of constructor arguments.
+
+        Returns:
+            A dict with the ``"embeddings"`` key.
+        """
+        return {"embeddings": self._embeddings}
