@@ -9,6 +9,8 @@ from typing import Any
 
 from rich.logging import RichHandler
 
+from zenpyre.utils.rich.console import console
+
 
 def configure_rich_logging(
     level: int = logging.INFO,
@@ -97,6 +99,8 @@ def configure_rich_logging(
         level=level,
         format=fmt,
         datefmt=datefmt,
-        handlers=[RichHandler(rich_tracebacks=rich_tracebacks, markup=markup, **kwargs)],
+        handlers=[
+            RichHandler(console=console, rich_tracebacks=rich_tracebacks, markup=markup, **kwargs)
+        ],
         force=force,
     )
