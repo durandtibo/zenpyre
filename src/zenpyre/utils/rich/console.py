@@ -13,7 +13,7 @@ from rich.pretty import Pretty
 
 # Single shared Console instance so Rich detects terminal capabilities
 # (colour support, width, TTY) once and output remains thread-safe.
-console = Console()
+_console = Console()
 
 
 def print_markdown(msg: str, title: str | None = None) -> None:
@@ -38,7 +38,7 @@ def print_markdown(msg: str, title: str | None = None) -> None:
 
         ```
     """
-    console.print(Panel(Markdown(msg), title=title))
+    _console.print(Panel(Markdown(msg), title=title))
 
 
 def print_pretty(data: Any, title: str | None = None) -> None:
@@ -63,4 +63,4 @@ def print_pretty(data: Any, title: str | None = None) -> None:
 
         ```
     """
-    console.print(Panel(Pretty(data), title=title))
+    _console.print(Panel(Pretty(data), title=title))
