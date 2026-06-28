@@ -5,7 +5,7 @@ from __future__ import annotations
 
 __all__ = ["HuggingFaceEmbeddingsFactory"]
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from coola.display import InlineDisplayMixin
 
@@ -15,7 +15,7 @@ from zenpyre.utils.imports import (
     is_langchain_huggingface_available,
 )
 
-if is_langchain_huggingface_available():
+if TYPE_CHECKING or is_langchain_huggingface_available():
     from langchain_huggingface import HuggingFaceEmbeddings
 else:  # pragma: no cover
     from zenpyre.utils.fallback.langchain_huggingface import HuggingFaceEmbeddings
