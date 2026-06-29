@@ -44,5 +44,8 @@ class DocumentListLoader(BaseLoader):
     def __init__(self, documents: Sequence[Document]) -> None:
         self._documents = documents
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__qualname__}(num_docs={len(self._documents):,})"
+
     def lazy_load(self) -> Iterator[Document]:
         yield from self._documents

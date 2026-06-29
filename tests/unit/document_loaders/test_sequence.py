@@ -90,3 +90,14 @@ def test_document_list_loader_load_equals_lazy_load() -> None:
     docs = _make_docs()
     loader = DocumentListLoader(docs)
     assert loader.load() == list(loader.lazy_load())
+
+
+# --- __repr__ and __str__ ---
+
+
+def test_document_list_loader_repr() -> None:
+    assert repr(DocumentListLoader(_make_docs())) == "DocumentListLoader(num_docs=2)"
+
+
+def test_document_list_loader_str_starts_with_class_name() -> None:
+    assert str(DocumentListLoader(_make_docs())) == "DocumentListLoader(num_docs=2)"
