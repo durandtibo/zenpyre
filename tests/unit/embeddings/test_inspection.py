@@ -16,13 +16,6 @@ from zenpyre.embeddings import inspect_embeddings
 # Fixtures
 # ---------------------------------------------------------------------------
 
-# Define a custom FakeEmbeddings because FakeEmbeddings fails if numpy is not installed
-
-
-# class MyFakeEmbeddings(FakeEmbeddings):
-#     def _get_embedding(self) -> list[float]:
-#         return [1.0] * self.size
-
 
 @pytest.fixture(scope="module")
 def vector_store() -> InMemoryVectorStore:
