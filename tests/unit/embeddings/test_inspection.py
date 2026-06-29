@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import pytest
 from langchain_core.documents import Document
 from langchain_core.embeddings.fake import FakeEmbeddings
@@ -13,12 +15,19 @@ from zenpyre.embeddings import inspect_embeddings
 # Fixtures
 # ---------------------------------------------------------------------------
 
+# Define a custom FakeEmbeddings because FakeEmbeddings fails if numpy is not installed
+
+
+class MyFakeEmbeddings(FakeEmbeddings):
+    def _get_embedding(self) -> list[float]:
+        return [1.0] * self.size
+
 
 @pytest.fixture(scope="module")
 def vector_store() -> InMemoryVectorStore:
     """Return a real InMemoryVectorStore populated with cat
     documents."""
-    vs = InMemoryVectorStore(FakeEmbeddings(size=6))
+    vs = InMemoryVectorStore(MyFakeEmbeddings(size=6))
     vs.add_documents(
         [
             Document(
@@ -65,8 +74,6 @@ def test_inspect_embeddings_empty_vector_store_does_not_raise() -> None:
 
 
 def test_inspect_embeddings_calls_similarity_search(vector_store: InMemoryVectorStore) -> None:
-    from unittest.mock import patch
-
     with patch.object(
         vector_store, "similarity_search", wraps=vector_store.similarity_search
     ) as mock:
