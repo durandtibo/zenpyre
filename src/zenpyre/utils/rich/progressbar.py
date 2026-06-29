@@ -2,7 +2,7 @@ r"""Provide helpers for creating progress bars with rich."""
 
 from __future__ import annotations
 
-__all__ = ["make_progressbar"]
+__all__ = ["make_progressbar", "make_spinner"]
 
 from rich.progress import (
     BarColumn,
@@ -62,5 +62,49 @@ def make_progressbar(*, transient: bool = False) -> Progress:
         MofNCompleteColumn(),
         TimeElapsedColumn(),
         TimeRemainingColumn(),
+        transient=transient,
+    )
+
+
+def make_spinner(*, transient: bool = True) -> Progress:
+    """Create a Rich spinner for tasks where the total number of items
+    is unknown.
+
+    Builds a :class:`~rich.progress.Progress` instance with a column
+    layout suited for indeterminate tasks:
+
+    - A spinner indicating the task is active.
+    - Description text.
+    - An M-of-N counter showing items processed so far (e.g. ``42/?``).
+    - Processing speed (e.g. ``12.3/s``).
+    - Elapsed time since the task started.
+
+    Args:
+        transient: If ``True``, the spinner is cleared from the terminal
+            when the context manager exits. Useful for short-lived tasks
+            where the spinner would clutter the output. Defaults to
+            ``True``.
+
+    Returns:
+        A configured :class:`~rich.progress.Progress` instance ready to
+        use as a context manager.
+
+    Example:
+        ```pycon
+        >>> from zenpyre.utils.rich import make_spinner
+        >>> items = list(range(10))
+        >>> with make_spinner() as progress:
+        ...     task = progress.add_task("Processing items...", total=None)
+        ...     for item in items:
+        ...         progress.advance(task)
+        ...
+
+        ```
+    """
+    return Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        MofNCompleteColumn(),
+        TimeElapsedColumn(),
         transient=transient,
     )
