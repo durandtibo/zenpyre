@@ -2,7 +2,7 @@ r"""Provide filtering utilities for LangChain document collections."""
 
 from __future__ import annotations
 
-__all__ = ["filter_by_metadata", "filter_by_metadata_range"]
+__all__ = ["filter_by_metadata", "filter_by_metadata_range", "filter_by_metadata_values"]
 
 from typing import TYPE_CHECKING, Any
 
@@ -117,3 +117,46 @@ def filter_by_metadata_range(
         return not (upper is not None and value > upper)
 
     return [doc for doc in docs if in_range(doc)]
+
+
+def filter_by_metadata_values(
+    docs: list[Document],
+    metadata_key: str,
+    values: set[Any],
+) -> list[Document]:
+    """Filter a list of documents by checking if a metadata value is in
+    a set.
+
+    Returns a new list containing only documents whose metadata contains
+    ``metadata_key`` with a value that is a member of ``values``.
+    Documents missing ``metadata_key`` are excluded.
+
+    Args:
+        docs: The list of :class:`~langchain_core.documents.Document`
+            instances to filter.
+        metadata_key: The metadata key to filter by.
+        values: The set of accepted values.  Documents whose
+            ``metadata_key`` is in this set are kept.
+
+    Returns:
+        A new list of :class:`~langchain_core.documents.Document`
+        instances whose ``metadata_key`` value is in ``values``.  The
+        original list is not modified.
+
+    Example:
+        ```pycon
+        >>> from langchain_core.documents import Document
+        >>> from zenpyre.documents.ops import filter_by_metadata_values
+        >>> docs = [
+        ...     Document(page_content="A", metadata={"category": "Science"}),
+        ...     Document(page_content="B", metadata={"category": "Cooking"}),
+        ...     Document(page_content="C", metadata={"category": "Technology"}),
+        ...     Document(page_content="D", metadata={"category": "Science"}),
+        ... ]
+        >>> result = filter_by_metadata_values(docs, "category", {"Science", "Technology"})
+        >>> sorted(doc.page_content for doc in result)
+        ['A', 'C', 'D']
+
+        ```
+    """
+    return [doc for doc in docs if doc.metadata.get(metadata_key) in values]

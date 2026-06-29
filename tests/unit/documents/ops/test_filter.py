@@ -3,7 +3,11 @@ from __future__ import annotations
 import pytest
 from langchain_core.documents import Document
 
-from zenpyre.documents.ops import filter_by_metadata, filter_by_metadata_range
+from zenpyre.documents.ops import (
+    filter_by_metadata,
+    filter_by_metadata_range,
+    filter_by_metadata_values,
+)
 
 
 @pytest.fixture
@@ -23,6 +27,16 @@ def page_docs() -> list[Document]:
         Document(page_content="B", metadata={"page": 5}),
         Document(page_content="C", metadata={"page": 10}),
         Document(page_content="D", metadata={"page": 15}),
+    ]
+
+
+@pytest.fixture
+def category_docs() -> list[Document]:
+    return [
+        Document(page_content="A", metadata={"category": "Science", "page": 1}),
+        Document(page_content="B", metadata={"category": "Cooking", "page": 2}),
+        Document(page_content="C", metadata={"category": "Technology", "page": 3}),
+        Document(page_content="D", metadata={"category": "Science", "page": 4}),
     ]
 
 
@@ -262,3 +276,115 @@ def test_filter_by_metadata_range_exact_match() -> None:
         lower=5,
         upper=5,
     ) == [Document(page_content="A", metadata={"page": 5})]
+
+
+###################################################
+#     Tests for filter_by_metadata_values         #
+###################################################
+
+
+# --- Return type and non-mutation ---
+
+
+def test_filter_by_metadata_values_returns_list(category_docs: list[Document]) -> None:
+    assert isinstance(filter_by_metadata_values(category_docs, "category", {"Science"}), list)
+
+
+def test_filter_by_metadata_values_does_not_mutate_input(category_docs: list[Document]) -> None:
+    original_len = len(category_docs)
+    filter_by_metadata_values(category_docs, "category", {"Science"})
+    assert len(category_docs) == original_len
+
+
+def test_filter_by_metadata_values_returns_new_list(category_docs: list[Document]) -> None:
+    assert filter_by_metadata_values(category_docs, "category", {"Science"}) is not category_docs
+
+
+# --- Filtering ---
+
+
+def test_filter_by_metadata_values_single_value(category_docs: list[Document]) -> None:
+    assert filter_by_metadata_values(category_docs, "category", {"Science"}) == [
+        Document(page_content="A", metadata={"category": "Science", "page": 1}),
+        Document(page_content="D", metadata={"category": "Science", "page": 4}),
+    ]
+
+
+def test_filter_by_metadata_values_multiple_values(category_docs: list[Document]) -> None:
+    assert filter_by_metadata_values(category_docs, "category", {"Science", "Technology"}) == [
+        Document(page_content="A", metadata={"category": "Science", "page": 1}),
+        Document(page_content="C", metadata={"category": "Technology", "page": 3}),
+        Document(page_content="D", metadata={"category": "Science", "page": 4}),
+    ]
+
+
+def test_filter_by_metadata_values_all_values(category_docs: list[Document]) -> None:
+    assert (
+        filter_by_metadata_values(category_docs, "category", {"Science", "Cooking", "Technology"})
+        == category_docs
+    )
+
+
+def test_filter_by_metadata_values_no_match(category_docs: list[Document]) -> None:
+    assert filter_by_metadata_values(category_docs, "category", {"Sports"}) == []
+
+
+def test_filter_by_metadata_values_integer_values() -> None:
+    docs = [
+        Document(page_content="A", metadata={"page": 1}),
+        Document(page_content="B", metadata={"page": 2}),
+        Document(page_content="C", metadata={"page": 3}),
+    ]
+    assert filter_by_metadata_values(docs, "page", {1, 3}) == [
+        Document(page_content="A", metadata={"page": 1}),
+        Document(page_content="C", metadata={"page": 3}),
+    ]
+
+
+# --- Missing keys ---
+
+
+def test_filter_by_metadata_values_missing_key_excluded() -> None:
+    docs = [
+        Document(page_content="A", metadata={"category": "Science"}),
+        Document(page_content="B"),
+    ]
+    assert filter_by_metadata_values(docs, "category", {"Science"}) == [
+        Document(page_content="A", metadata={"category": "Science"}),
+    ]
+
+
+def test_filter_by_metadata_values_all_missing_key_returns_empty() -> None:
+    docs = [Document(page_content="A"), Document(page_content="B")]
+    assert filter_by_metadata_values(docs, "category", {"Science"}) == []
+
+
+# --- Edge cases ---
+
+
+def test_filter_by_metadata_values_empty_list() -> None:
+    assert filter_by_metadata_values([], "category", {"Science"}) == []
+
+
+def test_filter_by_metadata_values_empty_set(category_docs: list[Document]) -> None:
+    assert filter_by_metadata_values(category_docs, "category", set()) == []
+
+
+def test_filter_by_metadata_values_single_document_match() -> None:
+    docs = [Document(page_content="A", metadata={"category": "Science"})]
+    assert filter_by_metadata_values(docs, "category", {"Science"}) == [
+        Document(page_content="A", metadata={"category": "Science"}),
+    ]
+
+
+def test_filter_by_metadata_values_single_document_no_match() -> None:
+    docs = [Document(page_content="A", metadata={"category": "Cooking"})]
+    assert filter_by_metadata_values(docs, "category", {"Science"}) == []
+
+
+def test_filter_by_metadata_values_preserves_order(category_docs: list[Document]) -> None:
+    assert filter_by_metadata_values(category_docs, "category", {"Science", "Cooking"}) == [
+        Document(page_content="A", metadata={"category": "Science", "page": 1}),
+        Document(page_content="B", metadata={"category": "Cooking", "page": 2}),
+        Document(page_content="D", metadata={"category": "Science", "page": 4}),
+    ]
