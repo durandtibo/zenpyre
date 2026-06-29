@@ -11,7 +11,7 @@ from rich.progress import (
     TimeRemainingColumn,
 )
 
-from zenpyre.utils.rich import make_progressbar
+from zenpyre.utils.rich import make_progressbar, make_spinner
 
 ######################################
 #     Tests for make_progressbar     #
@@ -46,3 +46,35 @@ def test_make_progressbar_column_types() -> None:
 
 def test_make_progressbar_each_call_returns_new_instance() -> None:
     assert make_progressbar() is not make_progressbar()
+
+
+##################################
+#     Tests for make_spinner     #
+##################################
+
+
+def test_make_spinner_returns_progress_instance() -> None:
+    assert isinstance(make_spinner(), Progress)
+
+
+def test_make_spinner_default_transient_is_true() -> None:
+    assert make_spinner().live.transient is True
+
+
+def test_make_spinner_transient_false() -> None:
+    assert make_spinner(transient=False).live.transient is False
+
+
+def test_make_spinner_column_types() -> None:
+    progress = make_spinner()
+    column_types = [type(c) for c in progress.columns]
+    assert column_types == [
+        SpinnerColumn,
+        TextColumn,
+        MofNCompleteColumn,
+        TimeElapsedColumn,
+    ]
+
+
+def test_make_spinner_each_call_returns_new_instance() -> None:
+    assert make_spinner() is not make_spinner()

@@ -6,6 +6,7 @@ __all__ = [
     "configure_rich_logging",
     "get_console",
     "make_progressbar",
+    "make_spinner",
     "print_markdown",
     "print_pretty",
     "set_console",
@@ -14,4 +15,4 @@ __all__ = [
 from zenpyre.utils.rich.console import get_console, set_console
 from zenpyre.utils.rich.logging import configure_rich_logging
 from zenpyre.utils.rich.print_ import print_markdown, print_pretty
-from zenpyre.utils.rich.progressbar import make_progressbar
+from zenpyre.utils.rich.progressbar import make_progressbar, make_spinner
