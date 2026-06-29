@@ -12,7 +12,7 @@ only-include = ["src"]
 
 [project]
 name = "zenpyre"
-version = "0.0.1a3"
+version = "0.0.1a4"
 description = "Utilities for LangChain"
 readme = "README.md"
 authors = [
