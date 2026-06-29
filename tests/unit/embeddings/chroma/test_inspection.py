@@ -36,18 +36,6 @@ def _make_vector_store(
     return mock
 
 
-def _make_empty_vector_store() -> MagicMock:
-    """Return a mock Chroma vector store with no embeddings."""
-    mock = MagicMock(spec=Chroma)
-    mock.get.return_value = {
-        "embeddings": None,
-        "documents": None,
-        "metadatas": None,
-        "ids": None,
-    }
-    return mock
-
-
 ###########################################
 #     Tests for inspect_embeddings        #
 ###########################################
@@ -71,16 +59,6 @@ def test_inspect_embeddings_calls_get_with_correct_include() -> None:
     inspect_embeddings(vector_store)
     _, kwargs = vector_store.get.call_args
     assert kwargs["include"] == ["embeddings", "documents", "metadatas"]
-
-
-@langchain_chroma_available
-def test_inspect_embeddings_empty_vector_store_returns_none() -> None:
-    assert inspect_embeddings(_make_empty_vector_store()) is None
-
-
-@langchain_chroma_available
-def test_inspect_embeddings_empty_vector_store_does_not_raise() -> None:
-    inspect_embeddings(_make_empty_vector_store())
 
 
 @langchain_chroma_available

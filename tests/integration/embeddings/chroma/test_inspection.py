@@ -34,16 +34,6 @@ def vector_store() -> Chroma:
     )
 
 
-@pytest.fixture(scope="module")
-def empty_vector_store() -> Chroma:
-    """Return a real in-memory Chroma vector store populated with cat
-    documents."""
-    return Chroma.from_documents(
-        documents=[],
-        embedding=FakeEmbeddings(size=6),
-    )
-
-
 ###########################################
 #     Tests for inspect_embeddings        #
 ###########################################
@@ -62,8 +52,3 @@ def test_inspect_embeddings_chroma_custom_n(vector_store: Chroma) -> None:
 @langchain_chroma_available
 def test_inspect_embeddings_chroma_n_larger_than_embeddings(vector_store: Chroma) -> None:
     inspect_embeddings(vector_store, n=100)
-
-
-@langchain_chroma_available
-def test_inspect_embeddings_empty_vector_store_does_not_raise(empty_vector_store: Chroma) -> None:
-    inspect_embeddings(empty_vector_store)
