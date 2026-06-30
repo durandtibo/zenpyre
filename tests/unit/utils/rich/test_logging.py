@@ -26,8 +26,9 @@ MODULE = "zenpyre.utils.rich.logging"
 def reset_root_logger() -> Generator[None]:
     """Restore the root logger's handlers and level after each test.
 
-    pytest installs its own ``LogCaptureHandler`` before each test, so we
-    snapshot and restore rather than clearing, to avoid breaking log capture.
+    pytest installs its own ``LogCaptureHandler`` before each test, so
+    we snapshot and restore rather than clearing, to avoid breaking log
+    capture.
     """
     root = logging.getLogger()
     original_handlers = root.handlers[:]
@@ -124,9 +125,10 @@ def test_extra_kwargs_forwarded_to_rich_handler() -> None:
     """Keyword arguments unknown to configure_rich_logging reach
     RichHandler.
 
-    ``show_path`` is stored internally by RichHandler and not exposed as a
-    public attribute, so we verify forwarding by inspecting the constructor
-    call via a mock rather than reading the attribute after the fact.
+    ``show_path`` is stored internally by RichHandler and not exposed as
+    a public attribute, so we verify forwarding by inspecting the
+    constructor call via a mock rather than reading the attribute after
+    the fact.
     """
     with patch(f"{MODULE}.RichHandler", wraps=RichHandler) as mock_handler:
         configure_rich_logging(show_path=False, force=True)
