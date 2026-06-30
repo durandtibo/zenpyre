@@ -76,40 +76,31 @@ def load_dataclasses(path: Path | str, cls: type[T]) -> list[T]:
     return items
 
 
-def save_dataclasses(items: list[Any], path: Path | str) -> None:
+def save_dataclasses(items: list[Any], path: Path | str, *, exist_ok: bool = False) -> None:
     """Save a list of dataclass instances to a JSON file.
 
     Serialises each item to a dict via :func:`dataclasses.asdict` and
-    writes the resulting list to ``path`` as a JSON array, with
-    two-space indentation for readability.  Works with any dataclass
-    type, including frozen dataclasses, as long as all field values are
-    JSON-serialisable.
+    writes the resulting list to ``path`` as a JSON array. Works with any
+    dataclass type, including frozen dataclasses, as long as all field
+    values are JSON-serialisable.
 
     Args:
-        items: The list of dataclass instances to save.  All items
-            must be instances of the same dataclass type, or at least
-            of dataclass types whose fields are JSON-serialisable.
-        path: The destination file path.  Parent directories are not
-            created automatically.
+        items: The list of dataclass instances to save.
+        path: The destination file path.
+        exist_ok: If ``exist_ok`` is ``False`` (the default),
+            ``FileExistsError`` is raised if the target file
+            already exists. If ``exist_ok`` is ``True``,
+            ``FileExistsError`` will not be raised unless the
+            given path already exists in the file system and is
+            not a file.
 
     Raises:
         TypeError: If any item in ``items`` is not a dataclass
             instance.
-        OSError: If ``path`` cannot be written to (e.g. the parent
-            directory does not exist or permissions are insufficient).
-
-    Example:
-        ```pycon
-        >>> from dataclasses import dataclass
-        >>> from zenpyre.utils.dataclass_io import save_dataclasses
-        >>> @dataclass(frozen=True)
-        ... class Point:
-        ...     x: int
-        ...     y: int
-        ...
-        >>> save_dataclasses([Point(1, 2), Point(3, 4)], "points.json")  # doctest: +SKIP
-
-        ```
+        FileExistsError: If ``path`` already exists and
+            ``exist_ok=False``.
+        OSError: If ``path`` cannot be written to, or if ``path``
+            exists as a directory (regardless of ``exist_ok``).
     """
     for item in items:
         if not is_dataclass(item):
@@ -119,5 +110,5 @@ def save_dataclasses(items: list[Any], path: Path | str) -> None:
     path = sanitize_path(path)
     logger.info("Saving %s items to %s...", f"{len(items):,}", path)
     data = [asdict(item) for item in items]
-    save_json(data, path)
+    save_json(data, path, exist_ok=exist_ok)
     logger.info("Saved %s items to %s.", f"{len(items):,}", path)
