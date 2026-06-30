@@ -59,7 +59,7 @@ def load_dataclasses(path: Path | str, cls: type[T]) -> list[T]:
         raise TypeError(msg)
 
     path = sanitize_path(path)
-    logger.info("Loading %s items from %s...", cls.__name__, path)
+    logger.debug("Loading %s items from %s...", cls.__name__, path)
     data = load_json(path)
 
     if not isinstance(data, list):
@@ -72,7 +72,7 @@ def load_dataclasses(path: Path | str, cls: type[T]) -> list[T]:
         msg = f"Could not parse {cls.__name__} entries from {path}: {e}"
         raise ValueError(msg) from e
 
-    logger.info("Loaded %s items from %s.", f"{len(items):,}", path)
+    logger.debug("Loaded %s items from %s.", f"{len(items):,}", path)
     return items
 
 
@@ -108,7 +108,7 @@ def save_dataclasses(items: list[Any], path: Path | str, *, exist_ok: bool = Fal
             raise TypeError(msg)
 
     path = sanitize_path(path)
-    logger.info("Saving %s items to %s...", f"{len(items):,}", path)
+    logger.debug("Saving %s items to %s...", f"{len(items):,}", path)
     data = [asdict(item) for item in items]
     save_json(data, path, exist_ok=exist_ok)
-    logger.info("Saved %s items to %s.", f"{len(items):,}", path)
+    logger.debug("Saved %s items to %s.", f"{len(items):,}", path)
