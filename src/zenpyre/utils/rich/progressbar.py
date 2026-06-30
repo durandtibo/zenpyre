@@ -15,6 +15,8 @@ from rich.progress import (
     TimeRemainingColumn,
 )
 
+from zenpyre.utils.rich import get_console
+
 
 def make_progressbar(*, transient: bool = False) -> Progress:
     """Create a standardised Rich progress bar for use across the
@@ -62,6 +64,7 @@ def make_progressbar(*, transient: bool = False) -> Progress:
         MofNCompleteColumn(),
         TimeElapsedColumn(),
         TimeRemainingColumn(),
+        console=get_console(),
         transient=transient,
     )
 
@@ -106,5 +109,6 @@ def make_spinner(*, transient: bool = True) -> Progress:
         TextColumn("[progress.description]{task.description}"),
         MofNCompleteColumn(),
         TimeElapsedColumn(),
+        console=get_console(),
         transient=transient,
     )
