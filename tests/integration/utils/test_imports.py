@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from zenpyre.testing.fixtures import (
+    duckdb_not_available,
     langchain_anthropic_available,
     langchain_anthropic_not_available,
     langchain_chroma_available,
@@ -19,6 +20,7 @@ from zenpyre.testing.fixtures import (
     langchain_text_splitters_not_available,
 )
 from zenpyre.utils.imports import (
+    check_duckdb,
     check_langchain_anthropic,
     check_langchain_chroma,
     check_langchain_google_genai,
@@ -26,6 +28,8 @@ from zenpyre.utils.imports import (
     check_langchain_ollama,
     check_langchain_openai,
     check_langchain_text_splitters,
+    duckdb_available,
+    is_duckdb_available,
     is_langchain_anthropic_available,
     is_langchain_chroma_available,
     is_langchain_google_genai_available,
@@ -89,6 +93,32 @@ def test_is_langchain_chroma_available_true() -> None:
 @langchain_chroma_not_available
 def test_is_langchain_chroma_available_false() -> None:
     assert not is_langchain_chroma_available()
+
+
+##################
+#     duckdb     #
+##################
+
+
+@duckdb_available
+def test_check_duckdb_with_package() -> None:
+    check_duckdb()
+
+
+@duckdb_not_available
+def test_check_duckdb_without_package() -> None:
+    with pytest.raises(RuntimeError, match=r"'duckdb' package is required but not installed."):
+        check_duckdb()
+
+
+@duckdb_available
+def test_is_duckdb_available_true() -> None:
+    assert is_duckdb_available()
+
+
+@duckdb_not_available
+def test_is_duckdb_available_false() -> None:
+    assert not is_duckdb_available()
 
 
 ##################################
