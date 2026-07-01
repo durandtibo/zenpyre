@@ -19,7 +19,7 @@ class InMemoryIngestor(BaseIngestor[T], InlineDisplayMixin):
 
     Wraps an arbitrary value and exposes it through the
     :meth:`ingest` interface, allowing any data already in memory to be
-    used wherever a :class:`~deltaagent.ingestor.BaseIngestor` is expected.
+    used wherever a :class:`~zenpyre.ingestors.BaseIngestor` is expected.
     Useful for testing, rapid prototyping, or bypassing the download and
     caching steps of a pipeline.
 
@@ -37,8 +37,10 @@ class InMemoryIngestor(BaseIngestor[T], InlineDisplayMixin):
 
     Example:
         ```pycon
+        >>> from zenpyre.ingestors import InMemoryIngestor
         >>> ingestor = InMemoryIngestor(data="hello\nworld")
         >>> ingestor.ingest()
+        hello\nworld
 
         ```
     """
@@ -48,12 +50,6 @@ class InMemoryIngestor(BaseIngestor[T], InlineDisplayMixin):
         self._copy = copy
 
     def ingest(self) -> T:
-        """Return the in-memory data.
-
-        Returns:
-            A deep copy of the stored value if ``copy=True``, or the
-            original object if ``copy=False``.
-        """
         if self._copy:
             return copy.deepcopy(self._data)
         return self._data
