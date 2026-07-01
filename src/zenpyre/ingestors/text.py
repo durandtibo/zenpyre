@@ -37,11 +37,9 @@ class TextIngestor(BaseIngestor[str], InlineDisplayMixin):
 
     Example:
         ```pycon
-        >>> from pathlib import Path
+        >>> from zenpyre.ingestors import TextIngestor
         >>> ingestor = TextIngestor(path="filing.md")
         >>> text = ingestor.ingest()  # doctest: +SKIP
-        >>> isinstance(text, str)  # doctest: +SKIP
-        True
 
         ```
     """
