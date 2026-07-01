@@ -144,6 +144,21 @@ class TypedDuckDBDocumentStore(BaseDocumentStore):
             doc_ids,
         )
 
+    def check_ids(self, doc_ids: list[str]) -> tuple[list[str], list[str]]:
+        if not doc_ids:
+            return [], []
+        placeholders = ", ".join("?" * len(doc_ids))
+        existing = {
+            row[0]
+            for row in self._conn.execute(
+                f"SELECT id FROM documents WHERE id IN ({placeholders})",  # noqa: S608
+                doc_ids,
+            ).fetchall()
+        }
+        found = [i for i in doc_ids if i in existing]
+        missing = [i for i in doc_ids if i not in existing]
+        return found, missing
+
     def all(self) -> list[Document]:
         rows = self._conn.execute("SELECT * FROM documents").fetchall()
         return [self._row_to_doc(row) for row in rows]

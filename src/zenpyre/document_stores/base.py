@@ -104,6 +104,19 @@ class BaseDocumentStore(ABC):
         """
 
     @abstractmethod
+    def check_ids(self, doc_ids: list[str]) -> tuple[list[str], list[str]]:
+        """Check which document IDs exist in the store.
+
+        Args:
+            doc_ids: The document IDs to check.
+
+        Returns:
+            A tuple of two lists: ``(found, missing)`` where ``found``
+            contains the IDs that exist in the store and ``missing``
+            contains the IDs that do not.
+        """
+
+    @abstractmethod
     def all(self) -> list[Document]:
         """Return all documents in the store.
 
