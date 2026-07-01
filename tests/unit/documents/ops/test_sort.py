@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from langchain_core.documents import Document
 
-from zenpyre.documents.ops import sort_by_metadata
+from zenpyre.documents import sort_by_metadata
 
 
 @pytest.fixture

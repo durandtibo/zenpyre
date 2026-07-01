@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from langchain_core.documents import Document
 
-from zenpyre.documents.ops import assign_ids
+from zenpyre.documents import assign_ids
 
 
 @pytest.fixture

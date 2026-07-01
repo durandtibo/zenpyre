@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from langchain_core.documents import Document
 
-from zenpyre.documents.ops import (
+from zenpyre.documents import (
     filter_by_metadata,
     filter_by_metadata_range,
     filter_by_metadata_values,
