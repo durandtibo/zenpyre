@@ -13,11 +13,11 @@ __all__ = [
     "sort_by_metadata",
 ]
 
-from zenpyre.documents.hashing import hash_document, hash_document_uuid, hash_documents
-from zenpyre.documents.ops import (
-    assign_ids,
+from zenpyre.documents.filter import (
     filter_by_metadata,
     filter_by_metadata_range,
     filter_by_metadata_values,
-    sort_by_metadata,
 )
+from zenpyre.documents.hashing import hash_document, hash_document_uuid, hash_documents
+from zenpyre.documents.id import assign_ids
+from zenpyre.documents.sort import sort_by_metadata
