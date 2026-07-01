@@ -26,14 +26,18 @@ jobs:
           python -c "from zenpyre import document_loaders"
           python -c "from zenpyre.document_loaders import factory"
 
+      - name: check zenpyre.documents
+        run: |
+          python -c "from zenpyre import documents"
+
       - name: check zenpyre.embeddings
         run: |
           python -c "from zenpyre import embeddings"
           python -c "from zenpyre.embeddings import factory"
 
-      - name: check zenpyre.hashing
+      - name: check zenpyre.records
         run: |
-          python -c "from zenpyre import hashing"
+          python -c "from zenpyre import records"
 
       - name: check zenpyre.testing
         run: |
