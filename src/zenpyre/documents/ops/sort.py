@@ -48,7 +48,7 @@ def sort_by_metadata(
     Example:
         ```pycon
         >>> from langchain_core.documents import Document
-        >>> from zenpyre.documents.ops import sort_by_metadata
+        >>> from zenpyre.documents import sort_by_metadata
         >>> docs = [
         ...     Document(page_content="B", metadata={"source": "b.txt"}),
         ...     Document(page_content="A", metadata={"source": "a.txt"}),

@@ -43,7 +43,7 @@ def assign_ids(docs: list[Document], *, force: bool = False) -> list[Document]:
     Example:
         ```pycon
         >>> from langchain_core.documents import Document
-        >>> from zenpyre.documents.ops import assign_ids
+        >>> from zenpyre.documents import assign_ids
         >>> docs = [
         ...     Document(page_content="Hello"),
         ...     Document(page_content="World", id="existing-id"),

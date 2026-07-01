@@ -36,7 +36,7 @@ def filter_by_metadata(
     Example:
         ```pycon
         >>> from langchain_core.documents import Document
-        >>> from zenpyre.documents.ops import filter_by_metadata
+        >>> from zenpyre.documents import filter_by_metadata
         >>> docs = [
         ...     Document(page_content="A", metadata={"category": "Science"}),
         ...     Document(page_content="B", metadata={"category": "Cooking"}),
@@ -89,7 +89,7 @@ def filter_by_metadata_range(
     Example:
         ```pycon
         >>> from langchain_core.documents import Document
-        >>> from zenpyre.documents.ops import filter_by_metadata_range
+        >>> from zenpyre.documents import filter_by_metadata_range
         >>> docs = [
         ...     Document(page_content="A", metadata={"page": 1}),
         ...     Document(page_content="B", metadata={"page": 5}),
@@ -146,7 +146,7 @@ def filter_by_metadata_values(
     Example:
         ```pycon
         >>> from langchain_core.documents import Document
-        >>> from zenpyre.documents.ops import filter_by_metadata_values
+        >>> from zenpyre.documents import filter_by_metadata_values
         >>> docs = [
         ...     Document(page_content="A", metadata={"category": "Science"}),
         ...     Document(page_content="B", metadata={"category": "Cooking"}),
