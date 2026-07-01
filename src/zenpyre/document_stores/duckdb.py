@@ -9,11 +9,15 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
-import duckdb
 from langchain_core.documents import Document
+
+from zenpyre.utils.imports import is_duckdb_available
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+if is_duckdb_available():  # pragma: no cover
+    import duckdb
 
 logger: logging.Logger = logging.getLogger(__name__)
 

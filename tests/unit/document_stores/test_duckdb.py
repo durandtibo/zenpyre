@@ -6,6 +6,7 @@ import pytest
 from langchain_core.documents import Document
 
 from zenpyre.document_stores import DuckDBDocumentStore
+from zenpyre.testing.fixtures import duckdb_available
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -51,16 +52,19 @@ def docs() -> list[Document]:
 # --- add_documents ---
 
 
+@duckdb_available
 def test_add_documents_increases_count(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     assert store.count() == len(docs)
 
 
+@duckdb_available
 def test_add_documents_no_id_raises(store: DuckDBDocumentStore) -> None:
     with pytest.raises(ValueError, match="id"):
         store.add_documents([Document(page_content="No id")])
 
 
+@duckdb_available
 def test_add_documents_upsert_replaces_existing(store: DuckDBDocumentStore) -> None:
     store.add_documents([Document(id="1", page_content="Original", metadata={})])
     store.add_documents([Document(id="1", page_content="Updated", metadata={})])
@@ -71,10 +75,12 @@ def test_add_documents_upsert_replaces_existing(store: DuckDBDocumentStore) -> N
 # --- count ---
 
 
+@duckdb_available
 def test_count_empty_store(store: DuckDBDocumentStore) -> None:
     assert store.count() == 0
 
 
+@duckdb_available
 def test_count_after_adding(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     assert store.count() == len(docs)
@@ -83,15 +89,18 @@ def test_count_after_adding(store: DuckDBDocumentStore, docs: list[Document]) ->
 # --- get ---
 
 
+@duckdb_available
 def test_get_existing_document(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     assert store.get("1") == docs[0]
 
 
+@duckdb_available
 def test_get_missing_document_returns_none(store: DuckDBDocumentStore) -> None:
     assert store.get("nonexistent") is None
 
 
+@duckdb_available
 def test_get_round_trips_metadata(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     assert store.get("1").metadata == docs[0].metadata
@@ -100,11 +109,13 @@ def test_get_round_trips_metadata(store: DuckDBDocumentStore, docs: list[Documen
 # --- get_many ---
 
 
+@duckdb_available
 def test_get_many_returns_correct_length(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     assert len(store.get_many(["1", "2", "99"])) == 3
 
 
+@duckdb_available
 def test_get_many_returns_none_for_missing(
     store: DuckDBDocumentStore, docs: list[Document]
 ) -> None:
@@ -113,6 +124,7 @@ def test_get_many_returns_none_for_missing(
     assert result[1] is None
 
 
+@duckdb_available
 def test_get_many_preserves_order(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     result = store.get_many(["3", "1", "2"])
@@ -122,10 +134,12 @@ def test_get_many_preserves_order(store: DuckDBDocumentStore, docs: list[Documen
 # --- all ---
 
 
+@duckdb_available
 def test_all_empty_store(store: DuckDBDocumentStore) -> None:
     assert store.all() == []
 
 
+@duckdb_available
 def test_all_returns_all_documents(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     result = store.all()
@@ -136,11 +150,13 @@ def test_all_returns_all_documents(store: DuckDBDocumentStore, docs: list[Docume
 # --- filter ---
 
 
+@duckdb_available
 def test_filter_no_args_returns_all(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     assert len(store.filter()) == len(docs)
 
 
+@duckdb_available
 def test_filter_single_field(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     result = store.filter(author="Alice")
@@ -148,17 +164,20 @@ def test_filter_single_field(store: DuckDBDocumentStore, docs: list[Document]) -
     assert len(result) == 2
 
 
+@duckdb_available
 def test_filter_multiple_fields(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     result = store.filter(author="Alice", category="Programming")
     assert len(result) == 2
 
 
+@duckdb_available
 def test_filter_no_match_returns_empty(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     assert store.filter(author="Charlie") == []
 
 
+@duckdb_available
 def test_filter_preserves_full_document(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     result = store.filter(author="Bob", category="History")
@@ -171,6 +190,7 @@ def test_filter_preserves_full_document(store: DuckDBDocumentStore, docs: list[D
     )
 
 
+@duckdb_available
 def test_filter_empty_store_returns_empty(store: DuckDBDocumentStore) -> None:
     assert store.filter(author="Alice") == []
 
@@ -178,6 +198,7 @@ def test_filter_empty_store_returns_empty(store: DuckDBDocumentStore) -> None:
 # --- delete ---
 
 
+@duckdb_available
 def test_delete_removes_document(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     store.delete("1")
@@ -185,6 +206,7 @@ def test_delete_removes_document(store: DuckDBDocumentStore, docs: list[Document
     assert store.get("1") is None
 
 
+@duckdb_available
 def test_delete_nonexistent_is_silent(store: DuckDBDocumentStore) -> None:
     store.delete("nonexistent")
 
@@ -192,6 +214,7 @@ def test_delete_nonexistent_is_silent(store: DuckDBDocumentStore) -> None:
 # --- delete_many ---
 
 
+@duckdb_available
 def test_delete_many_removes_documents(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     store.delete_many(["1", "3"])
@@ -200,6 +223,7 @@ def test_delete_many_removes_documents(store: DuckDBDocumentStore, docs: list[Do
     assert store.get("3") is None
 
 
+@duckdb_available
 def test_delete_many_preserves_other_documents(
     store: DuckDBDocumentStore, docs: list[Document]
 ) -> None:
@@ -209,16 +233,19 @@ def test_delete_many_preserves_other_documents(
     assert store.get("4") is not None
 
 
+@duckdb_available
 def test_delete_many_empty_list_is_no_op(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     store.delete_many([])
     assert store.count() == len(docs)
 
 
+@duckdb_available
 def test_delete_many_nonexistent_ids_are_silent(store: DuckDBDocumentStore) -> None:
     store.delete_many(["99", "100"])
 
 
+@duckdb_available
 def test_delete_many_single_id(store: DuckDBDocumentStore, docs: list[Document]) -> None:
     store.add_documents(docs)
     store.delete_many(["2"])
