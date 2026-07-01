@@ -9,7 +9,7 @@ from zenpyre.ingestors import TextIngestor
 if TYPE_CHECKING:
     from pathlib import Path
 
-CONTENT = "blablabla."
+CONTENT = "blabla\nBla."
 
 
 ################################
