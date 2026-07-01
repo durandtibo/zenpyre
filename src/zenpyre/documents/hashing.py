@@ -2,7 +2,7 @@ r"""Provide a hashing utility for LangChain documents."""
 
 from __future__ import annotations
 
-__all__ = ["hash_document", "hash_document_uuid"]
+__all__ = ["hash_document", "hash_document_uuid", "hash_documents"]
 
 import json
 import uuid
@@ -85,3 +85,41 @@ def hash_document_uuid(doc: Document) -> str:
     """
     content = doc.page_content + json.dumps(doc.metadata, sort_keys=True)
     return str(uuid.uuid5(_NAMESPACE, content))
+
+
+def hash_documents(docs: list[Document], length: int = 64) -> str:
+    """Compute a stable, reproducible hash of a list of LangChain
+    documents.
+
+    Hashes each document individually via :func:`hash_document` and
+    combines the results into a single canonical string, then hashes
+    that.  The order of documents matters — two lists with the same
+    documents in a different order will produce different hashes.
+
+    Args:
+        docs: The list of :class:`~langchain_core.documents.Document`
+            instances to hash.
+        length: The desired length of the returned hex string.  Must be
+            an even number between 2 and 128 inclusive.  Defaults to
+            ``64``.
+
+    Returns:
+        A lowercase hexadecimal string of exactly ``length`` characters
+        that uniquely identifies the list's content, metadata, and
+        ordering.
+
+    Example:
+        ```pycon
+        >>> from langchain_core.documents import Document
+        >>> from zenpyre.documents import hash_documents
+        >>> docs = [
+        ...     Document(page_content="Hello", metadata={"source": "a.txt"}),
+        ...     Document(page_content="World", metadata={"source": "b.txt"}),
+        ... ]
+        >>> len(hash_documents(docs))
+        64
+
+        ```
+    """
+    combined = "".join(hash_document(doc, length=length) for doc in docs)
+    return hash_string(combined, length=length)
