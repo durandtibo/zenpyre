@@ -251,3 +251,64 @@ def test_delete_many_single_id(store: DuckDBDocumentStore, docs: list[Document])
     store.delete_many(["2"])
     assert store.count() == len(docs) - 1
     assert store.get("2") is None
+
+
+# --- check_ids ---
+
+
+@duckdb_available
+def test_check_ids_all_found(store: DuckDBDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    found, missing = store.check_ids(["1", "2", "3", "4"])
+    assert found == ["1", "2", "3", "4"]
+    assert missing == []
+
+
+@duckdb_available
+def test_check_ids_all_missing(store: DuckDBDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    found, missing = store.check_ids(["99", "100"])
+    assert found == []
+    assert missing == ["99", "100"]
+
+
+@duckdb_available
+def test_check_ids_mixed(store: DuckDBDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    found, missing = store.check_ids(["1", "99", "3", "42"])
+    assert found == ["1", "3"]
+    assert missing == ["99", "42"]
+
+
+@duckdb_available
+def test_check_ids_preserves_order(store: DuckDBDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    found, missing = store.check_ids(["3", "99", "1", "42", "2"])
+    assert found == ["3", "1", "2"]
+    assert missing == ["99", "42"]
+
+
+@duckdb_available
+def test_check_ids_empty_input_returns_empty_lists(store: DuckDBDocumentStore) -> None:
+    found, missing = store.check_ids([])
+    assert found == []
+    assert missing == []
+
+
+@duckdb_available
+def test_check_ids_empty_store_returns_all_missing(store: DuckDBDocumentStore) -> None:
+    found, missing = store.check_ids(["1", "2"])
+    assert found == []
+    assert missing == ["1", "2"]
+
+
+@duckdb_available
+def test_check_ids_returns_tuple_of_two_lists(
+    store: DuckDBDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    result = store.check_ids(["1", "99"])
+    assert isinstance(result, tuple)
+    assert len(result) == 2
+    assert isinstance(result[0], list)
+    assert isinstance(result[1], list)
