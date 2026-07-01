@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any
 
 from langchain_core.documents import Document
 
+from zenpyre.document_stores.base import BaseDocumentStore
 from zenpyre.utils.imports import check_duckdb, is_duckdb_available
 
 if TYPE_CHECKING:
@@ -22,7 +23,7 @@ if is_duckdb_available():  # pragma: no cover
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-class TypedDuckDBDocumentStore:
+class TypedDuckDBDocumentStore(BaseDocumentStore):
     """A DuckDB-backed store for LangChain documents with metadata
     filtering.
 
@@ -87,22 +88,7 @@ class TypedDuckDBDocumentStore:
         self._conn = duckdb.connect(str(path))
         self._conn.execute(self._build_create_table())
 
-    # ---------------------------------------------------------------------------
-    # Public API
-    # ---------------------------------------------------------------------------
-
     def add_documents(self, docs: list[Document]) -> None:
-        """Add or replace documents in the store.
-
-        Documents whose ``id`` already exists are replaced (upsert).
-
-        Args:
-            docs: The list of :class:`~langchain_core.documents.Document`
-                instances to add.  Each document must have an ``id``.
-
-        Raises:
-            ValueError: If any document has no ``id``.
-        """
         for doc in docs:
             if doc.id is None:
                 msg = "All documents must have an id. Assign one before adding."
@@ -115,29 +101,10 @@ class TypedDuckDBDocumentStore:
         logger.info("Added %s documents.", f"{len(docs):,}")
 
     def get(self, doc_id: str) -> Document | None:
-        """Retrieve a single document by its ID.
-
-        Args:
-            doc_id: The document ID to look up.
-
-        Returns:
-            The :class:`~langchain_core.documents.Document`, or
-            ``None`` if not found.
-        """
         row = self._conn.execute("SELECT * FROM documents WHERE id = ?", [doc_id]).fetchone()
         return self._row_to_doc(row) if row else None
 
     def get_many(self, doc_ids: list[str]) -> list[Document | None]:
-        """Retrieve multiple documents by their IDs.
-
-        Args:
-            doc_ids: The document IDs to look up.
-
-        Returns:
-            A list the same length as ``doc_ids``, with the
-            corresponding :class:`~langchain_core.documents.Document`
-            for each ID that exists, or ``None`` for IDs not found.
-        """
         placeholders = ", ".join("?" * len(doc_ids))
         rows = self._conn.execute(
             f"SELECT * FROM documents WHERE id IN ({placeholders})",  # noqa: S608
@@ -147,22 +114,6 @@ class TypedDuckDBDocumentStore:
         return [by_id.get(doc_id) for doc_id in doc_ids]
 
     def filter(self, **metadata_filters: Any) -> list[Document]:
-        """Retrieve documents matching all provided metadata filters.
-
-        Filters on known schema fields use native typed column
-        comparisons.  Filters on fields not in the schema fall back to
-        JSON extraction from the ``extra`` column.  All filters are
-        combined with ``AND``.
-
-        Args:
-            **metadata_filters: Key-value pairs where each key is a
-                metadata field name and the value is the exact value
-                to match.
-
-        Returns:
-            A list of matching
-            :class:`~langchain_core.documents.Document` instances.
-        """
         if not metadata_filters:
             return self.all()
 
@@ -182,21 +133,9 @@ class TypedDuckDBDocumentStore:
         return [self._row_to_doc(row) for row in rows]
 
     def delete(self, doc_id: str) -> None:
-        """Delete a document by its ID.
-
-        Args:
-            doc_id: The ID of the document to delete.
-        """
         self._conn.execute("DELETE FROM documents WHERE id = ?", [doc_id])
 
     def delete_many(self, doc_ids: list[str]) -> None:
-        """Delete multiple documents by their IDs.
-
-        IDs that do not exist are silently ignored.
-
-        Args:
-            doc_ids: The IDs of the documents to delete.
-        """
         if not doc_ids:
             return
         placeholders = ", ".join("?" * len(doc_ids))
@@ -206,21 +145,10 @@ class TypedDuckDBDocumentStore:
         )
 
     def all(self) -> list[Document]:
-        """Return all documents in the store.
-
-        Returns:
-            A list of all :class:`~langchain_core.documents.Document`
-            instances.
-        """
         rows = self._conn.execute("SELECT * FROM documents").fetchall()
         return [self._row_to_doc(row) for row in rows]
 
     def count(self) -> int:
-        """Return the total number of documents in the store.
-
-        Returns:
-            The number of documents currently stored.
-        """
         return self._conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
 
     # ---------------------------------------------------------------------------
