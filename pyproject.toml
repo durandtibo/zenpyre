@@ -12,7 +12,7 @@ only-include = ["src"]
 
 [project]
 name = "zenpyre"
-version = "0.0.1a11"
+version = "0.0.1a12"
 description = "Utilities for LangChain"
 readme = "README.md"
 authors = [
@@ -59,12 +59,15 @@ dependencies = [
 anthropic = [ "langchain-anthropic >= 1.4,<2.0" ]
 # Require python 3.11 because onnxruntime is one of the dependency and needs >= 3.11
 chroma = [ "langchain-chroma >=1.0,<2.0 ; python_version >= '3.11'" ]
+duckdb = [ "duckdb >=1.5,<2.0" ]
 google-genai = [ "langchain-google-genai >= 4.2,<5.0" ]
 huggingface = [ "langchain-huggingface >=1.2,<2.0" ]
 ollama = [ "langchain-ollama >= 1.1,<2.0" ]
 openai = [ "langchain-openai >=1.2,<2.0" ]
 sentence-transformers = [ "sentence-transformers >=5.0,<6.0" ]
 text-splitters = [ "langchain-text-splitters >=1.0,<2.0" ]
+
+
 
 [dependency-groups]
 dev = [

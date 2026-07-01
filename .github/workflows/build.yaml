@@ -22,10 +22,14 @@ jobs:
         package-extra: [
           "",
           'anthropic',
+          'chroma',
+          'duckdb',
           'google-genai',
           'huggingface',
           'ollama',
           'openai',
+          'sentence-transformers',
+          'text-splitters',
         ]
 
     steps:

@@ -25,6 +25,7 @@ __all__ = [
 import pytest
 
 from zenpyre.utils.imports import (
+    is_duckdb_available,
     is_langchain_anthropic_available,
     is_langchain_chroma_available,
     is_langchain_google_genai_available,
@@ -46,6 +47,13 @@ langchain_chroma_available: pytest.MarkDecorator = pytest.mark.skipif(
 )
 langchain_chroma_not_available: pytest.MarkDecorator = pytest.mark.skipif(
     is_langchain_chroma_available(), reason="Skip if langchain_chroma is available"
+)
+
+duckdb_available: pytest.MarkDecorator = pytest.mark.skipif(
+    not is_duckdb_available(), reason="Requires duckdb"
+)
+duckdb_not_available: pytest.MarkDecorator = pytest.mark.skipif(
+    is_duckdb_available(), reason="Skip if duckdb is available"
 )
 
 langchain_google_genai_available: pytest.MarkDecorator = pytest.mark.skipif(

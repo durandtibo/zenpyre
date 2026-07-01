@@ -3,6 +3,7 @@ r"""Helpers to detect and validate optional dependencies."""
 from __future__ import annotations
 
 __all__ = [
+    "check_duckdb",
     "check_langchain_anthropic",
     "check_langchain_chroma",
     "check_langchain_google_genai",
@@ -10,6 +11,8 @@ __all__ = [
     "check_langchain_ollama",
     "check_langchain_openai",
     "check_langchain_text_splitters",
+    "duckdb_available",
+    "is_duckdb_available",
     "is_langchain_anthropic_available",
     "is_langchain_chroma_available",
     "is_langchain_google_genai_available",
@@ -24,6 +27,7 @@ __all__ = [
     "langchain_ollama_available",
     "langchain_openai_available",
     "langchain_text_splitters_available",
+    "raise_duckdb_missing_error",
     "raise_langchain_anthropic_missing_error",
     "raise_langchain_chroma_missing_error",
     "raise_langchain_google_genai_missing_error",
@@ -33,6 +37,12 @@ __all__ = [
     "raise_langchain_text_splitters_missing_error",
 ]
 
+from zenpyre.utils.imports.duckdb import (
+    check_duckdb,
+    duckdb_available,
+    is_duckdb_available,
+    raise_duckdb_missing_error,
+)
 from zenpyre.utils.imports.langchain_anthropic import (
     check_langchain_anthropic,
     is_langchain_anthropic_available,
