@@ -370,3 +370,75 @@ def test_check_ids_returns_tuple_of_two_lists(
     assert len(result) == 2
     assert isinstance(result[0], list)
     assert isinstance(result[1], list)
+
+
+# --- columns_info ---
+
+
+@duckdb_available
+def test_get_columns_info_returns_dict(store: TypedDuckDBDocumentStore) -> None:
+    result = store.get_columns_info()
+    assert isinstance(result, dict)
+
+
+@duckdb_available
+def test_get_columns_info_keys_are_column_names(store: TypedDuckDBDocumentStore) -> None:
+    result = store.get_columns_info()
+    expected_columns = {row[0] for row in store._conn.sql("DESCRIBE documents").fetchall()}
+    assert set(result.keys()) == expected_columns
+
+
+@duckdb_available
+def test_get_columns_info_values_are_strings(store: TypedDuckDBDocumentStore) -> None:
+    result = store.get_columns_info()
+    assert all(isinstance(v, str) for v in result.values())
+
+
+@duckdb_available
+def test_get_columns_info_matches_describe_output(store: TypedDuckDBDocumentStore) -> None:
+    """Cross-check against the raw DESCRIBE output as the source of
+    truth."""
+    rows = store._conn.sql("DESCRIBE documents").fetchall()
+    expected = {row[0]: row[1] for row in rows}
+    assert store.get_columns_info() == expected
+
+
+@duckdb_available
+def test_get_columns_info_non_empty_for_created_table(store: TypedDuckDBDocumentStore) -> None:
+    """The documents table is created in __init__, so this should never
+    be empty for a freshly constructed store."""
+    result = store.get_columns_info()
+    assert len(result) > 0
+
+
+@duckdb_available
+def test_get_columns_info_does_not_mutate_between_calls(store: TypedDuckDBDocumentStore) -> None:
+    first = store.get_columns_info()
+    second = store.get_columns_info()
+    assert first == second
+    assert first is not second  # each call builds a fresh dict
+
+
+@duckdb_available
+def test_show_columns_info_does_not_raise(
+    store: TypedDuckDBDocumentStore, capsys: pytest.CaptureFixture[str]
+) -> None:
+    store.show_columns_info()  # should not raise
+    captured = capsys.readouterr()
+    assert captured.out != ""
+
+
+@duckdb_available
+def test_show_columns_info_output_contains_column_names(
+    store: TypedDuckDBDocumentStore, capsys: pytest.CaptureFixture[str]
+) -> None:
+    expected_columns = store.get_columns_info().keys()
+    store.show_columns_info()
+    captured = capsys.readouterr()
+    for col in expected_columns:
+        assert col in captured.out
+
+
+@duckdb_available
+def test_show_columns_info_returns_none(store: TypedDuckDBDocumentStore) -> None:
+    assert store.show_columns_info() is None

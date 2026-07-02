@@ -9,7 +9,7 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
-from coola.display import MultilineDisplayMixin
+from coola.display import InlineDisplayMixin
 from coola.utils.path import sanitize_path
 from langchain_core.documents import Document
 
@@ -33,7 +33,7 @@ _CREATE_TABLE = """
 """
 
 
-class DuckDBDocumentStore(BaseDocumentStore, MultilineDisplayMixin):
+class DuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
     """A DuckDB-backed store for LangChain documents.
 
     Persists documents to a DuckDB database and supports adding,
@@ -158,6 +158,24 @@ class DuckDBDocumentStore(BaseDocumentStore, MultilineDisplayMixin):
     def count(self) -> int:
         return self._conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
 
+    def get_columns_info(self) -> dict[str, str]:
+        """Return the column names and types of the documents table.
+
+        Returns:
+            A mapping of column name to DuckDB type name.
+        """
+        rows = self._conn.sql("DESCRIBE documents").fetchall()
+        return {row[0]: str(row[1]) for row in rows}
+
+    def show_columns_info(self) -> None:
+        """Print the documents table's column names and types to stdout.
+
+        This is a convenience wrapper around :meth:`get_columns_info` for
+        interactive/debugging use. For programmatic access, use
+        :meth:`get_columns_info` instead.
+        """
+        self._conn.sql("DESCRIBE documents").show()
+
     # ---------------------------------------------------------------------------
     # Private helpers
     # ---------------------------------------------------------------------------
@@ -173,7 +191,7 @@ class DuckDBDocumentStore(BaseDocumentStore, MultilineDisplayMixin):
         )
 
     def _get_repr_kwargs(self) -> dict[str, Any]:
-        return {}
+        return {"count": self.count()}
 
 
 def prepare_duckdb_path(path: Path | str) -> Path | str:
