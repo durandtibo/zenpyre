@@ -17,6 +17,7 @@ from zenpyre.document_stores.base import BaseDocumentStore
 from zenpyre.utils.imports import check_duckdb, is_duckdb_available
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
     from pathlib import Path
 
 if is_duckdb_available():  # pragma: no cover
@@ -189,6 +190,16 @@ class DuckDBDocumentStore(BaseDuckDBDocumentStore):
     def all(self) -> list[Document]:
         rows = self._conn.execute("SELECT id, page_content, metadata FROM documents").fetchall()
         return [self._row_to_doc(row) for row in rows]
+
+    def iter_batches(self, batch_size: int = 32) -> Generator[list[Document], None, None]:
+        if batch_size < 1:
+            msg = f"batch_size must be a positive integer, got {batch_size}"
+            raise ValueError(msg)
+
+        cursor = self._conn.cursor()
+        cursor.execute("SELECT id, page_content, metadata FROM documents")
+        while rows := cursor.fetchmany(batch_size):
+            yield [self._row_to_doc(row) for row in rows]
 
     # ---------------------------------------------------------------------------
     # Private helpers
