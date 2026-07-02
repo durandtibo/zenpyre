@@ -55,7 +55,7 @@ def load_dataclasses(path: Path | str, cls: type[T]) -> list[T]:
         ```
     """
     if not is_dataclass(cls):
-        msg = f"cls must be a dataclass type, got {cls}."
+        msg = f"cls must be a dataclass type, got {cls}"
         raise TypeError(msg)
 
     path = sanitize_path(path)
@@ -63,7 +63,7 @@ def load_dataclasses(path: Path | str, cls: type[T]) -> list[T]:
     data = load_json(path)
 
     if not isinstance(data, list):
-        msg = f"Expected a JSON array of {cls.__name__} objects in {path}, got {type(data)}."
+        msg = f"Expected a JSON array of {cls.__name__} objects in {path}, got {type(data)}"
         raise TypeError(msg)
 
     try:
@@ -72,7 +72,7 @@ def load_dataclasses(path: Path | str, cls: type[T]) -> list[T]:
         msg = f"Could not parse {cls.__name__} entries from {path}: {e}"
         raise ValueError(msg) from e
 
-    logger.debug("Loaded %s items from %s.", f"{len(items):,}", path)
+    logger.debug("Loaded %s items from %s", f"{len(items):,}", path)
     return items
 
 
@@ -104,11 +104,11 @@ def save_dataclasses(items: list[Any], path: Path | str, *, exist_ok: bool = Fal
     """
     for item in items:
         if not is_dataclass(item):
-            msg = f"All items must be dataclass instances, got {type(item)}."
+            msg = f"All items must be dataclass instances, got {type(item)}"
             raise TypeError(msg)
 
     path = sanitize_path(path)
     logger.debug("Saving %s items to %s...", f"{len(items):,}", path)
     data = [asdict(item) for item in items]
     save_json(data, path, exist_ok=exist_ok)
-    logger.debug("Saved %s items to %s.", f"{len(items):,}", path)
+    logger.debug("Saved %s items to %s", f"{len(items):,}", path)

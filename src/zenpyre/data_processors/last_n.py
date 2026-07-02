@@ -41,7 +41,7 @@ class LastNProcessor(BaseProcessor[Sequence[T], list[T]], InlineDisplayMixin):
 
     def __init__(self, n: int) -> None:
         if n < 1:
-            msg = f"n must be a positive integer, got {n}."
+            msg = f"n must be a positive integer, got {n}"
             raise ValueError(msg)
         self._n = n
 
@@ -56,7 +56,7 @@ class LastNProcessor(BaseProcessor[Sequence[T], list[T]], InlineDisplayMixin):
             all elements if ``len(data) < n``.
         """
         result = list(data[-self._n :])
-        logger.info("Last n items: %s -> %s.", f"{len(data):,}", f"{len(result):,}")
+        logger.info("Last n items: %s -> %s", f"{len(data):,}", f"{len(result):,}")
         return result
 
     def _get_repr_kwargs(self) -> dict[str, Any]:

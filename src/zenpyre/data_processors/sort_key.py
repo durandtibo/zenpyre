@@ -67,7 +67,7 @@ class SortByKeyProcessor(
         """
         result = sorted(data, key=lambda item: item[self._key], reverse=self._reverse)
         logger.info(
-            "Sorted %s item(s) by key %r (reverse=%s).",
+            "Sorted %s item(s) by key %r (reverse=%s)",
             f"{len(result):,}",
             self._key,
             self._reverse,

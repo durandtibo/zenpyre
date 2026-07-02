@@ -56,7 +56,7 @@ class PickleIngestor(BaseIngestor[T], InlineDisplayMixin):
         if not self._path.is_file():
             msg = (
                 f"Pickle file not found: '{self._path}'. "
-                "Ensure the file has been created before calling ingest()."
+                "Ensure the file has been created before calling ingest()"
             )
             raise FileNotFoundError(msg)
         return load_pickle(self._path)
