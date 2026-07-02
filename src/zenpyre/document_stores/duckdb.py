@@ -29,9 +29,10 @@ class BaseDuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
     r"""Define a base class for DuckDB-backed store for LangChain
     documents."""
 
-    def __init__(self, conn: duckdb.DuckDBPyConnection) -> None:
+    def __init__(self, path: Path | str) -> None:
         check_duckdb()
-        self._conn = conn
+        self._path = prepare_duckdb_path(path)
+        self._conn = duckdb.connect(str(self._path))
 
     def delete(self, doc_id: str) -> None:
         self._conn.execute("DELETE FROM documents WHERE id = ?", [doc_id])
@@ -67,7 +68,7 @@ class BaseDuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
         self._conn.sql("DESCRIBE documents").show()
 
     def _get_repr_kwargs(self) -> dict[str, Any]:
-        return {"count": self.count()}
+        return {"count": self.count(), "path": self._path}
 
 
 _CREATE_TABLE = """
@@ -127,7 +128,7 @@ class DuckDBDocumentStore(BaseDuckDBDocumentStore):
     """
 
     def __init__(self, path: Path | str = ":memory:") -> None:
-        super().__init__(duckdb.connect(str(prepare_duckdb_path(path))))
+        super().__init__(path)
         self._conn.execute(_CREATE_TABLE)
 
     def add_documents(self, docs: list[Document]) -> None:
