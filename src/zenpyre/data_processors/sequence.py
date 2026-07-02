@@ -36,6 +36,10 @@ class SequenceProcessor(BaseProcessor[Sequence[U], list[T]], MultilineDisplayMix
             value of type ``T``.
         progress_description: The description shown on the progress bar
             while processing.  Defaults to ``"Processing items..."``.
+        raise_on_error: If ``True`` (default), an exception raised while
+            processing an item is propagated and processing stops
+            immediately. If ``False``, items that fail are logged and
+            skipped, and processing continues with the remaining items.
 
     Example:
         ```pycon
@@ -51,10 +55,14 @@ class SequenceProcessor(BaseProcessor[Sequence[U], list[T]], MultilineDisplayMix
     """
 
     def __init__(
-        self, processor: BaseProcessor[U, T], progress_description: str = "Processing items..."
+        self,
+        processor: BaseProcessor[U, T],
+        progress_description: str = "Processing items...",
+        raise_on_error: bool = True,
     ) -> None:
         self._processor = processor
         self._progress_description = progress_description
+        self._raise_on_error = raise_on_error
 
     def process(self, data: Sequence[U]) -> list[T]:
         """Apply ``processor`` to each item in ``data`` and return the
@@ -64,20 +72,51 @@ class SequenceProcessor(BaseProcessor[Sequence[U], list[T]], MultilineDisplayMix
             data: The sequence of items to process.
 
         Returns:
-            A list of results in the same order as ``data``, where each
-            element is the output of ``processor.process`` applied to
-            the corresponding input item.
+            A list of results in the same order as the successfully
+            processed items in ``data``. If ``raise_on_error`` is
+            ``False``, items that raise an exception are skipped and
+            omitted from the returned list.
         """
         results = []
+        n_errors = 0
 
         with make_progressbar() as progress:
             task = progress.add_task(self._progress_description, total=len(data))
             for item in data:
-                results.append(self._processor.process(item))
+                success, result = self._process_item(item)
+                if success:
+                    results.append(result)
+                else:
+                    n_errors += 1
                 progress.advance(task)
 
+        if n_errors:
+            logger.warning("Skipped %s item(s) that failed to process.", f"{n_errors:,}")
         logger.info("Processed %s item(s).", f"{len(results):,}")
         return results
 
+    def _process_item(self, item: U) -> tuple[bool, T | None]:
+        """Process a single item, handling errors according to
+        ``raise_on_error``.
+
+        Args:
+            item: The item to process.
+
+        Returns:
+            A ``(success, result)`` tuple. ``result`` is ``None`` when
+            ``success`` is ``False``.
+        """
+        try:
+            return True, self._processor.process(item)
+        except Exception:
+            if self._raise_on_error:
+                raise
+            logger.exception("Failed to process item: %r", item)
+            return False, None
+
     def _get_repr_kwargs(self) -> dict[str, Any]:
-        return {"processor": self._processor, "progress_description": self._progress_description}
+        return {
+            "processor": self._processor,
+            "progress_description": self._progress_description,
+            "raise_on_error": self._raise_on_error,
+        }
