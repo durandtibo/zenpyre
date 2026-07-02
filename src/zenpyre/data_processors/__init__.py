@@ -5,6 +5,7 @@ from __future__ import annotations
 __all__ = [
     "BaseProcessor",
     "FilterDocumentsByMetadataProcessor",
+    "FilterDocumentsByMetadataRangeProcessor",
     "FirstNProcessor",
     "LambdaProcessor",
     "LastNProcessor",
@@ -16,6 +17,9 @@ __all__ = [
 
 from zenpyre.data_processors.base import BaseProcessor
 from zenpyre.data_processors.filter_documents import FilterDocumentsByMetadataProcessor
+from zenpyre.data_processors.filter_documents_range import (
+    FilterDocumentsByMetadataRangeProcessor,
+)
 from zenpyre.data_processors.first_n import FirstNProcessor
 from zenpyre.data_processors.lambdaa import LambdaProcessor
 from zenpyre.data_processors.last_n import LastNProcessor
