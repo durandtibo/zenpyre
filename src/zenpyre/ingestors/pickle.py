@@ -24,12 +24,6 @@ logger: logging.Logger = logging.getLogger(__name__)
 class PickleIngestor(BaseIngestor[T], InlineDisplayMixin):
     """Ingestor that loads data from a pickle file.
 
-    Intended as a lightweight alternative to
-    :class:`~deltaagent.ingestor.SecFilingsIngestor` when the data
-    has already been downloaded and pickled to disk. Useful for
-    reproducible experiments and for skipping network calls during
-    development.
-
     Args:
         path: Path to the pickle file to load.
 
@@ -52,10 +46,7 @@ class PickleIngestor(BaseIngestor[T], InlineDisplayMixin):
         """Load and return data from the pickle file.
 
         Returns:
-            The Python object stored in the pickle file, expected to be
-            a dict mapping form types to lists of
-            :class:`~pathlib.Path` objects as produced by
-            :func:`~deltaagent.data.download_sec_filings`.
+            The Python object stored in the pickle file.
 
         Raises:
             FileNotFoundError: If the pickle file does not exist at the
