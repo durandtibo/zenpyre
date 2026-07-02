@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any
 from langchain_core.documents import Document
 
 from zenpyre.document_stores.base import BaseDocumentStore
+from zenpyre.document_stores.duckdb import prepare_duckdb_path
 from zenpyre.utils.imports import check_duckdb, is_duckdb_available
 
 if TYPE_CHECKING:
@@ -85,7 +86,7 @@ class TypedDuckDBDocumentStore(BaseDocumentStore):
     ) -> None:
         check_duckdb()
         self._schema: dict[str, str] = metadata_schema or {}
-        self._conn = duckdb.connect(str(path))
+        self._conn = duckdb.connect(str(prepare_duckdb_path(path)))
         self._conn.execute(self._build_create_table())
 
     def add_documents(self, docs: list[Document]) -> None:
