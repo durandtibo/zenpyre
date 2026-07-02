@@ -10,6 +10,7 @@ __all__ = [
     "SequenceProcessor",
     "SequentialProcessor",
     "SortDocumentsByMetadataProcessor",
+    "SortRecordsByMetadataProcessor",
 ]
 
 from zenpyre.data_processors.base import BaseProcessor
@@ -19,3 +20,4 @@ from zenpyre.data_processors.last_n import LastNProcessor
 from zenpyre.data_processors.sequence import SequenceProcessor
 from zenpyre.data_processors.sequential import SequentialProcessor
 from zenpyre.data_processors.sort_documents import SortDocumentsByMetadataProcessor
+from zenpyre.data_processors.sort_records import SortRecordsByMetadataProcessor
