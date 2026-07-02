@@ -17,12 +17,12 @@ def test_first_n_processor_stores_n() -> None:
 
 
 def test_first_n_processor_n_zero_raises() -> None:
-    with pytest.raises(ValueError, match="n must be a positive integer, got 0"):
+    with pytest.raises(ValueError, match=r"n must be a positive integer, got 0"):
         FirstNProcessor(n=0)
 
 
 def test_first_n_processor_n_negative_raises() -> None:
-    with pytest.raises(ValueError, match="n must be a positive integer, got -1"):
+    with pytest.raises(ValueError, match=r"n must be a positive integer, got -1"):
         FirstNProcessor(n=-1)
 
 

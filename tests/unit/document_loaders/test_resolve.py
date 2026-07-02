@@ -59,5 +59,5 @@ def test_resolve_document_loader_from_dict_returns_correct_type() -> None:
 
 
 def test_resolve_document_loader_invalid_type_raises_type_error() -> None:
-    with pytest.raises(TypeError, match="Received object is not a BaseLoader instance"):
+    with pytest.raises(TypeError, match=r"Received object is not a BaseLoader instance"):
         resolve_document_loader("not-a-loader")

@@ -60,7 +60,7 @@ def test_add_documents_increases_count(store: DuckDBDocumentStore, docs: list[Do
 
 @duckdb_available
 def test_add_documents_no_id_raises(store: DuckDBDocumentStore) -> None:
-    with pytest.raises(ValueError, match="id"):
+    with pytest.raises(ValueError, match=r"id"):
         store.add_documents([Document(page_content="No id")])
 
 

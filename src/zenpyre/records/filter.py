@@ -22,14 +22,14 @@ def filter_by_metadata(
     ``metadata_key`` are excluded.
 
     Args:
-        records: The list of :class:`~record.Record` instances to
+        records: The list of :class:`~zenpyre.records.Record` instances to
             filter.
         metadata_key: The metadata key to filter by.
         value: The value to match against.  Records whose
             ``metadata_key`` equals this value are kept.
 
     Returns:
-        A new list of :class:`~record.Record` instances whose metadata
+        A new list of :class:`~zenpyre.records.Record` instances whose metadata
         matches the filter.  The original list is not modified.
 
     Example:
@@ -65,7 +65,7 @@ def filter_by_metadata_range(
     returned.  Records missing ``metadata_key`` are always excluded.
 
     Args:
-        records: The list of :class:`~record.Record` instances to
+        records: The list of :class:`~zenpyre.records.Record` instances to
             filter.
         metadata_key: The metadata key to filter by.
         lower: The inclusive lower bound.  Pass ``None`` (the default)
@@ -74,7 +74,7 @@ def filter_by_metadata_range(
             for no upper bound.
 
     Returns:
-        A new list of :class:`~record.Record` instances whose
+        A new list of :class:`~zenpyre.records.Record` instances whose
         ``metadata_key`` value falls within ``[lower, upper]``.  The
         original list is not modified.
 
@@ -127,14 +127,14 @@ def filter_by_metadata_values(
     Records missing ``metadata_key`` are excluded.
 
     Args:
-        records: The list of :class:`~record.Record` instances to
+        records: The list of :class:`~zenpyre.records.Record` instances to
             filter.
         metadata_key: The metadata key to filter by.
         values: The set of accepted values.  Records whose
             ``metadata_key`` is in this set are kept.
 
     Returns:
-        A new list of :class:`~record.Record` instances whose
+        A new list of :class:`~zenpyre.records.Record` instances whose
         ``metadata_key`` value is in ``values``.  The original list is
         not modified.
 

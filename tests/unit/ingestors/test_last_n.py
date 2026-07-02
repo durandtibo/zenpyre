@@ -34,7 +34,7 @@ def test_last_n_ingestor_stores_n() -> None:
     ],
 )
 def test_last_n_ingestor_raises_for_non_positive_n(n: int) -> None:
-    with pytest.raises(ValueError, match="n must be a positive integer"):
+    with pytest.raises(ValueError, match=r"n must be a positive integer"):
         LastNIngestor(ingestor=InMemoryIngestor(data=[]), n=n)
 
 

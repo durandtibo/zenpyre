@@ -65,5 +65,5 @@ def test_resolve_text_splitter_without_langchain_text_splitters() -> None:
 
 @langchain_text_splitters_available
 def test_resolve_embeddings_invalid_type_raises_type_error() -> None:
-    with pytest.raises(TypeError, match="Received object is not a TextSplitter instance"):
+    with pytest.raises(TypeError, match=r"Received object is not a TextSplitter instance"):
         resolve_text_splitter("not-a-text-splitter")
