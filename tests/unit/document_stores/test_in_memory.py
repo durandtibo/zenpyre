@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 import pytest
 from langchain_core.documents import Document
 
@@ -293,3 +295,104 @@ def test_check_ids_returns_tuple_of_two_lists(
     assert len(result) == 2
     assert isinstance(result[0], list)
     assert isinstance(result[1], list)
+
+
+# --- iter_batches ---
+
+
+def test_iter_batches_empty_store_yields_nothing(store: InMemoryDocumentStore) -> None:
+    assert list(store.iter_batches()) == []
+
+
+def test_iter_batches_returns_generator(store: InMemoryDocumentStore) -> None:
+    result = store.iter_batches()
+    assert isinstance(result, Iterator)
+
+
+def test_iter_batches_default_batch_size(
+    store: InMemoryDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    batches = list(store.iter_batches())
+    assert len(batches) == 1
+    assert len(batches[0]) == len(docs)
+
+
+def test_iter_batches_yields_correct_batch_sizes(
+    store: InMemoryDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    batches = list(store.iter_batches(batch_size=2))
+    assert [len(b) for b in batches] == [2, 2]
+
+
+def test_iter_batches_last_batch_may_be_smaller(
+    store: InMemoryDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    batches = list(store.iter_batches(batch_size=3))
+    assert [len(b) for b in batches] == [3, 1]
+
+
+def test_iter_batches_batch_size_larger_than_store(
+    store: InMemoryDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    batches = list(store.iter_batches(batch_size=100))
+    assert len(batches) == 1
+    assert len(batches[0]) == len(docs)
+
+
+def test_iter_batches_batch_size_one(store: InMemoryDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    batches = list(store.iter_batches(batch_size=1))
+    assert [len(b) for b in batches] == [1, 1, 1, 1]
+
+
+def test_iter_batches_returns_all_documents(
+    store: InMemoryDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    result = [doc for batch in store.iter_batches(batch_size=2) for doc in batch]
+    assert len(result) == len(docs)
+    assert {r.id for r in result} == {d.id for d in docs}
+
+
+def test_iter_batches_matches_all(store: InMemoryDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    flattened = [doc for batch in store.iter_batches(batch_size=2) for doc in batch]
+    assert flattened == store.all()
+
+
+def test_iter_batches_batches_contain_document_instances(
+    store: InMemoryDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    batches = list(store.iter_batches(batch_size=2))
+    assert all(isinstance(doc, Document) for batch in batches for doc in batch)
+
+
+def test_iter_batches_zero_batch_size_raises(store: InMemoryDocumentStore) -> None:
+    with pytest.raises(ValueError, match="batch_size must be a positive integer"):
+        list(store.iter_batches(batch_size=0))
+
+
+def test_iter_batches_negative_batch_size_raises(store: InMemoryDocumentStore) -> None:
+    with pytest.raises(ValueError, match="batch_size must be a positive integer"):
+        list(store.iter_batches(batch_size=-1))
+
+
+def test_iter_batches_error_raised_before_any_query(store: InMemoryDocumentStore) -> None:
+    """The ValueError should be raised eagerly on the first call to
+    next(), not silently swallowed by generator laziness."""
+    gen = store.iter_batches(batch_size=0)
+    with pytest.raises(ValueError, match="batch_size"):
+        next(gen)
+
+
+def test_iter_batches_does_not_mutate_store(
+    store: InMemoryDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    list(store.iter_batches(batch_size=2))
+    assert store.count() == len(docs)

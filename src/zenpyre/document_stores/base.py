@@ -8,6 +8,8 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from langchain_core.documents import Document
 
 
@@ -123,6 +125,40 @@ class BaseDocumentStore(ABC):
         Returns:
             A list of all :class:`~langchain_core.documents.Document`
             instances currently in the store.
+        """
+
+    @abstractmethod
+    def iter_batches(self, batch_size: int = 32) -> Generator[list[Document], None, None]:
+        """Yield documents in batches, avoiding loading the whole store
+        into memory at once.
+
+        This is the scalable equivalent of :meth:`all`: instead of
+        materializing every document as a single list, it streams
+        them from the database in chunks of ``batch_size``.
+
+        Args:
+            batch_size: The maximum number of documents to yield per
+                batch. Must be a positive integer.
+
+        Yields:
+            Lists of documents, each with at most ``batch_size``
+            elements, in the same order as :meth:`all`. The last batch
+            may contain fewer than ``batch_size`` documents.
+
+        Example:
+            ```pycon
+            >>> from zenpyre.document_stores import DuckDBDocumentStore
+            >>> from langchain_core.documents import Document
+            >>> store = DuckDBDocumentStore(":memory:")
+            >>> store.add_documents([Document(id=str(i), page_content=str(i)) for i in range(5)])
+            >>> for batch in store.iter_batches(batch_size=2):
+            ...     print(len(batch))
+            ...
+            2
+            2
+            1
+
+            ```
         """
 
     @abstractmethod
