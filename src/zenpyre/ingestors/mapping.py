@@ -47,7 +47,7 @@ class MappingIngestor(BaseIngestor[dict[Hashable, BaseIngestor[T]]], MultilineDi
     """
 
     def __init__(self, ingestors: Mapping[Hashable, BaseIngestor[T]]) -> None:
-        self._ingestors = dict(ingestors)
+        self._ingestors = ingestors
 
     def ingest(self) -> dict[Hashable, T]:
         return {key: ingestor.ingest() for key, ingestor in self._ingestors.items()}

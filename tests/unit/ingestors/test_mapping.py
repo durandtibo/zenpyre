@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from coola.equality import objects_are_equal
+
 from zenpyre.ingestors import InMemoryIngestor, MappingIngestor
 
 #################################
@@ -13,7 +15,7 @@ from zenpyre.ingestors import InMemoryIngestor, MappingIngestor
 
 def test_mapping_ingestor_stores_ingestors() -> None:
     inner = {"a": InMemoryIngestor(data=1), "b": InMemoryIngestor(data=2)}
-    assert MappingIngestor(ingestors=inner)._ingestors is inner
+    assert objects_are_equal(MappingIngestor(ingestors=inner)._ingestors, inner)
 
 
 # --- repr and str ---
