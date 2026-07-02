@@ -199,5 +199,5 @@ def test_hash_chat_model_default_query_does_not_affect_hash() -> None:
     ],
 )
 def test_hash_chat_model_invalid_length_raises(length: int) -> None:
-    with pytest.raises(ValueError, match="length"):
+    with pytest.raises(ValueError, match=r"length"):
         hash_chat_model(MinimalChatModel(), length=length)

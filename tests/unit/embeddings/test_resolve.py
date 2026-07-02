@@ -49,5 +49,5 @@ def test_resolve_embeddings_from_dict_returns_correct_type() -> None:
 
 
 def test_resolve_embeddings_invalid_type_raises_type_error() -> None:
-    with pytest.raises(TypeError, match="Received object is not an Embeddings instance"):
+    with pytest.raises(TypeError, match=r"Received object is not an Embeddings instance"):
         resolve_embeddings("not-an-embeddings")

@@ -70,5 +70,5 @@ def test_hash_dict_uuid_boolean_values() -> None:
 
 
 def test_hash_dict_uuid_non_serialisable_raises() -> None:
-    with pytest.raises(TypeError, match="Object of type object is not JSON serializable"):
+    with pytest.raises(TypeError, match=r"Object of type object is not JSON serializable"):
         hash_dict_uuid({"obj": object()})

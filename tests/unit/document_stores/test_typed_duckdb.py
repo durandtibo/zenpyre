@@ -72,7 +72,7 @@ def test_add_documents_increases_count(
 
 @duckdb_available
 def test_add_documents_no_id_raises(store: TypedDuckDBDocumentStore) -> None:
-    with pytest.raises(ValueError, match="All documents must have an id"):
+    with pytest.raises(ValueError, match=r"All documents must have an id"):
         store.add_documents([Document(page_content="No id")])
 
 

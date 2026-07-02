@@ -23,7 +23,7 @@ class SortDocumentsByMetadataProcessor(
     """Processor that sorts a list of LangChain documents by the value
     of a metadata key.
 
-    Wraps :func:`~zenpyre.documents.ops.sort_by_metadata` as a
+    Wraps :func:`~zenpyre.documents.sort_by_metadata` as a
     :class:`~zenpyre.data_processors.base.BaseProcessor` so it can be
     composed in a :class:`~zenpyre.data_processors.SequentialProcessor`
     pipeline.

@@ -26,7 +26,7 @@ def sort_by_metadata(
     or removed entirely if ``keep_missing=False``.
 
     Args:
-        records: The list of :class:`~record.Record` instances to sort.
+        records: The list of :class:`~zenpyre.records.Record` instances to sort.
         metadata_key: The metadata key to sort by.
         keep_missing: If ``True`` (the default), records without
             ``metadata_key`` in their metadata are kept and placed at
@@ -37,7 +37,7 @@ def sort_by_metadata(
             :func:`sorted`.
 
     Returns:
-        A new sorted list of :class:`~record.Record` instances.  The
+        A new sorted list of :class:`~zenpyre.records.Record` instances.  The
         original list is not modified.
 
     Raises:

@@ -19,12 +19,12 @@ def test_last_n_processor_stores_n() -> None:
 
 
 def test_last_n_processor_n_zero_raises() -> None:
-    with pytest.raises(ValueError, match="n must be a positive integer, got 0"):
+    with pytest.raises(ValueError, match=r"n must be a positive integer, got 0"):
         LastNProcessor(n=0)
 
 
 def test_last_n_processor_n_negative_raises() -> None:
-    with pytest.raises(ValueError, match="n must be a positive integer, got -1"):
+    with pytest.raises(ValueError, match=r"n must be a positive integer, got -1"):
         LastNProcessor(n=-1)
 
 

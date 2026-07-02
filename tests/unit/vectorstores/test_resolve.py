@@ -61,5 +61,5 @@ def test_resolve_vector_store_from_dict_returns_correct_type() -> None:
 
 
 def test_resolve_vector_store_invalid_type_raises_type_error() -> None:
-    with pytest.raises(TypeError, match="Received object is not a VectorStore instance"):
+    with pytest.raises(TypeError, match=r"Received object is not a VectorStore instance"):
         resolve_vector_store("not-a-vector-store")
