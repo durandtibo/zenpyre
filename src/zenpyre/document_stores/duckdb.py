@@ -19,8 +19,6 @@ from zenpyre.utils.imports import check_duckdb, is_duckdb_available
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from _duckdb import DuckDBPyConnection
-
 if is_duckdb_available():  # pragma: no cover
     import duckdb
 
@@ -31,7 +29,7 @@ class BaseDuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
     r"""Define a base class for DuckDB-backed store for LangChain
     documents."""
 
-    def __init__(self, conn: DuckDBPyConnection) -> None:
+    def __init__(self, conn: duckdb.DuckDBPyConnection) -> None:
         check_duckdb()
         self._conn = conn
 
