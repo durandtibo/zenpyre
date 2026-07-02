@@ -3,12 +3,14 @@ metadata."""
 
 from __future__ import annotations
 
-__all__ = ["DuckDBDocumentStore"]
+__all__ = ["DuckDBDocumentStore", "prepare_duckdb_path"]
 
 import json
 import logging
 from typing import TYPE_CHECKING, Any
 
+from coola.display import MultilineDisplayMixin
+from coola.utils.path import sanitize_path
 from langchain_core.documents import Document
 
 from zenpyre.document_stores.base import BaseDocumentStore
@@ -31,7 +33,7 @@ _CREATE_TABLE = """
 """
 
 
-class DuckDBDocumentStore(BaseDocumentStore):
+class DuckDBDocumentStore(BaseDocumentStore, MultilineDisplayMixin):
     """A DuckDB-backed store for LangChain documents.
 
     Persists documents to a DuckDB database and supports adding,
@@ -79,7 +81,7 @@ class DuckDBDocumentStore(BaseDocumentStore):
     """
 
     def __init__(self, path: Path | str = ":memory:") -> None:
-        self._conn = duckdb.connect(str(path))
+        self._conn = duckdb.connect(str(prepare_duckdb_path(path)))
         self._conn.execute(_CREATE_TABLE)
 
     def add_documents(self, docs: list[Document]) -> None:
@@ -169,3 +171,32 @@ class DuckDBDocumentStore(BaseDocumentStore):
             page_content=page_content,
             metadata=json.loads(metadata_json) if metadata_json else {},
         )
+
+    def _get_repr_kwargs(self) -> dict[str, Any]:
+        return {}
+
+
+def prepare_duckdb_path(path: Path | str) -> Path | str:
+    """Prepare a path for use with ``duckdb.connect``.
+
+    If ``path`` is the special in-memory sentinel (``":memory:"``), it is
+    returned unchanged. Otherwise, ``path`` is sanitized and its parent
+    directory is created if it does not already exist, so that DuckDB
+    can create the database file without failing on a missing directory.
+
+    Args:
+        path: The DuckDB connection target -- either the in-memory
+            sentinel ``":memory:"``, or a filesystem path to a database
+            file.
+
+    Returns:
+        ``":memory:"`` unchanged, or the sanitized, absolute ``Path``
+        whose parent directory is guaranteed to exist.
+    """
+    if isinstance(path, str) and path == ":memory:":
+        return path
+
+    path = sanitize_path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    logger.debug("Ensured parent directory exists: %s", path.parent)
+    return path

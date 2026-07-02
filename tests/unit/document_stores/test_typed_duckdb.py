@@ -58,6 +58,18 @@ def docs() -> list[Document]:
 #     Tests for TypedDuckDBDocumentStore         #
 ##################################################
 
+# --- repr/str ---
+
+
+@duckdb_available
+def test_repr(store: TypedDuckDBDocumentStore) -> None:
+    assert repr(store).startswith("TypedDuckDBDocumentStore(")
+
+
+@duckdb_available
+def test_str(store: TypedDuckDBDocumentStore) -> None:
+    assert repr(store).startswith("TypedDuckDBDocumentStore(")
+
 
 # --- add_documents ---
 
