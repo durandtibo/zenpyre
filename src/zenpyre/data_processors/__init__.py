@@ -6,6 +6,7 @@ __all__ = [
     "BaseProcessor",
     "FilterDocumentsByMetadataProcessor",
     "FilterDocumentsByMetadataRangeProcessor",
+    "FilterDocumentsByMetadataValuesProcessor",
     "FirstNProcessor",
     "LambdaProcessor",
     "LastNProcessor",
@@ -19,6 +20,9 @@ from zenpyre.data_processors.base import BaseProcessor
 from zenpyre.data_processors.filter_documents import FilterDocumentsByMetadataProcessor
 from zenpyre.data_processors.filter_documents_range import (
     FilterDocumentsByMetadataRangeProcessor,
+)
+from zenpyre.data_processors.filter_documents_values import (
+    FilterDocumentsByMetadataValuesProcessor,
 )
 from zenpyre.data_processors.first_n import FirstNProcessor
 from zenpyre.data_processors.lambdaa import LambdaProcessor
