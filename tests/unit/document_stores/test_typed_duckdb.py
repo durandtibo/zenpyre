@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 import pytest
 from langchain_core.documents import Document
 
@@ -442,3 +444,118 @@ def test_show_columns_info_output_contains_column_names(
 @duckdb_available
 def test_show_columns_info_returns_none(store: TypedDuckDBDocumentStore) -> None:
     assert store.show_columns_info() is None
+
+
+# --- iter_batches ---
+
+
+@duckdb_available
+def test_iter_batches_empty_store_yields_nothing(store: TypedDuckDBDocumentStore) -> None:
+    assert list(store.iter_batches()) == []
+
+
+@duckdb_available
+def test_iter_batches_returns_generator(store: TypedDuckDBDocumentStore) -> None:
+    result = store.iter_batches()
+    assert isinstance(result, Iterator)
+
+
+@duckdb_available
+def test_iter_batches_default_batch_size(
+    store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    batches = list(store.iter_batches())
+    assert len(batches) == 1
+    assert len(batches[0]) == len(docs)
+
+
+@duckdb_available
+def test_iter_batches_yields_correct_batch_sizes(
+    store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    batches = list(store.iter_batches(batch_size=2))
+    assert [len(b) for b in batches] == [2, 2]
+
+
+@duckdb_available
+def test_iter_batches_last_batch_may_be_smaller(
+    store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    batches = list(store.iter_batches(batch_size=3))
+    assert [len(b) for b in batches] == [3, 1]
+
+
+@duckdb_available
+def test_iter_batches_batch_size_larger_than_store(
+    store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    batches = list(store.iter_batches(batch_size=100))
+    assert len(batches) == 1
+    assert len(batches[0]) == len(docs)
+
+
+@duckdb_available
+def test_iter_batches_batch_size_one(store: TypedDuckDBDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    batches = list(store.iter_batches(batch_size=1))
+    assert [len(b) for b in batches] == [1, 1, 1, 1]
+
+
+@duckdb_available
+def test_iter_batches_returns_all_documents(
+    store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    result = [doc for batch in store.iter_batches(batch_size=2) for doc in batch]
+    assert len(result) == len(docs)
+    assert {r.id for r in result} == {d.id for d in docs}
+
+
+@duckdb_available
+def test_iter_batches_matches_all(store: TypedDuckDBDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    flattened = [doc for batch in store.iter_batches(batch_size=2) for doc in batch]
+    assert flattened == store.all()
+
+
+@duckdb_available
+def test_iter_batches_batches_contain_document_instances(
+    store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    batches = list(store.iter_batches(batch_size=2))
+    assert all(isinstance(doc, Document) for batch in batches for doc in batch)
+
+
+@duckdb_available
+def test_iter_batches_zero_batch_size_raises(store: TypedDuckDBDocumentStore) -> None:
+    with pytest.raises(ValueError, match="batch_size must be a positive integer"):
+        list(store.iter_batches(batch_size=0))
+
+
+@duckdb_available
+def test_iter_batches_negative_batch_size_raises(store: TypedDuckDBDocumentStore) -> None:
+    with pytest.raises(ValueError, match="batch_size must be a positive integer"):
+        list(store.iter_batches(batch_size=-1))
+
+
+@duckdb_available
+def test_iter_batches_error_raised_before_any_query(store: TypedDuckDBDocumentStore) -> None:
+    """The ValueError should be raised eagerly on the first call to
+    next(), not silently swallowed by generator laziness."""
+    gen = store.iter_batches(batch_size=0)
+    with pytest.raises(ValueError, match="batch_size"):
+        next(gen)
+
+
+@duckdb_available
+def test_iter_batches_does_not_mutate_store(
+    store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    list(store.iter_batches(batch_size=2))
+    assert store.count() == len(docs)

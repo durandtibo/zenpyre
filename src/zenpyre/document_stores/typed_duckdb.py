@@ -14,6 +14,7 @@ from langchain_core.documents import Document
 from zenpyre.document_stores.duckdb import BaseDuckDBDocumentStore
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -146,6 +147,16 @@ class TypedDuckDBDocumentStore(BaseDuckDBDocumentStore):
     def all(self) -> list[Document]:
         rows = self._conn.execute("SELECT * FROM documents").fetchall()
         return [self._row_to_doc(row) for row in rows]
+
+    def iter_batches(self, batch_size: int = 1000) -> Iterator[list[Document]]:
+        if batch_size < 1:
+            msg = f"batch_size must be a positive integer, got {batch_size}"
+            raise ValueError(msg)
+
+        cursor = self._conn.cursor()
+        cursor.execute("SELECT * FROM documents")
+        while rows := cursor.fetchmany(batch_size):
+            yield [self._row_to_doc(row) for row in rows]
 
     # ---------------------------------------------------------------------------
     # Private helpers
