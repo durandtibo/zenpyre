@@ -8,6 +8,7 @@ __all__ = [
     "FirstNIngestor",
     "InMemoryIngestor",
     "LastNIngestor",
+    "MappingIngestor",
     "PickleIngestor",
     "TextIngestor",
 ]
@@ -17,5 +18,6 @@ from zenpyre.ingestors.dataclass import DataclassIngestor
 from zenpyre.ingestors.first_n import FirstNIngestor
 from zenpyre.ingestors.in_memory import InMemoryIngestor
 from zenpyre.ingestors.last_n import LastNIngestor
+from zenpyre.ingestors.mapping import MappingIngestor
 from zenpyre.ingestors.pickle import PickleIngestor
 from zenpyre.ingestors.text import TextIngestor
