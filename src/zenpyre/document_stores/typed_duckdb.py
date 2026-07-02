@@ -12,13 +12,9 @@ from typing import TYPE_CHECKING, Any
 from langchain_core.documents import Document
 
 from zenpyre.document_stores.duckdb import BaseDuckDBDocumentStore
-from zenpyre.utils.imports import is_duckdb_available
 
 if TYPE_CHECKING:
     from pathlib import Path
-
-if is_duckdb_available():  # pragma: no cover
-    pass
 
 logger: logging.Logger = logging.getLogger(__name__)
 
