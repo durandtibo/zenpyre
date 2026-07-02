@@ -35,10 +35,10 @@ def inspect_embeddings(vector_store: VectorStore, n: int = 2) -> None:
     docs = vector_store.similarity_search("", k=n)
 
     if not docs:
-        logger.info("No documents found in the vector store.")
+        logger.info("No documents found in the vector store")
         return
 
-    logger.info("Retrieved %s documents from the vector store.", f"{len(docs):,}")
+    logger.info("Retrieved %s documents from the vector store", f"{len(docs):,}")
 
     for _i, doc in enumerate(docs):
         logger.info("Chunk ID:   %s", doc.id)

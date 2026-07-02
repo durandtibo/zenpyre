@@ -53,7 +53,7 @@ class FirstNIngestor(BaseIngestor[list[T]], MultilineDisplayMixin):
 
     def __init__(self, ingestor: BaseIngestor[Sequence[T]], n: int) -> None:
         if n < 1:
-            msg = f"n must be a positive integer, got {n}."
+            msg = f"n must be a positive integer, got {n}"
             raise ValueError(msg)
         self._ingestor = ingestor
         self._n = n
@@ -69,7 +69,7 @@ class FirstNIngestor(BaseIngestor[list[T]], MultilineDisplayMixin):
         items = list(self._ingestor.ingest())
         result = items[: self._n]
         logger.info(
-            "Returning first %d of %d item(s) (n=%d).",
+            "Returning first %d of %d item(s) (n=%d)",
             len(result),
             len(items),
             self._n,

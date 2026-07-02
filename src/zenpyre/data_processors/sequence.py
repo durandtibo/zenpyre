@@ -91,8 +91,8 @@ class SequenceProcessor(BaseProcessor[Sequence[U], list[T]], MultilineDisplayMix
                 progress.advance(task)
 
         if n_errors:
-            logger.warning("Skipped %s item(s) that failed to process.", f"{n_errors:,}")
-        logger.info("Processed %s item(s).", f"{len(results):,}")
+            logger.warning("Skipped %s item(s) that failed to process", f"{n_errors:,}")
+        logger.info("Processed %s item(s)", f"{len(results):,}")
         return results
 
     def _process_item(self, item: U) -> tuple[bool, T | None]:

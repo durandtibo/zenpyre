@@ -62,7 +62,7 @@ class TextIngestor(BaseIngestor[str], InlineDisplayMixin):
         if not self._path.is_file():
             msg = (
                 f"Text file not found: '{self._path}'. "
-                "Ensure the file exists before calling ingest()."
+                "Ensure the file exists before calling ingest()"
             )
             raise FileNotFoundError(msg)
         return load_text(self._path, encoding=self._encoding)
