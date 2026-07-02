@@ -2,9 +2,16 @@ r"""Contain data processors."""
 
 from __future__ import annotations
 
-__all__ = ["BaseProcessor", "LambdaProcessor", "SequenceProcessor", "SequentialProcessor"]
+__all__ = [
+    "BaseProcessor",
+    "FirstNProcessor",
+    "LambdaProcessor",
+    "SequenceProcessor",
+    "SequentialProcessor",
+]
 
 from zenpyre.data_processors.base import BaseProcessor
+from zenpyre.data_processors.first_n import FirstNProcessor
 from zenpyre.data_processors.lambdaa import LambdaProcessor
 from zenpyre.data_processors.sequence import SequenceProcessor
 from zenpyre.data_processors.sequential import SequentialProcessor
