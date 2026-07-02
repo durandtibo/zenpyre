@@ -13,6 +13,8 @@ from coola.display import InlineDisplayMixin
 from zenpyre.document_stores.base import BaseDocumentStore
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from langchain_core.documents import Document
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -94,6 +96,20 @@ class InMemoryDocumentStore(BaseDocumentStore, InlineDisplayMixin):
 
     def all(self) -> list[Document]:
         return [copy.deepcopy(doc) for doc in self._docs.values()]
+
+    def iter_batches(self, batch_size: int = 1000) -> Iterator[list[Document]]:
+        if batch_size < 1:
+            msg = f"batch_size must be a positive integer, got {batch_size}"
+            raise ValueError(msg)
+
+        batch = []
+        for doc in self._docs.values():
+            batch.append(copy.deepcopy(doc))
+            if len(batch) == batch_size:
+                yield batch
+                batch = []
+        if batch:
+            yield batch
 
     def count(self) -> int:
         return len(self._docs)
