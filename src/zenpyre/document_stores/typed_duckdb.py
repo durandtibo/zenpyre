@@ -11,14 +11,10 @@ from typing import TYPE_CHECKING, Any
 
 from langchain_core.documents import Document
 
-from zenpyre.document_stores.duckdb import BaseDuckDBDocumentStore, prepare_duckdb_path
-from zenpyre.utils.imports import is_duckdb_available
+from zenpyre.document_stores.duckdb import BaseDuckDBDocumentStore
 
 if TYPE_CHECKING:
     from pathlib import Path
-
-if is_duckdb_available():  # pragma: no cover
-    import duckdb
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -84,7 +80,7 @@ class TypedDuckDBDocumentStore(BaseDuckDBDocumentStore):
         metadata_schema: dict[str, str] | None = None,
     ) -> None:
 
-        super().__init__(duckdb.connect(str(prepare_duckdb_path(path))))
+        super().__init__(path)
         self._schema: dict[str, str] = metadata_schema or {}
         self._conn.execute(self._build_create_table())
 
