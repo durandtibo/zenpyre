@@ -9,12 +9,10 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
-from coola.display import InlineDisplayMixin
 from langchain_core.documents import Document
 
-from zenpyre.document_stores.base import BaseDocumentStore
-from zenpyre.document_stores.duckdb import prepare_duckdb_path
-from zenpyre.utils.imports import check_duckdb, is_duckdb_available
+from zenpyre.document_stores.duckdb import BaseDuckDBDocumentStore, prepare_duckdb_path
+from zenpyre.utils.imports import is_duckdb_available
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -25,7 +23,7 @@ if is_duckdb_available():  # pragma: no cover
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-class TypedDuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
+class TypedDuckDBDocumentStore(BaseDuckDBDocumentStore):
     """A DuckDB-backed store for LangChain documents with metadata
     filtering.
 
@@ -85,9 +83,9 @@ class TypedDuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
         path: Path | str = ":memory:",
         metadata_schema: dict[str, str] | None = None,
     ) -> None:
-        check_duckdb()
+
+        super().__init__(duckdb.connect(str(prepare_duckdb_path(path))))
         self._schema: dict[str, str] = metadata_schema or {}
-        self._conn = duckdb.connect(str(prepare_duckdb_path(path)))
         self._conn.execute(self._build_create_table())
 
     def add_documents(self, docs: list[Document]) -> None:
@@ -134,18 +132,6 @@ class TypedDuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
         ).fetchall()
         return [self._row_to_doc(row) for row in rows]
 
-    def delete(self, doc_id: str) -> None:
-        self._conn.execute("DELETE FROM documents WHERE id = ?", [doc_id])
-
-    def delete_many(self, doc_ids: list[str]) -> None:
-        if not doc_ids:
-            return
-        placeholders = ", ".join("?" * len(doc_ids))
-        self._conn.execute(
-            f"DELETE FROM documents WHERE id IN ({placeholders})",  # noqa: S608
-            doc_ids,
-        )
-
     def check_ids(self, doc_ids: list[str]) -> tuple[list[str], list[str]]:
         if not doc_ids:
             return [], []
@@ -164,27 +150,6 @@ class TypedDuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
     def all(self) -> list[Document]:
         rows = self._conn.execute("SELECT * FROM documents").fetchall()
         return [self._row_to_doc(row) for row in rows]
-
-    def count(self) -> int:
-        return self._conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
-
-    def get_columns_info(self) -> dict[str, str]:
-        """Return the column names and types of the documents table.
-
-        Returns:
-            A mapping of column name to DuckDB type name.
-        """
-        rows = self._conn.sql("DESCRIBE documents").fetchall()
-        return {row[0]: str(row[1]) for row in rows}
-
-    def show_columns_info(self) -> None:
-        """Print the documents table's column names and types to stdout.
-
-        This is a convenience wrapper around :meth:`get_columns_info` for
-        interactive/debugging use. For programmatic access, use
-        :meth:`get_columns_info` instead.
-        """
-        self._conn.sql("DESCRIBE documents").show()
 
     # ---------------------------------------------------------------------------
     # Private helpers
@@ -220,6 +185,3 @@ class TypedDuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
         if extra_json:
             metadata.update(json.loads(extra_json))
         return Document(id=doc_id, page_content=page_content, metadata=metadata)
-
-    def _get_repr_kwargs(self) -> dict[str, Any]:
-        return {"count": self.count()}

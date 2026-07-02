@@ -14,7 +14,7 @@ from coola.utils.path import sanitize_path
 from langchain_core.documents import Document
 
 from zenpyre.document_stores.base import BaseDocumentStore
-from zenpyre.utils.imports import is_duckdb_available
+from zenpyre.utils.imports import check_duckdb, is_duckdb_available
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -23,6 +23,52 @@ if is_duckdb_available():  # pragma: no cover
     import duckdb
 
 logger: logging.Logger = logging.getLogger(__name__)
+
+
+class BaseDuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
+    r"""Define a base class for DuckDB-backed store for LangChain
+    documents."""
+
+    def __init__(self, conn: duckdb.DuckDBPyConnection) -> None:
+        check_duckdb()
+        self._conn = conn
+
+    def delete(self, doc_id: str) -> None:
+        self._conn.execute("DELETE FROM documents WHERE id = ?", [doc_id])
+
+    def delete_many(self, doc_ids: list[str]) -> None:
+        if not doc_ids:
+            return
+        placeholders = ", ".join("?" * len(doc_ids))
+        self._conn.execute(
+            f"DELETE FROM documents WHERE id IN ({placeholders})",  # noqa: S608
+            doc_ids,
+        )
+
+    def count(self) -> int:
+        return self._conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
+
+    def get_columns_info(self) -> dict[str, str]:
+        """Return the column names and types of the documents table.
+
+        Returns:
+            A mapping of column name to DuckDB type name.
+        """
+        rows = self._conn.sql("DESCRIBE documents").fetchall()
+        return {row[0]: str(row[1]) for row in rows}
+
+    def show_columns_info(self) -> None:
+        """Print the documents table's column names and types to stdout.
+
+        This is a convenience wrapper around :meth:`get_columns_info` for
+        interactive/debugging use. For programmatic access, use
+        :meth:`get_columns_info` instead.
+        """
+        self._conn.sql("DESCRIBE documents").show()
+
+    def _get_repr_kwargs(self) -> dict[str, Any]:
+        return {"count": self.count()}
+
 
 _CREATE_TABLE = """
     CREATE TABLE IF NOT EXISTS documents (
@@ -33,7 +79,7 @@ _CREATE_TABLE = """
 """
 
 
-class DuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
+class DuckDBDocumentStore(BaseDuckDBDocumentStore):
     """A DuckDB-backed store for LangChain documents.
 
     Persists documents to a DuckDB database and supports adding,
@@ -81,7 +127,7 @@ class DuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
     """
 
     def __init__(self, path: Path | str = ":memory:") -> None:
-        self._conn = duckdb.connect(str(prepare_duckdb_path(path)))
+        super().__init__(duckdb.connect(str(prepare_duckdb_path(path))))
         self._conn.execute(_CREATE_TABLE)
 
     def add_documents(self, docs: list[Document]) -> None:
@@ -124,18 +170,6 @@ class DuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
         ).fetchall()
         return [self._row_to_doc(row) for row in rows]
 
-    def delete(self, doc_id: str) -> None:
-        self._conn.execute("DELETE FROM documents WHERE id = ?", [doc_id])
-
-    def delete_many(self, doc_ids: list[str]) -> None:
-        if not doc_ids:
-            return
-        placeholders = ", ".join("?" * len(doc_ids))
-        self._conn.execute(
-            f"DELETE FROM documents WHERE id IN ({placeholders})",  # noqa: S608
-            doc_ids,
-        )
-
     def check_ids(self, doc_ids: list[str]) -> tuple[list[str], list[str]]:
         if not doc_ids:
             return [], []
@@ -155,27 +189,6 @@ class DuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
         rows = self._conn.execute("SELECT id, page_content, metadata FROM documents").fetchall()
         return [self._row_to_doc(row) for row in rows]
 
-    def count(self) -> int:
-        return self._conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
-
-    def get_columns_info(self) -> dict[str, str]:
-        """Return the column names and types of the documents table.
-
-        Returns:
-            A mapping of column name to DuckDB type name.
-        """
-        rows = self._conn.sql("DESCRIBE documents").fetchall()
-        return {row[0]: str(row[1]) for row in rows}
-
-    def show_columns_info(self) -> None:
-        """Print the documents table's column names and types to stdout.
-
-        This is a convenience wrapper around :meth:`get_columns_info` for
-        interactive/debugging use. For programmatic access, use
-        :meth:`get_columns_info` instead.
-        """
-        self._conn.sql("DESCRIBE documents").show()
-
     # ---------------------------------------------------------------------------
     # Private helpers
     # ---------------------------------------------------------------------------
@@ -189,9 +202,6 @@ class DuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
             page_content=page_content,
             metadata=json.loads(metadata_json) if metadata_json else {},
         )
-
-    def _get_repr_kwargs(self) -> dict[str, Any]:
-        return {"count": self.count()}
 
 
 def prepare_duckdb_path(path: Path | str) -> Path | str:
