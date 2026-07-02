@@ -9,6 +9,7 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
+from coola.display import MultilineDisplayMixin
 from langchain_core.documents import Document
 
 from zenpyre.document_stores.base import BaseDocumentStore
@@ -24,7 +25,7 @@ if is_duckdb_available():  # pragma: no cover
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-class TypedDuckDBDocumentStore(BaseDocumentStore):
+class TypedDuckDBDocumentStore(BaseDocumentStore, MultilineDisplayMixin):
     """A DuckDB-backed store for LangChain documents with metadata
     filtering.
 
@@ -201,3 +202,6 @@ class TypedDuckDBDocumentStore(BaseDocumentStore):
         if extra_json:
             metadata.update(json.loads(extra_json))
         return Document(id=doc_id, page_content=page_content, metadata=metadata)
+
+    def _get_repr_kwargs(self) -> dict[str, Any]:
+        return {}

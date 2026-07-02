@@ -9,6 +9,7 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
+from coola.display import MultilineDisplayMixin
 from coola.utils.path import sanitize_path
 from langchain_core.documents import Document
 
@@ -32,7 +33,7 @@ _CREATE_TABLE = """
 """
 
 
-class DuckDBDocumentStore(BaseDocumentStore):
+class DuckDBDocumentStore(BaseDocumentStore, MultilineDisplayMixin):
     """A DuckDB-backed store for LangChain documents.
 
     Persists documents to a DuckDB database and supports adding,
@@ -170,6 +171,9 @@ class DuckDBDocumentStore(BaseDocumentStore):
             page_content=page_content,
             metadata=json.loads(metadata_json) if metadata_json else {},
         )
+
+    def _get_repr_kwargs(self) -> dict[str, Any]:
+        return {}
 
 
 def prepare_duckdb_path(path: Path | str) -> Path | str:
