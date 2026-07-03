@@ -191,6 +191,12 @@ class DuckDBDocumentStore(BaseDuckDBDocumentStore):
         rows = self._conn.execute("SELECT id, page_content, metadata FROM documents").fetchall()
         return [self._row_to_doc(row) for row in rows]
 
+    def lazy_all(self) -> Generator[Document, None, None]:
+        cursor = self._conn.cursor()
+        cursor.execute("SELECT id, page_content, metadata FROM documents")
+        while row := cursor.fetchone():
+            yield self._row_to_doc(row)
+
     def iter_batches(self, batch_size: int = 32) -> Generator[list[Document], None, None]:
         if batch_size < 1:
             msg = f"batch_size must be a positive integer, got {batch_size}"
