@@ -6,11 +6,10 @@ __all__ = ["print_markdown", "print_pretty"]
 
 from typing import TYPE_CHECKING, Any
 
+from rich import get_console
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.pretty import Pretty
-
-from zenpyre.utils.rich.console import get_console
 
 if TYPE_CHECKING:
     from rich import Console

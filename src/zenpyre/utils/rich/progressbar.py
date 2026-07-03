@@ -4,6 +4,7 @@ from __future__ import annotations
 
 __all__ = ["make_progressbar", "make_spinner"]
 
+from rich import get_console
 from rich.progress import (
     BarColumn,
     MofNCompleteColumn,
@@ -14,8 +15,6 @@ from rich.progress import (
     TimeElapsedColumn,
     TimeRemainingColumn,
 )
-
-from zenpyre.utils.rich import get_console
 
 
 def make_progressbar(*, transient: bool = False) -> Progress:
