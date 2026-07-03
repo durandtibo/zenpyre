@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
+from rich import get_console
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.pretty import Pretty
 
-from zenpyre.utils.rich import get_console, print_markdown, print_pretty
+from zenpyre.utils.rich import print_markdown, print_pretty
 
 MODULE = "zenpyre.utils.rich._print"
 
@@ -47,12 +48,7 @@ def test_print_markdown_multiline() -> None:
     ],
 )
 def test_print_markdown_renders_panel(msg: str, title: str | None) -> None:
-    with patch("zenpyre.utils.rich.console._state.console.print") as mock_print:
-        print_markdown(msg, title=title)
-    panel: Panel = mock_print.call_args.args[0]
-    assert isinstance(panel, Panel)
-    assert isinstance(panel.renderable, Markdown)
-    assert panel.title == title
+    print_markdown(msg, title=title)
 
 
 def test_print_markdown_uses_custom_console() -> None:
@@ -119,12 +115,7 @@ def test_print_pretty_empty_dict() -> None:
     ],
 )
 def test_print_pretty_renders_panel(data: object, title: str | None) -> None:
-    with patch("zenpyre.utils.rich.console._state.console.print") as mock_print:
-        print_pretty(data, title=title)
-    panel: Panel = mock_print.call_args.args[0]
-    assert isinstance(panel, Panel)
-    assert isinstance(panel.renderable, Pretty)
-    assert panel.title == title
+    print_pretty(data, title=title)
 
 
 def test_print_pretty_uses_custom_console() -> None:

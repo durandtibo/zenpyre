@@ -7,9 +7,8 @@ __all__ = ["configure_rich_logging"]
 import logging
 from typing import Any
 
+from rich import get_console
 from rich.logging import RichHandler
-
-from zenpyre.utils.rich.console import get_console
 
 
 def configure_rich_logging(
