@@ -138,10 +138,11 @@ class DuckDBDocumentStore(BaseDuckDBDocumentStore):
                 msg = "All documents must have an id. Assign one before adding"
                 raise ValueError(msg)
 
-        self._conn.executemany(
-            "INSERT OR REPLACE INTO documents VALUES (?, ?, ?)",
-            [(doc.id, doc.page_content, json.dumps(doc.metadata)) for doc in docs],
-        )
+        if docs:
+            self._conn.executemany(
+                "INSERT OR REPLACE INTO documents VALUES (?, ?, ?)",
+                [(doc.id, doc.page_content, json.dumps(doc.metadata)) for doc in docs],
+            )
         logger.info("Added %s documents", f"{len(docs):,}")
 
     def get(self, doc_id: str) -> Document | None:
