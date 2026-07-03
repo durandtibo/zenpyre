@@ -3,7 +3,7 @@ collections."""
 
 from __future__ import annotations
 
-__all__ = ["assign_ids"]
+__all__ = ["assign_ids", "copy_ids_to_metadata"]
 
 from typing import TYPE_CHECKING
 
@@ -63,3 +63,44 @@ def assign_ids(docs: list[Document], *, force: bool = False) -> list[Document]:
         if force or doc.id is None:
             doc.id = hash_document_uuid(doc)
     return docs
+
+
+def copy_ids_to_metadata(
+    documents: list[Document],
+    metadata_key: str = "source_id",
+) -> list[Document]:
+    """Copy each document's `id` into its metadata under `metadata_key`.
+
+    Text splitters generally copy a parent document's metadata onto every
+    chunk they produce, but they do not preserve the parent's `id` (each
+    chunk gets its own, usually `None` unless assigned later). Storing the
+    parent id in metadata before splitting means every resulting chunk
+    retains a reference back to the document it came from, under
+    `chunk.metadata[metadata_key]`.
+
+    Documents are mutated in place and the same list is returned. Documents
+    whose `id` is `None` are left untouched, so no key is added for them.
+
+    Args:
+        documents: The documents to tag. Mutated in place.
+        metadata_key: The metadata key to store the id under. Defaults to
+            "source_id".
+
+    Returns:
+        The same list of documents that was passed in.
+
+    Example:
+        ```pycon
+        >>> from langchain_core.documents import Document
+        >>> from zenpyre.documents import copy_ids_to_metadata
+        >>> docs = [Document(page_content="Hello", id="doc-1")]
+        >>> copy_ids_to_metadata(docs)
+        >>> docs[0].metadata["source_id"]
+        'doc-1'
+
+        ```
+    """
+    for doc in documents:
+        if doc.id is not None:
+            doc.metadata[metadata_key] = doc.id
+    return documents
