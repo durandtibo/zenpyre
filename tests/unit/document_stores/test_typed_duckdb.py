@@ -173,22 +173,6 @@ def test_get_many_preserves_order(store: TypedDuckDBDocumentStore, docs: list[Do
     assert [r.id for r in result] == ["3", "1", "2"]
 
 
-# --- all ---
-
-
-@duckdb_available
-def test_all_empty_store(store: TypedDuckDBDocumentStore) -> None:
-    assert store.all() == []
-
-
-@duckdb_available
-def test_all_returns_all_documents(store: TypedDuckDBDocumentStore, docs: list[Document]) -> None:
-    store.add_documents(docs)
-    result = store.all()
-    assert len(result) == len(docs)
-    assert {r.id for r in result} == {d.id for d in docs}
-
-
 # --- filter ---
 
 
@@ -374,76 +358,126 @@ def test_check_ids_returns_tuple_of_two_lists(
     assert isinstance(result[1], list)
 
 
-# --- columns_info ---
+# --- all ---
 
 
 @duckdb_available
-def test_get_columns_info_returns_dict(store: TypedDuckDBDocumentStore) -> None:
-    result = store.get_columns_info()
-    assert isinstance(result, dict)
+def test_all_empty_store(store: TypedDuckDBDocumentStore) -> None:
+    assert store.all() == []
 
 
 @duckdb_available
-def test_get_columns_info_keys_are_column_names(store: TypedDuckDBDocumentStore) -> None:
-    result = store.get_columns_info()
-    expected_columns = {row[0] for row in store._conn.sql("DESCRIBE documents").fetchall()}
-    assert set(result.keys()) == expected_columns
+def test_all_returns_all_documents(store: TypedDuckDBDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    result = store.all()
+    assert len(result) == len(docs)
+    assert {r.id for r in result} == {d.id for d in docs}
+
+
+# --- lazy_all ---
 
 
 @duckdb_available
-def test_get_columns_info_values_are_strings(store: TypedDuckDBDocumentStore) -> None:
-    result = store.get_columns_info()
-    assert all(isinstance(v, str) for v in result.values())
+def test_lazy_all_empty_store_yields_nothing(store: TypedDuckDBDocumentStore) -> None:
+    assert list(store.lazy_all()) == []
 
 
 @duckdb_available
-def test_get_columns_info_matches_describe_output(store: TypedDuckDBDocumentStore) -> None:
-    """Cross-check against the raw DESCRIBE output as the source of
-    truth."""
-    rows = store._conn.sql("DESCRIBE documents").fetchall()
-    expected = {row[0]: row[1] for row in rows}
-    assert store.get_columns_info() == expected
+def test_lazy_all_returns_generator(store: TypedDuckDBDocumentStore) -> None:
+    result = store.lazy_all()
+    assert isinstance(result, Iterator)
 
 
 @duckdb_available
-def test_get_columns_info_non_empty_for_created_table(store: TypedDuckDBDocumentStore) -> None:
-    """The documents table is created in __init__, so this should never
-    be empty for a freshly constructed store."""
-    result = store.get_columns_info()
-    assert len(result) > 0
-
-
-@duckdb_available
-def test_get_columns_info_does_not_mutate_between_calls(store: TypedDuckDBDocumentStore) -> None:
-    first = store.get_columns_info()
-    second = store.get_columns_info()
-    assert first == second
-    assert first is not second  # each call builds a fresh dict
-
-
-@duckdb_available
-def test_show_columns_info_does_not_raise(
-    store: TypedDuckDBDocumentStore, capsys: pytest.CaptureFixture[str]
+def test_lazy_all_yields_one_document_at_a_time(
+    store: TypedDuckDBDocumentStore, docs: list[Document]
 ) -> None:
-    store.show_columns_info()  # should not raise
-    captured = capsys.readouterr()
-    assert captured.out != ""
+    store.add_documents(docs)
+    gen = store.lazy_all()
+    first = next(gen)
+    assert isinstance(first, Document)
 
 
 @duckdb_available
-def test_show_columns_info_output_contains_column_names(
-    store: TypedDuckDBDocumentStore, capsys: pytest.CaptureFixture[str]
+def test_lazy_all_returns_all_documents(
+    store: TypedDuckDBDocumentStore, docs: list[Document]
 ) -> None:
-    expected_columns = store.get_columns_info().keys()
-    store.show_columns_info()
-    captured = capsys.readouterr()
-    for col in expected_columns:
-        assert col in captured.out
+    store.add_documents(docs)
+    result = list(store.lazy_all())
+    assert len(result) == len(docs)
+    assert {r.id for r in result} == {d.id for d in docs}
 
 
 @duckdb_available
-def test_show_columns_info_returns_none(store: TypedDuckDBDocumentStore) -> None:
-    assert store.show_columns_info() is None
+def test_lazy_all_matches_all(store: TypedDuckDBDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    assert list(store.lazy_all()) == store.all()
+
+
+@duckdb_available
+def test_lazy_all_yields_document_instances(
+    store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    result = list(store.lazy_all())
+    assert all(isinstance(doc, Document) for doc in result)
+
+
+@duckdb_available
+def test_lazy_all_preserves_metadata(store: TypedDuckDBDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    result = {doc.id: doc for doc in store.lazy_all()}
+    for doc in docs:
+        assert result[doc.id].metadata == doc.metadata
+
+
+@duckdb_available
+def test_lazy_all_does_not_mutate_store(
+    store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    list(store.lazy_all())
+    assert store.count() == len(docs)
+
+
+@duckdb_available
+def test_lazy_all_single_document(store: TypedDuckDBDocumentStore) -> None:
+    store.add_documents([Document(id="1", page_content="Solo", metadata={})])
+    result = list(store.lazy_all())
+    assert len(result) == 1
+    assert result[0].id == "1"
+
+
+@duckdb_available
+def test_lazy_all_is_lazy_not_exhausted_on_creation(
+    store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    """Calling lazy_all() should not itself execute the query eagerly
+    consuming results before iteration begins; adding docs after
+    creating the generator but before the first next() call should still
+    be reflected, confirming the query executes lazily."""
+    gen = store.lazy_all()
+    store.add_documents(docs)
+    result = list(gen)
+    assert len(result) == len(docs)
+
+
+@duckdb_available
+def test_lazy_all_independent_generators_do_not_interfere(
+    store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    """Two separate lazy_all() generators should each independently
+    yield the full set of documents, since each uses its own cursor."""
+    store.add_documents(docs)
+    gen1 = store.lazy_all()
+    gen2 = store.lazy_all()
+    first_from_gen1 = next(gen1)
+    result2 = list(gen2)
+    remaining_from_gen1 = list(gen1)
+
+    assert len(result2) == len(docs)
+    assert len(remaining_from_gen1) + 1 == len(docs)
+    assert first_from_gen1.id not in {d.id for d in remaining_from_gen1}
 
 
 # --- iter_batches ---
@@ -559,3 +593,75 @@ def test_iter_batches_does_not_mutate_store(
     store.add_documents(docs)
     list(store.iter_batches(batch_size=2))
     assert store.count() == len(docs)
+
+
+# --- columns_info ---
+
+
+@duckdb_available
+def test_get_columns_info_returns_dict(store: TypedDuckDBDocumentStore) -> None:
+    result = store.get_columns_info()
+    assert isinstance(result, dict)
+
+
+@duckdb_available
+def test_get_columns_info_keys_are_column_names(store: TypedDuckDBDocumentStore) -> None:
+    result = store.get_columns_info()
+    expected_columns = {row[0] for row in store._conn.sql("DESCRIBE documents").fetchall()}
+    assert set(result.keys()) == expected_columns
+
+
+@duckdb_available
+def test_get_columns_info_values_are_strings(store: TypedDuckDBDocumentStore) -> None:
+    result = store.get_columns_info()
+    assert all(isinstance(v, str) for v in result.values())
+
+
+@duckdb_available
+def test_get_columns_info_matches_describe_output(store: TypedDuckDBDocumentStore) -> None:
+    """Cross-check against the raw DESCRIBE output as the source of
+    truth."""
+    rows = store._conn.sql("DESCRIBE documents").fetchall()
+    expected = {row[0]: row[1] for row in rows}
+    assert store.get_columns_info() == expected
+
+
+@duckdb_available
+def test_get_columns_info_non_empty_for_created_table(store: TypedDuckDBDocumentStore) -> None:
+    """The documents table is created in __init__, so this should never
+    be empty for a freshly constructed store."""
+    result = store.get_columns_info()
+    assert len(result) > 0
+
+
+@duckdb_available
+def test_get_columns_info_does_not_mutate_between_calls(store: TypedDuckDBDocumentStore) -> None:
+    first = store.get_columns_info()
+    second = store.get_columns_info()
+    assert first == second
+    assert first is not second  # each call builds a fresh dict
+
+
+@duckdb_available
+def test_show_columns_info_does_not_raise(
+    store: TypedDuckDBDocumentStore, capsys: pytest.CaptureFixture[str]
+) -> None:
+    store.show_columns_info()  # should not raise
+    captured = capsys.readouterr()
+    assert captured.out != ""
+
+
+@duckdb_available
+def test_show_columns_info_output_contains_column_names(
+    store: TypedDuckDBDocumentStore, capsys: pytest.CaptureFixture[str]
+) -> None:
+    expected_columns = store.get_columns_info().keys()
+    store.show_columns_info()
+    captured = capsys.readouterr()
+    for col in expected_columns:
+        assert col in captured.out
+
+
+@duckdb_available
+def test_show_columns_info_returns_none(store: TypedDuckDBDocumentStore) -> None:
+    assert store.show_columns_info() is None

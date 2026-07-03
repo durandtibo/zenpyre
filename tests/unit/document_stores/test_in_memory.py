@@ -134,20 +134,6 @@ def test_get_many_preserves_order(store: InMemoryDocumentStore, docs: list[Docum
     assert [r.id for r in result] == ["3", "1", "2"]
 
 
-# --- all ---
-
-
-def test_all_empty_store(store: InMemoryDocumentStore) -> None:
-    assert store.all() == []
-
-
-def test_all_returns_all_documents(store: InMemoryDocumentStore, docs: list[Document]) -> None:
-    store.add_documents(docs)
-    result = store.all()
-    assert len(result) == len(docs)
-    assert {r.id for r in result} == {d.id for d in docs}
-
-
 # --- filter ---
 
 
@@ -295,6 +281,111 @@ def test_check_ids_returns_tuple_of_two_lists(
     assert len(result) == 2
     assert isinstance(result[0], list)
     assert isinstance(result[1], list)
+
+
+# --- all ---
+
+
+def test_all_empty_store(store: InMemoryDocumentStore) -> None:
+    assert store.all() == []
+
+
+def test_all_returns_all_documents(store: InMemoryDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    result = store.all()
+    assert len(result) == len(docs)
+    assert {r.id for r in result} == {d.id for d in docs}
+
+
+# --- lazy_all ---
+
+
+def test_lazy_all_empty_store_yields_nothing(store: InMemoryDocumentStore) -> None:
+    assert list(store.lazy_all()) == []
+
+
+def test_lazy_all_returns_generator(store: InMemoryDocumentStore) -> None:
+    result = store.lazy_all()
+    assert isinstance(result, Iterator)
+
+
+def test_lazy_all_yields_one_document_at_a_time(
+    store: InMemoryDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    gen = store.lazy_all()
+    first = next(gen)
+    assert isinstance(first, Document)
+
+
+def test_lazy_all_returns_all_documents(store: InMemoryDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    result = list(store.lazy_all())
+    assert len(result) == len(docs)
+    assert {r.id for r in result} == {d.id for d in docs}
+
+
+def test_lazy_all_matches_all(store: InMemoryDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    assert list(store.lazy_all()) == store.all()
+
+
+def test_lazy_all_yields_document_instances(
+    store: InMemoryDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    result = list(store.lazy_all())
+    assert all(isinstance(doc, Document) for doc in result)
+
+
+def test_lazy_all_preserves_metadata(store: InMemoryDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    result = {doc.id: doc for doc in store.lazy_all()}
+    for doc in docs:
+        assert result[doc.id].metadata == doc.metadata
+
+
+def test_lazy_all_does_not_mutate_store(store: InMemoryDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    list(store.lazy_all())
+    assert store.count() == len(docs)
+
+
+def test_lazy_all_single_document(store: InMemoryDocumentStore) -> None:
+    store.add_documents([Document(id="1", page_content="Solo", metadata={})])
+    result = list(store.lazy_all())
+    assert len(result) == 1
+    assert result[0].id == "1"
+
+
+def test_lazy_all_is_lazy_not_exhausted_on_creation(
+    store: InMemoryDocumentStore, docs: list[Document]
+) -> None:
+    """Calling lazy_all() should not itself execute the query eagerly
+    consuming results before iteration begins; adding docs after
+    creating the generator but before the first next() call should still
+    be reflected, confirming the query executes lazily."""
+    gen = store.lazy_all()
+    store.add_documents(docs)
+    result = list(gen)
+    assert len(result) == len(docs)
+
+
+def test_lazy_all_independent_generators_do_not_interfere(
+    store: InMemoryDocumentStore, docs: list[Document]
+) -> None:
+    """Two separate lazy_all() generators should each independently
+    yield the full set of documents, since each uses its own cursor."""
+    store.add_documents(docs)
+    gen1 = store.lazy_all()
+    gen2 = store.lazy_all()
+    first_from_gen1 = next(gen1)
+    result2 = list(gen2)
+    remaining_from_gen1 = list(gen1)
+
+    assert len(result2) == len(docs)
+    assert len(remaining_from_gen1) + 1 == len(docs)
+    assert first_from_gen1.id not in {d.id for d in remaining_from_gen1}
 
 
 # --- iter_batches ---
