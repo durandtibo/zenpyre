@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Generator, Iterator
 
     from langchain_core.documents import Document
 
@@ -126,6 +126,16 @@ class BaseDocumentStore(ABC):
             A list of all :class:`~langchain_core.documents.Document`
             instances currently in the store.
         """
+
+    def lazy_all(self, batch_size: int = 32) -> Iterator[Document]:
+        """Lazily iterate over all documents without loading them all
+        into memory at once.
+
+        Returns:
+            A generator yielding one ``Document`` at a time.
+        """
+        for batch in self.iter_batches(batch_size=batch_size):
+            yield from batch
 
     @abstractmethod
     def iter_batches(self, batch_size: int = 32) -> Generator[list[Document], None, None]:
