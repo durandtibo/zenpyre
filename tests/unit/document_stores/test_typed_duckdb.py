@@ -98,6 +98,11 @@ def test_add_documents_upsert_replaces_existing(store: TypedDuckDBDocumentStore)
     assert store.get("1").page_content == "Updated"
 
 
+@duckdb_available
+def test_add_documents_empty(store: TypedDuckDBDocumentStore) -> None:
+    store.add_documents([])
+
+
 # --- count ---
 
 

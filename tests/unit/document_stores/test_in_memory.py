@@ -81,6 +81,10 @@ def test_add_documents_upsert_replaces_existing(store: InMemoryDocumentStore) ->
     assert store.get("1").page_content == "Updated"
 
 
+def test_add_documents_empty(store: InMemoryDocumentStore) -> None:
+    store.add_documents([])
+
+
 # --- count ---
 
 

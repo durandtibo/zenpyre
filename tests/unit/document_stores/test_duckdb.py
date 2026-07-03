@@ -88,6 +88,11 @@ def test_add_documents_upsert_replaces_existing(store: DuckDBDocumentStore) -> N
     assert store.get("1").page_content == "Updated"
 
 
+@duckdb_available
+def test_add_documents_empty(store: DuckDBDocumentStore) -> None:
+    store.add_documents([])
+
+
 # --- count ---
 
 
