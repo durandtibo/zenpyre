@@ -18,9 +18,9 @@ class BaseDocumentStore(ABC):
 
     Defines the common interface that all document store implementations
     must provide.  Concrete implementations include
-    :class:`~zenpyre.document_stores.DuckDBDocumentStore` (JSON metadata)
+    :class:`~zenpyre.document_stores.InMemoryDocumentStore` (JSON metadata)
     and
-    :class:`~zenpyre.document_stores.TypedDuckDBDocumentStore` (typed
+    :class:`~zenpyre.document_stores.TypedInMemoryDocumentStore` (typed
     columns + JSON overflow).
 
     To implement a custom document store, subclass
@@ -157,9 +157,9 @@ class BaseDocumentStore(ABC):
 
         Example:
             ```pycon
-            >>> from zenpyre.document_stores import DuckDBDocumentStore
+            >>> from zenpyre.document_stores import InMemoryDocumentStore
             >>> from langchain_core.documents import Document
-            >>> store = DuckDBDocumentStore(":memory:")
+            >>> store = InMemoryDocumentStore()
             >>> store.add_documents([Document(id=str(i), page_content=str(i)) for i in range(5)])
             >>> for batch in store.iter_batches(batch_size=2):
             ...     print(len(batch))
