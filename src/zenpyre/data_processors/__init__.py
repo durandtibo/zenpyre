@@ -12,6 +12,7 @@ __all__ = [
     "LastNProcessor",
     "SequenceProcessor",
     "SequentialProcessor",
+    "ShuffleProcessor",
     "SortByKeyProcessor",
     "SortDocumentsByMetadataProcessor",
     "SortRecordsByMetadataProcessor",
@@ -30,6 +31,7 @@ from zenpyre.data_processors.lambdaa import LambdaProcessor
 from zenpyre.data_processors.last_n import LastNProcessor
 from zenpyre.data_processors.sequence import SequenceProcessor
 from zenpyre.data_processors.sequential import SequentialProcessor
+from zenpyre.data_processors.shuffle import ShuffleProcessor
 from zenpyre.data_processors.sort_documents import SortDocumentsByMetadataProcessor
 from zenpyre.data_processors.sort_key import SortByKeyProcessor
 from zenpyre.data_processors.sort_records import SortRecordsByMetadataProcessor
