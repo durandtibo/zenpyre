@@ -28,14 +28,14 @@ class MappingIngestor(BaseIngestor[dict[Hashable, BaseIngestor[T]]], MultilineDi
     type.
 
     Args:
-        ingestors: A mapping from arbitrary keys to
+        sources: A mapping from arbitrary keys to
             :class:`~zenpyre.ingestors.BaseIngestor` instances.
 
     Example:
         ```pycon
         >>> from zenpyre.ingestors import InMemoryIngestor, MappingIngestor
         >>> ingestor = MappingIngestor(
-        ...     ingestors={
+        ...     sources={
         ...         "10-K": InMemoryIngestor(data="annual report text"),
         ...         "10-Q": InMemoryIngestor(data="quarterly report text"),
         ...     }
@@ -46,11 +46,11 @@ class MappingIngestor(BaseIngestor[dict[Hashable, BaseIngestor[T]]], MultilineDi
         ```
     """
 
-    def __init__(self, ingestors: Mapping[Hashable, BaseIngestor[T]]) -> None:
-        self._ingestors = ingestors
+    def __init__(self, sources: Mapping[Hashable, BaseIngestor[T]]) -> None:
+        self._sources = sources
 
     def ingest(self) -> dict[Hashable, T]:
-        return {key: ingestor.ingest() for key, ingestor in self._ingestors.items()}
+        return {key: ingestor.ingest() for key, ingestor in self._sources.items()}
 
     def _get_repr_kwargs(self) -> dict[Hashable, Any]:
-        return self._ingestors
+        return self._sources

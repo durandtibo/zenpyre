@@ -24,13 +24,13 @@ class FirstNIngestor(BaseIngestor[list[T]], MultilineDisplayMixin):
     """Ingestor that returns the first ``n`` items from another
     ingestor.
 
-    Wraps an inner :class:`~zenpyre.ingestors.BaseIngestor` that
+    Wraps a source :class:`~zenpyre.ingestors.BaseIngestor` that
     returns a sequence, and slices the first ``n`` elements from its
-    output. If the inner ingestor returns fewer than ``n`` items, all
+    output. If the source ingestor returns fewer than ``n`` items, all
     items are returned.
 
     Args:
-        ingestor: The inner ingestor whose output will be sliced.
+        source: The source ingestor whose output will be sliced.
             Must return a sequence.
         n: The maximum number of items to return from the start of the
             sequence. Must be a positive integer.
@@ -42,7 +42,7 @@ class FirstNIngestor(BaseIngestor[list[T]], MultilineDisplayMixin):
         ```pycon
         >>> from zenpyre.ingestors import InMemoryIngestor, FirstNIngestor
         >>> ingestor = FirstNIngestor(
-        ...     ingestor=InMemoryIngestor(data=[1, 2, 3, 4, 5]),
+        ...     source=InMemoryIngestor(data=[1, 2, 3, 4, 5]),
         ...     n=3,
         ... )
         >>> ingestor.ingest()
@@ -51,22 +51,22 @@ class FirstNIngestor(BaseIngestor[list[T]], MultilineDisplayMixin):
         ```
     """
 
-    def __init__(self, ingestor: BaseIngestor[Sequence[T]], n: int) -> None:
+    def __init__(self, source: BaseIngestor[Sequence[T]], n: int) -> None:
         if n < 1:
             msg = f"n must be a positive integer, got {n}"
             raise ValueError(msg)
-        self._ingestor = ingestor
+        self._source = source
         self._n = n
 
     def ingest(self) -> list[T]:
-        """Return the first ``n`` items from the inner ingestor.
+        """Return the first ``n`` items from the source ingestor.
 
         Returns:
-            A list containing the first ``n`` elements of the inner
+            A list containing the first ``n`` elements of the source
             ingestor's output. If fewer than ``n`` items are available,
             all of them are returned.
         """
-        items = list(self._ingestor.ingest())
+        items = list(self._source.ingest())
         result = items[: self._n]
         logger.info(
             "Returning first %d of %d item(s) (n=%d)",
@@ -77,4 +77,4 @@ class FirstNIngestor(BaseIngestor[list[T]], MultilineDisplayMixin):
         return result
 
     def _get_repr_kwargs(self) -> dict[str, Any]:
-        return {"ingestor": self._ingestor, "n": self._n}
+        return {"source": self._source, "n": self._n}
