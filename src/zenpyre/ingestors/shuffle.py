@@ -6,18 +6,21 @@ __all__ = ["ShuffleIngestor"]
 
 import logging
 import random
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from coola.display import MultilineDisplayMixin
 
 from zenpyre.ingestors.base import BaseIngestor
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 T = TypeVar("T")
 
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-class ShuffleIngestor(BaseIngestor[T], MultilineDisplayMixin):
+class ShuffleIngestor(BaseIngestor[list[T]], MultilineDisplayMixin):
     r"""Ingestor that shuffles the output of another ingestor.
 
     Wraps a source :class:`~zenpyre.ingestors.base.BaseIngestor` and
@@ -54,12 +57,12 @@ class ShuffleIngestor(BaseIngestor[T], MultilineDisplayMixin):
         ```
     """
 
-    def __init__(self, source: BaseIngestor[T], *, seed: int | None = None) -> None:
+    def __init__(self, source: BaseIngestor[Sequence[T]], *, seed: int | None = None) -> None:
         self._source = source
         self._seed = seed
         self._rng = random.Random(seed)  # noqa: S311
 
-    def ingest(self) -> T:
+    def ingest(self) -> list[T]:
         r"""Ingest data from the source ingestor and shuffle it.
 
         Calls :meth:`~zenpyre.ingestors.base.BaseIngestor.ingest` on
