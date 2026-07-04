@@ -62,8 +62,8 @@ class BaseDuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
     def show_columns_info(self) -> None:
         """Print the documents table's column names and types to stdout.
 
-        This is a convenience wrapper around :meth:`get_columns_info` for
-        interactive/debugging use. For programmatic access, use
+        This is a convenience wrapper around :meth:`get_columns_info`
+        for interactive/debugging use. For programmatic access, use
         :meth:`get_columns_info` instead.
         """
         self._conn.sql("DESCRIBE documents").show()
