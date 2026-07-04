@@ -10,6 +10,7 @@ __all__ = [
     "LastNIngestor",
     "MappingIngestor",
     "PickleIngestor",
+    "ShuffleIngestor",
     "TextIngestor",
 ]
 
@@ -20,4 +21,5 @@ from zenpyre.ingestors.in_memory import InMemoryIngestor
 from zenpyre.ingestors.last_n import LastNIngestor
 from zenpyre.ingestors.mapping import MappingIngestor
 from zenpyre.ingestors.pickle import PickleIngestor
+from zenpyre.ingestors.shuffle import ShuffleIngestor
 from zenpyre.ingestors.text import TextIngestor
