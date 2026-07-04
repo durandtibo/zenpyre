@@ -70,7 +70,7 @@ def test_load_dataclasses_non_dataclass_cls_raises(tmp_path: Path) -> None:
     path = tmp_path / "points.json"
     save_dataclasses([Point(1, 2)], path)
     with pytest.raises(TypeError, match=r"cls must be a dataclass type"):
-        load_dataclasses(path, str)  # type: ignore[type-var]
+        load_dataclasses(path, str)
 
 
 def test_load_dataclasses_missing_field_raises_value_error(tmp_path: Path) -> None:
