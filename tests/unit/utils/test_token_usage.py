@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import logging
 from unittest.mock import Mock, patch
 
+import pytest
 from langchain_core.messages import (
     AIMessage,
     HumanMessage,
@@ -15,6 +17,7 @@ from zenpyre.utils.token_usage import (
     format_token_usage,
     get_batch_token_usage,
     get_invoke_token_usage,
+    log_token_usage,
 )
 
 MODULE = "zenpyre.utils.token_usage"
@@ -260,3 +263,85 @@ def test_get_batch_token_usage_passes_each_result_to_get_invoke_token_usage() ->
         get_batch_token_usage(results)
     mock_get_invoke.assert_any_call(results[0])
     mock_get_invoke.assert_any_call(results[1])
+
+
+######################################################
+#     Tests for log_token_usage                      #
+######################################################
+
+
+def test_log_token_usage_single_invoke_result(caplog: pytest.LogCaptureFixture) -> None:
+    result = {
+        "messages": [
+            AIMessage(
+                content="hi",
+                usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+            )
+        ]
+    }
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage(result)
+    expected_usage = UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15)
+    assert caplog.messages == [format_token_usage(expected_usage)]
+
+
+def test_log_token_usage_batch_result(caplog: pytest.LogCaptureFixture) -> None:
+    results = [
+        {
+            "messages": [
+                AIMessage(
+                    content="a",
+                    usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+                )
+            ]
+        },
+        {
+            "messages": [
+                AIMessage(
+                    content="b",
+                    usage_metadata=UsageMetadata(input_tokens=20, output_tokens=8, total_tokens=28),
+                )
+            ]
+        },
+    ]
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage(results)
+    expected_usage = UsageMetadata(input_tokens=30, output_tokens=13, total_tokens=43)
+    assert caplog.messages == [format_token_usage(expected_usage)]
+
+
+def test_log_token_usage_empty_dict_logs_zeros(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage({})
+    expected_usage = UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+    assert caplog.messages == [format_token_usage(expected_usage)]
+
+
+def test_log_token_usage_empty_list_logs_zeros(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage([])
+    expected_usage = UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+    assert caplog.messages == [format_token_usage(expected_usage)]
+
+
+def test_log_token_usage_logs_at_info_level(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage({})
+    assert caplog.records[0].levelno == logging.INFO
+
+
+def test_log_token_usage_logs_exactly_once(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage({})
+    assert len(caplog.records) == 1
+
+
+def test_log_token_usage_invalid_type_raises_type_error() -> None:
+    with pytest.raises(TypeError, match=r"Expected a dict .* or a list of dicts .*, but got str"):
+        log_token_usage("not a valid result")
+
+
+def test_log_token_usage_invalid_type_does_not_log(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level(logging.INFO, logger=MODULE), pytest.raises(TypeError):
+        log_token_usage(123)
+    assert caplog.records == []

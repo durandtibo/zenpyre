@@ -4,9 +4,12 @@ from __future__ import annotations
 
 __all__ = ["format_token_usage", "get_batch_token_usage", "get_invoke_token_usage"]
 
+import logging
 from typing import Any
 
 from langchain_core.messages import AIMessage, UsageMetadata
+
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 def format_token_usage(usage: UsageMetadata) -> str:
@@ -130,3 +133,27 @@ def get_batch_token_usage(results: list[dict[str, Any]]) -> UsageMetadata:
         output_tokens=total_output,
         total_tokens=total_tokens,
     )
+
+
+def log_token_usage(result: dict[str, Any] | list[dict[str, Any]]) -> None:
+    """Log the token usage for a single invocation or a batch of them.
+
+    Args:
+        result: The dict returned by ``agent.invoke(...)``, or the list
+            of dicts returned by ``agent.batch(...)``.
+
+    Raises:
+        TypeError: If ``result`` is neither a ``dict`` nor a ``list``.
+    """
+    if isinstance(result, dict):
+        usage = get_invoke_token_usage(result)
+    elif isinstance(result, list):
+        usage = get_batch_token_usage(result)
+    else:
+        msg = (
+            f"Expected a dict (from agent.invoke) or a list of dicts "
+            f"(from agent.batch), but got {type(result).__qualname__}"
+        )
+        raise TypeError(msg)
+
+    logger.info(format_token_usage(usage))
