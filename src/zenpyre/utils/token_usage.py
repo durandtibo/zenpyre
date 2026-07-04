@@ -2,7 +2,7 @@ r"""Contain utilities to compute token usage."""
 
 from __future__ import annotations
 
-__all__ = ["get_invoke_token_usage"]
+__all__ = ["get_batch_token_usage", "get_invoke_token_usage"]
 
 from typing import Any
 
@@ -46,6 +46,38 @@ def get_invoke_token_usage(result: dict[str, Any]) -> UsageMetadata:
         total_input += usage.get("input_tokens", 0)
         total_output += usage.get("output_tokens", 0)
         total_tokens += usage.get("total_tokens", 0)
+
+    return UsageMetadata(
+        input_tokens=total_input,
+        output_tokens=total_output,
+        total_tokens=total_tokens,
+    )
+
+
+def get_batch_token_usage(results: list[dict[str, Any]]) -> UsageMetadata:
+    """Sum token usage across all results from an ``agent.batch(...)``
+    call.
+
+    Delegates to :func:`get_invoke_token_usage` for each individual
+    result, then sums the per-result totals across the batch.
+
+    Args:
+        results: The list of dicts returned by ``agent.batch(...)``, one
+            per input in the batch.
+
+    Returns:
+        A ``UsageMetadata`` dict with token counts summed across every
+            run in the batch.
+    """
+    total_input = 0
+    total_output = 0
+    total_tokens = 0
+
+    for result in results:
+        usage = get_invoke_token_usage(result)
+        total_input += usage["input_tokens"]
+        total_output += usage["output_tokens"]
+        total_tokens += usage["total_tokens"]
 
     return UsageMetadata(
         input_tokens=total_input,
