@@ -11,9 +11,68 @@ from langchain_core.messages import (
     UsageMetadata,
 )
 
-from zenpyre.utils.token_usage import get_batch_token_usage, get_invoke_token_usage
+from zenpyre.utils.token_usage import (
+    format_token_usage,
+    get_batch_token_usage,
+    get_invoke_token_usage,
+)
 
 MODULE = "zenpyre.utils.token_usage"
+
+
+######################################################
+#     Tests for format_token_usage                   #
+######################################################
+
+
+def test_format_token_usage_returns_str() -> None:
+    usage = UsageMetadata(input_tokens=1234, output_tokens=567, total_tokens=1801)
+    result = format_token_usage(usage)
+    assert isinstance(result, str)
+
+
+def test_format_token_usage_docstring_example() -> None:
+    usage = UsageMetadata(input_tokens=1234, output_tokens=567, total_tokens=1801)
+    assert format_token_usage(usage) == (
+        "Token usage\n  Input tokens:  1,234\n  Output tokens:   567\n  Total tokens:  1,801"
+    )
+
+
+def test_format_token_usage_zero_values() -> None:
+    usage = UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+    assert format_token_usage(usage) == (
+        "Token usage\n  Input tokens:  0\n  Output tokens: 0\n  Total tokens:  0"
+    )
+
+
+def test_format_token_usage_missing_keys_default_to_zero() -> None:
+    assert format_token_usage({}) == (
+        "Token usage\n  Input tokens:  0\n  Output tokens: 0\n  Total tokens:  0"
+    )
+
+
+def test_format_token_usage_adds_thousands_separator() -> None:
+    usage = UsageMetadata(input_tokens=1000000, output_tokens=1, total_tokens=1000001)
+    assert format_token_usage(usage) == (
+        "Token usage\n"
+        "  Input tokens:  1,000,000\n"
+        "  Output tokens:         1\n"
+        "  Total tokens:  1,000,001"
+    )
+
+
+def test_format_token_usage_single_digit_values() -> None:
+    usage = UsageMetadata(input_tokens=1, output_tokens=22, total_tokens=333)
+    assert format_token_usage(usage) == (
+        "Token usage\n  Input tokens:    1\n  Output tokens:  22\n  Total tokens:  333"
+    )
+
+
+def test_format_token_usage_output_wider_than_input_and_total() -> None:
+    usage = UsageMetadata(input_tokens=5, output_tokens=123456, total_tokens=99)
+    assert format_token_usage(usage) == (
+        "Token usage\n  Input tokens:        5\n  Output tokens: 123,456\n  Total tokens:       99"
+    )
 
 
 ######################################################

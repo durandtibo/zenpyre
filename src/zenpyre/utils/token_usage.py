@@ -2,11 +2,57 @@ r"""Contain utilities to compute token usage."""
 
 from __future__ import annotations
 
-__all__ = ["get_batch_token_usage", "get_invoke_token_usage"]
+__all__ = ["format_token_usage", "get_batch_token_usage", "get_invoke_token_usage"]
 
 from typing import Any
 
 from langchain_core.messages import AIMessage, UsageMetadata
+
+
+def format_token_usage(usage: UsageMetadata) -> str:
+    """Format token usage as a human-readable string for terminal
+    display.
+
+    Args:
+        usage: The token usage to format, as returned by
+            :func:`~glyphik.utils.tokens.get_invoke_token_usage` or
+            :func:`~glyphik.utils.tokens.get_batch_token_usage`.
+
+    Returns:
+        A multi-line, aligned string summarizing input, output, and
+        total token counts, suitable for printing to a terminal.
+
+    Example:
+        ```pycon
+        >>> from langchain_core.messages import UsageMetadata
+        >>> from zenpyre.utils.token_usage import format_token_usage
+        >>> usage = UsageMetadata(input_tokens=1234, output_tokens=567, total_tokens=1801)
+        >>> print(format_token_usage(usage))
+        Token usage
+          Input tokens:  1,234
+          Output tokens:   567
+          Total tokens:  1,801
+
+        ```
+    """
+    labels = ["Input tokens", "Output tokens", "Total tokens"]
+    values = [
+        f"{usage.get('input_tokens', 0):,}",
+        f"{usage.get('output_tokens', 0):,}",
+        f"{usage.get('total_tokens', 0):,}",
+    ]
+
+    # Compute both column widths programmatically so alignment holds
+    # even if a label changes length.
+    label_width = max(len(label) for label in labels)
+    value_width = max(len(value) for value in values)
+
+    lines = ["Token usage"]
+    lines.extend(
+        f"  {label + ':':<{label_width + 1}} {value:>{value_width}}"
+        for label, value in zip(labels, values, strict=True)
+    )
+    return "\n".join(lines)
 
 
 def get_invoke_token_usage(result: dict[str, Any]) -> UsageMetadata:
