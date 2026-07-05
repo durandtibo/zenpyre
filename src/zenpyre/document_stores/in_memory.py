@@ -21,7 +21,7 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 
 class InMemoryDocumentStore(BaseDocumentStore, InlineDisplayMixin):
-    """A :class:`~glyphik.document_stores.base.BaseDocumentStore`
+    """A :class:`~zenpyre.document_stores.base.BaseDocumentStore`
     implementation backed by a plain ``dict``.
 
     Documents are keyed by their ``id`` and held entirely in process
