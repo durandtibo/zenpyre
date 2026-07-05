@@ -7,6 +7,7 @@ __all__ = [
     "get_batch_token_usage",
     "get_invoke_token_usage",
     "get_token_usage",
+    "log_token_usage",
 ]
 
 import logging
