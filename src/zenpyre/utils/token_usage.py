@@ -7,7 +7,7 @@ __all__ = ["format_token_usage", "get_batch_token_usage", "get_invoke_token_usag
 import logging
 from typing import Any
 
-from langchain_core.messages import AIMessage, UsageMetadata
+from langchain_core.messages import AIMessage, BaseMessage, UsageMetadata
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ def format_token_usage(usage: UsageMetadata) -> str:
     return "\n".join(lines)
 
 
-def get_invoke_token_usage(result: dict[str, Any]) -> UsageMetadata:
+def get_invoke_token_usage(result: dict[str, Any] | BaseMessage) -> UsageMetadata:
     """Sum token usage across all AI messages produced during an agent
     run.
 
@@ -75,18 +75,22 @@ def get_invoke_token_usage(result: dict[str, Any]) -> UsageMetadata:
     simple sum.
 
     Args:
-        result: The dict returned by ``agent.invoke(...)``, expected to
-            contain a ``"messages"`` key with the full message list.
+        result: Either the dict returned by ``agent.invoke(...)``,
+            expected to contain a ``"messages"`` key with the full
+            message list, or a single ``BaseMessage`` (e.g. the direct
+            return value of ``model.invoke(...)``).
 
     Returns:
         A ``UsageMetadata`` dict with ``input_tokens``, ``output_tokens``,
             and ``total_tokens`` summed across all AI messages found.
     """
+    messages = [result] if isinstance(result, BaseMessage) else result.get("messages", [])
+
     total_input = 0
     total_output = 0
     total_tokens = 0
 
-    for msg in result.get("messages", []):
+    for msg in messages:
         if not isinstance(msg, AIMessage):
             continue
         usage = msg.usage_metadata
