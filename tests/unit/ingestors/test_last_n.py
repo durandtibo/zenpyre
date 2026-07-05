@@ -41,11 +41,11 @@ def test_last_n_ingestor_raises_for_non_positive_n(n: int) -> None:
 # --- repr and str ---
 
 
-def test_last_n_ingestor_repr_contains_class_name() -> None:
+def test_last_n_ingestor_repr() -> None:
     assert repr(make_ingestor(data=[], n=1)).startswith("LastNIngestor(")
 
 
-def test_last_n_ingestor_str_contains_class_name() -> None:
+def test_last_n_ingestor_str() -> None:
     assert str(make_ingestor(data=[], n=1)).startswith("LastNIngestor(")
 
 
