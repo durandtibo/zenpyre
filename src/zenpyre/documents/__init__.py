@@ -3,6 +3,7 @@ r"""Contain utilities for documents."""
 from __future__ import annotations
 
 __all__ = [
+    "DocumentHasher",
     "assign_ids",
     "copy_ids_to_metadata",
     "filter_by_metadata",
@@ -25,6 +26,11 @@ from zenpyre.documents.filter import (
     filter_by_metadata_range,
     filter_by_metadata_values,
 )
-from zenpyre.documents.hashing import hash_document, hash_document_uuid, hash_documents
+from zenpyre.documents.hashing import (
+    DocumentHasher,
+    hash_document,
+    hash_document_uuid,
+    hash_documents,
+)
 from zenpyre.documents.id import assign_ids, copy_ids_to_metadata
 from zenpyre.documents.sort import sort_by_metadata

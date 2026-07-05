@@ -2,22 +2,54 @@ r"""Provide a hashing utility for LangChain documents."""
 
 from __future__ import annotations
 
-__all__ = ["hash_document", "hash_document_uuid", "hash_documents"]
+__all__ = ["DocumentHasher", "hash_document", "hash_document_uuid", "hash_documents"]
 
 import json
 import uuid
-from typing import TYPE_CHECKING
 
-from coola.hashing import hash_string
-
-if TYPE_CHECKING:
-    from langchain_core.documents import Document
-
+from coola.hashing import BaseHasher, HasherRegistry, get_default_registry, hash_string
+from langchain_core.documents import Document
 
 # Project-specific namespace for deterministic document UUIDs.
 # Generated once with uuid.uuid4() and fixed here so hashes are
 # stable across runs and reproducible across environments.
 _NAMESPACE = uuid.UUID("21e6c43e-bc36-4f09-8e20-98201adab5df")
+
+
+class DocumentHasher(BaseHasher[Document]):
+    r"""Hasher for LangChain ``Document`` objects.
+
+    This hasher delegates to ``hash_document``, which computes a hash
+    from the document's ``page_content`` and ``metadata``, so two
+    documents with equal content and metadata produce the same hash
+    regardless of object identity.
+
+    Example:
+        ```pycon
+        >>> from langchain_core.documents import Document
+        >>> from coola.hashing import HasherRegistry
+        >>> from zenpyre.documents import DocumentHasher
+        >>> registry = HasherRegistry()
+        >>> hasher = DocumentHasher()
+        >>> hasher
+        DocumentHasher()
+        >>> doc = Document(page_content="hello", metadata={"source": "test"})
+        >>> hasher.hash(doc, registry=registry)
+        '324dcf027dd4a30a932c441f365a25e86b173defa4b8e58948253471b81b72cf'
+
+        ```
+    """
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__qualname__}()"
+
+    def hash(
+        self,
+        data: Document,
+        registry: HasherRegistry,  # noqa: ARG002
+        length: int = 64,
+    ) -> str:
+        return hash_document(data, length=length)
 
 
 def hash_document(doc: Document, length: int = 64) -> str:
@@ -123,3 +155,6 @@ def hash_documents(docs: list[Document], length: int = 64) -> str:
     """
     combined = "".join(hash_document(doc, length=length) for doc in docs)
     return hash_string(combined, length=length)
+
+
+get_default_registry().register(Document, DocumentHasher(), exist_ok=True)
