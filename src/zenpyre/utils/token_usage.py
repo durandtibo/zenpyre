@@ -2,7 +2,12 @@ r"""Contain utilities to compute token usage."""
 
 from __future__ import annotations
 
-__all__ = ["format_token_usage", "get_batch_token_usage", "get_invoke_token_usage"]
+__all__ = [
+    "format_token_usage",
+    "get_batch_token_usage",
+    "get_invoke_token_usage",
+    "get_token_usage",
+]
 
 import logging
 from typing import Any
@@ -139,7 +144,39 @@ def get_batch_token_usage(results: list[dict[str, Any]]) -> UsageMetadata:
     )
 
 
-def log_token_usage(result: dict[str, Any] | list[dict[str, Any]]) -> None:
+def get_token_usage(result: BaseMessage | dict[str, Any] | list[dict[str, Any]]) -> UsageMetadata:
+    """Return the token usage for a single invocation, a batch of them,
+    or a single message.
+
+    Args:
+        result: One of:
+            - A ``BaseMessage`` (e.g. the direct return value of
+              ``model.invoke(...)``).
+            - The dict returned by ``agent.invoke(...)``, expected to
+              contain a ``"messages"`` key.
+            - The list of such dicts returned by ``agent.batch(...)``.
+
+    Returns:
+        A ``UsageMetadata`` dict with token counts summed across every
+            message (or run, for a batch) found in ``result``.
+
+    Raises:
+        TypeError: If ``result`` is not a ``BaseMessage``, a ``dict``,
+            or a ``list``.
+    """
+    if isinstance(result, (dict, BaseMessage)):
+        return get_invoke_token_usage(result)
+    if isinstance(result, list):
+        return get_batch_token_usage(result)
+
+    msg = (
+        f"Expected a BaseMessage, a dict (from agent.invoke), or a list "
+        f"of dicts (from agent.batch), but got {type(result).__qualname__}"
+    )
+    raise TypeError(msg)
+
+
+def log_token_usage(result: BaseMessage | dict[str, Any] | list[dict[str, Any]]) -> None:
     """Log the token usage for a single invocation or a batch of them.
 
     Args:
@@ -149,15 +186,5 @@ def log_token_usage(result: dict[str, Any] | list[dict[str, Any]]) -> None:
     Raises:
         TypeError: If ``result`` is neither a ``dict`` nor a ``list``.
     """
-    if isinstance(result, dict):
-        usage = get_invoke_token_usage(result)
-    elif isinstance(result, list):
-        usage = get_batch_token_usage(result)
-    else:
-        msg = (
-            f"Expected a dict (from agent.invoke) or a list of dicts "
-            f"(from agent.batch), but got {type(result).__qualname__}"
-        )
-        raise TypeError(msg)
-
+    usage = get_token_usage(result)
     logger.info(format_token_usage(usage))
