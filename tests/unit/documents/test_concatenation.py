@@ -2,7 +2,99 @@ from __future__ import annotations
 
 from langchain_core.documents import Document
 
-from zenpyre.documents import format_documents_as_xml
+from zenpyre.documents import format_documents_as_markdown, format_documents_as_xml
+
+######################################################
+#     Tests for format_documents_as_markdown         #
+######################################################
+
+
+def test_format_documents_as_markdown_empty() -> None:
+    assert format_documents_as_markdown([]) == ""
+
+
+def test_format_documents_as_markdown_single_document() -> None:
+    documents = [Document(page_content="The cat sat on the mat.")]
+    assert format_documents_as_markdown(documents) == ("## Document 1\n\nThe cat sat on the mat.")
+
+
+def test_format_documents_as_markdown_multiple_documents() -> None:
+    documents = [
+        Document(page_content="The cat sat on the mat."),
+        Document(page_content="The dog chased the ball."),
+    ]
+    assert format_documents_as_markdown(documents) == (
+        "## Document 1\n\nThe cat sat on the mat.\n\n## Document 2\n\nThe dog chased the ball."
+    )
+
+
+def test_format_documents_as_markdown_without_metadata_ignores_metadata() -> None:
+    documents = [
+        Document(page_content="The cat sat on the mat.", metadata={"source": "story.txt"}),
+    ]
+    assert format_documents_as_markdown(documents, include_metadata=False) == (
+        "## Document 1\n\nThe cat sat on the mat."
+    )
+
+
+def test_format_documents_as_markdown_with_metadata_single_document() -> None:
+    documents = [
+        Document(
+            page_content="The cat sat on the mat.",
+            metadata={"source": "story.txt", "author": "Alice"},
+        ),
+    ]
+    assert format_documents_as_markdown(documents, include_metadata=True) == (
+        "## Document 1\n\n- author: Alice\n- source: story.txt\n\nThe cat sat on the mat."
+    )
+
+
+def test_format_documents_as_markdown_with_metadata_multiple_documents() -> None:
+    documents = [
+        Document(
+            page_content="The cat sat on the mat.",
+            metadata={"source": "story.txt", "author": "Alice"},
+        ),
+        Document(
+            page_content="The dog chased the ball.",
+            metadata={"source": "story.txt", "author": "Bob"},
+        ),
+    ]
+    assert format_documents_as_markdown(documents, include_metadata=True) == (
+        "## Document 1\n"
+        "\n"
+        "- author: Alice\n"
+        "- source: story.txt\n"
+        "\n"
+        "The cat sat on the mat.\n"
+        "\n"
+        "## Document 2\n"
+        "\n"
+        "- author: Bob\n"
+        "- source: story.txt\n"
+        "\n"
+        "The dog chased the ball."
+    )
+
+
+def test_format_documents_as_markdown_with_metadata_sorted_by_key() -> None:
+    documents = [
+        Document(
+            page_content="The cat sat on the mat.",
+            metadata={"zebra": "z", "apple": "a", "mango": "m"},
+        ),
+    ]
+    assert format_documents_as_markdown(documents, include_metadata=True) == (
+        "## Document 1\n\n- apple: a\n- mango: m\n- zebra: z\n\nThe cat sat on the mat."
+    )
+
+
+def test_format_documents_as_markdown_with_metadata_true_but_empty_metadata() -> None:
+    documents = [Document(page_content="The cat sat on the mat.", metadata={})]
+    assert format_documents_as_markdown(documents, include_metadata=True) == (
+        "## Document 1\n\nThe cat sat on the mat."
+    )
+
 
 ######################################################
 #     Tests for format_documents_as_xml              #
