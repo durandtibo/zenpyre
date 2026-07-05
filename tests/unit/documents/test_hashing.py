@@ -125,9 +125,9 @@ def test_document_hasher_hash_ignores_registry(registry: HasherRegistry) -> None
     assert hasher.hash(doc, registry=HasherRegistry()) == hasher.hash(doc, registry=registry)
 
 
-#################################
-#     Tests for hash_document   #
-#################################
+###################################
+#     Tests for hash_document     #
+###################################
 
 
 def test_hash_document_returns_str() -> None:
@@ -198,9 +198,9 @@ def test_hash_document_nested_metadata_same_hash() -> None:
     assert hash_document(doc_a) == hash_document(doc_b)
 
 
-#####################################
-#     Tests for hash_document_uuid  #
-#####################################
+########################################
+#     Tests for hash_document_uuid     #
+########################################
 
 
 def test_hash_document_uuid_returns_str() -> None:
@@ -259,9 +259,9 @@ def test_hash_document_uuid_nested_metadata_order_independent() -> None:
     assert hash_document_uuid(doc_a) == hash_document_uuid(doc_b)
 
 
-##################################
-#     Tests for hash_documents   #
-##################################
+####################################
+#     Tests for hash_documents     #
+####################################
 
 
 def test_hash_documents_returns_str(docs: list[Document]) -> None:

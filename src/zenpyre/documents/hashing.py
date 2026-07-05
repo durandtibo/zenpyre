@@ -7,7 +7,13 @@ __all__ = ["DocumentHasher", "hash_document", "hash_document_uuid", "hash_docume
 import json
 import uuid
 
-from coola.hashing import BaseHasher, HasherRegistry, get_default_registry, hash_string
+from coola.hashing import (
+    BaseHasher,
+    HasherRegistry,
+    get_default_registry,
+    hash_object,
+    hash_string,
+)
 from langchain_core.documents import Document
 
 # Project-specific namespace for deterministic document UUIDs.
@@ -153,8 +159,7 @@ def hash_documents(docs: list[Document], length: int = 64) -> str:
 
         ```
     """
-    combined = "".join(hash_document(doc, length=length) for doc in docs)
-    return hash_string(combined, length=length)
+    return hash_object(docs, length=length)
 
 
 get_default_registry().register(Document, DocumentHasher(), exist_ok=True)
