@@ -41,12 +41,12 @@ def test_first_n_ingestor_raises_for_non_positive_n(n: int) -> None:
 # --- repr and str ---
 
 
-def test_first_n_ingestor_repr_contains_class_name() -> None:
-    assert "FirstNIngestor" in repr(make_ingestor(data=[], n=1))
+def test_first_n_ingestor_repr() -> None:
+    assert repr(make_ingestor(data=[], n=1)).startswith("FirstNIngestor(")
 
 
-def test_first_n_ingestor_str_contains_class_name() -> None:
-    assert "FirstNIngestor" in str(make_ingestor(data=[], n=1))
+def test_first_n_ingestor_str() -> None:
+    assert str(make_ingestor(data=[], n=1)).startswith("FirstNIngestor(")
 
 
 # --- ingest: return type ---
