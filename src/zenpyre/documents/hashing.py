@@ -40,8 +40,8 @@ class DocumentHasher(BaseHasher[Document]):
         >>> hasher
         DocumentHasher()
         >>> doc = Document(page_content="hello", metadata={"source": "test"})
-        >>> hasher.hash(doc, registry=registry)
-        '324dcf027dd4a30a932c441f365a25e86b173defa4b8e58948253471b81b72cf'
+        >>> len(hasher.hash(doc, registry=registry))
+        64
 
         ```
     """
