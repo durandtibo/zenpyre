@@ -8,12 +8,14 @@ __all__ = [
     "filter_by_metadata",
     "filter_by_metadata_range",
     "filter_by_metadata_values",
+    "format_documents_as_xml",
     "hash_document",
     "hash_document_uuid",
     "hash_documents",
     "sort_by_metadata",
 ]
 
+from zenpyre.documents.concatenation import format_documents_as_xml
 from zenpyre.documents.filter import (
     filter_by_metadata,
     filter_by_metadata_range,
