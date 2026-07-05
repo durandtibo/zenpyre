@@ -24,8 +24,8 @@ def format_token_usage(usage: UsageMetadata) -> str:
 
     Args:
         usage: The token usage to format, as returned by
-            :func:`~glyphik.utils.tokens.get_invoke_token_usage` or
-            :func:`~glyphik.utils.tokens.get_batch_token_usage`.
+            :func:`~zenpyre.utils.tokens.get_invoke_token_usage` or
+            :func:`~zenpyre.utils.tokens.get_batch_token_usage`.
 
     Returns:
         A multi-line, aligned string summarizing input, output, and
