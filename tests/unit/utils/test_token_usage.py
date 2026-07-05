@@ -174,6 +174,33 @@ def test_get_invoke_token_usage_total_tokens_independent_of_input_output() -> No
     assert result == UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=20)
 
 
+def test_get_invoke_token_usage_single_base_message_with_usage() -> None:
+    message = AIMessage(
+        content="hi",
+        usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+    )
+    result = get_invoke_token_usage(message)
+    assert result == UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15)
+
+
+def test_get_invoke_token_usage_single_ai_message_without_usage_metadata() -> None:
+    message = AIMessage(content="no usage here")
+    result = get_invoke_token_usage(message)
+    assert result == UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+
+
+def test_get_invoke_token_usage_single_non_ai_message_returns_zeros() -> None:
+    message = HumanMessage(content="hello")
+    result = get_invoke_token_usage(message)
+    assert result == UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+
+
+def test_get_invoke_token_usage_single_system_message_returns_zeros() -> None:
+    message = SystemMessage(content="you are a bot")
+    result = get_invoke_token_usage(message)
+    assert result == UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+
+
 ######################################################
 #     Tests for get_batch_token_usage                #
 ######################################################
