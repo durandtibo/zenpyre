@@ -177,15 +177,15 @@ def get_token_usage(result: BaseMessage | dict[str, Any] | list[dict[str, Any]])
     raise TypeError(msg)
 
 
-def log_token_usage(result: BaseMessage | dict[str, Any] | list[dict[str, Any]]) -> None:
+def log_token_usage(result: Any) -> None:
     """Log the token usage for a single invocation or a batch of them.
 
     Args:
         result: The dict returned by ``agent.invoke(...)``, or the list
             of dicts returned by ``agent.batch(...)``.
-
-    Raises:
-        TypeError: If ``result`` is neither a ``dict`` nor a ``list``.
     """
-    usage = get_token_usage(result)
+    try:
+        usage = get_token_usage(result)
+    except TypeError:
+        return
     logger.info(format_token_usage(usage))

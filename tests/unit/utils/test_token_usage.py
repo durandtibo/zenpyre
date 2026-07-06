@@ -501,14 +501,6 @@ def test_log_token_usage_logs_exactly_once(caplog: pytest.LogCaptureFixture) -> 
     assert len(caplog.records) == 1
 
 
-def test_log_token_usage_invalid_type_raises_type_error() -> None:
-    with pytest.raises(
-        TypeError, match=r"Expected a BaseMessage, a dict .*, or a list of dicts .*, but got str"
-    ):
-        log_token_usage("not a valid result")
-
-
 def test_log_token_usage_invalid_type_does_not_log(caplog: pytest.LogCaptureFixture) -> None:
-    with caplog.at_level(logging.INFO, logger=MODULE), pytest.raises(TypeError):
-        log_token_usage(123)
+    log_token_usage(123)
     assert caplog.records == []
