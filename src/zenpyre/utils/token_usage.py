@@ -13,6 +13,7 @@ __all__ = [
 import logging
 from typing import Any
 
+from coola.iterator import dfs_iterate, filter_by_type
 from langchain_core.messages import AIMessage, BaseMessage, UsageMetadata
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -64,15 +65,11 @@ def format_token_usage(usage: UsageMetadata) -> str:
     return "\n".join(lines)
 
 
-def get_invoke_token_usage(result: dict[str, Any] | BaseMessage) -> UsageMetadata:
-    """Sum token usage across all AI messages produced during an agent
-    run.
+def _sum_usage(messages: list[AIMessage]) -> UsageMetadata:
+    """Sum token usage across a collection of AI messages.
 
-    Model-agnostic: relies only on the standard ``usage_metadata`` field
-    that LangChain populates on ``AIMessage`` objects, regardless of the
-    underlying provider (OpenAI, Anthropic, Ollama, etc.). If a given
-    message has no usage metadata (e.g. the provider didn't report it),
-    it is silently skipped.
+    Messages without ``usage_metadata`` (e.g. the provider didn't
+    report it) are silently skipped.
 
     ``total_tokens`` is summed independently from ``input_tokens`` and
     ``output_tokens`` rather than derived from them, since some
@@ -81,24 +78,17 @@ def get_invoke_token_usage(result: dict[str, Any] | BaseMessage) -> UsageMetadat
     simple sum.
 
     Args:
-        result: Either the dict returned by ``agent.invoke(...)``,
-            expected to contain a ``"messages"`` key with the full
-            message list, or a single ``BaseMessage`` (e.g. the direct
-            return value of ``model.invoke(...)``).
+        messages: The AI messages to sum usage over.
 
     Returns:
         A ``UsageMetadata`` dict with ``input_tokens``, ``output_tokens``,
-            and ``total_tokens`` summed across all AI messages found.
+            and ``total_tokens`` summed across all given messages.
     """
-    messages = [result] if isinstance(result, BaseMessage) else result.get("messages", [])
-
     total_input = 0
     total_output = 0
     total_tokens = 0
 
     for msg in messages:
-        if not isinstance(msg, AIMessage):
-            continue
         usage = msg.usage_metadata
         if not usage:
             continue
@@ -111,6 +101,31 @@ def get_invoke_token_usage(result: dict[str, Any] | BaseMessage) -> UsageMetadat
         output_tokens=total_output,
         total_tokens=total_tokens,
     )
+
+
+def get_invoke_token_usage(result: dict[str, Any] | BaseMessage) -> UsageMetadata:
+    """Sum token usage across all AI messages produced during an agent
+    run.
+
+    Model-agnostic: relies only on the standard ``usage_metadata`` field
+    that LangChain populates on ``AIMessage`` objects, regardless of the
+    underlying provider (OpenAI, Anthropic, Ollama, etc.). If a given
+    message has no usage metadata (e.g. the provider didn't report it),
+    it is silently skipped.
+
+    Args:
+        result: Either the dict returned by ``agent.invoke(...)``,
+            expected to contain a ``"messages"`` key with the full
+            message list, or a single ``BaseMessage`` (e.g. the direct
+            return value of ``model.invoke(...)``).
+
+    Returns:
+        A ``UsageMetadata`` dict with ``input_tokens``, ``output_tokens``,
+            and ``total_tokens`` summed across all AI messages found.
+    """
+    messages = [result] if isinstance(result, BaseMessage) else result.get("messages", [])
+    ai_messages = [msg for msg in messages if isinstance(msg, AIMessage)]
+    return _sum_usage(ai_messages)
 
 
 def get_batch_token_usage(results: list[dict[str, Any]]) -> UsageMetadata:
@@ -145,36 +160,36 @@ def get_batch_token_usage(results: list[dict[str, Any]]) -> UsageMetadata:
     )
 
 
-def get_token_usage(result: BaseMessage | dict[str, Any] | list[dict[str, Any]]) -> UsageMetadata:
-    """Return the token usage for a single invocation, a batch of them,
-    or a single message.
+def get_token_usage(result: Any) -> UsageMetadata:
+    """Sum token usage across every AI message found anywhere within
+    ``result``.
+
+    Unlike :func:`get_invoke_token_usage` and :func:`get_batch_token_usage`,
+    this function does not branch on the shape of ``result``. Instead it
+    walks ``result`` depth-first (via ``coola``'s ``dfs_iterate``) and
+    collects every ``AIMessage`` instance found, regardless of how deeply
+    it is nested. This makes it a convenient, shape-agnostic entry point
+    that works for a single ``BaseMessage``, the dict returned by
+    ``agent.invoke(...)``, the list returned by ``agent.batch(...)``, or
+    any other structure that contains ``AIMessage`` objects.
+
+    If ``result`` contains no ``AIMessage`` instances (including cases
+    where ``result`` is of an unrecognized type, e.g. an ``int`` or a
+    plain ``str``), this function returns all-zero usage rather than
+    raising an error.
 
     Args:
-        result: One of:
-            - A ``BaseMessage`` (e.g. the direct return value of
-              ``model.invoke(...)``).
-            - The dict returned by ``agent.invoke(...)``, expected to
-              contain a ``"messages"`` key.
-            - The list of such dicts returned by ``agent.batch(...)``.
+        result: Any object potentially containing ``AIMessage``
+            instances, such as a ``BaseMessage``, the dict returned by
+            ``agent.invoke(...)``, or the list returned by
+            ``agent.batch(...)``.
 
     Returns:
         A ``UsageMetadata`` dict with token counts summed across every
-            message (or run, for a batch) found in ``result``.
-
-    Raises:
-        TypeError: If ``result`` is not a ``BaseMessage``, a ``dict``,
-            or a ``list``.
+            ``AIMessage`` found within ``result``.
     """
-    if isinstance(result, (dict, BaseMessage)):
-        return get_invoke_token_usage(result)
-    if isinstance(result, list):
-        return get_batch_token_usage(result)
-
-    msg = (
-        f"Expected a BaseMessage, a dict (from agent.invoke), or a list "
-        f"of dicts (from agent.batch), but got {type(result).__qualname__}"
-    )
-    raise TypeError(msg)
+    ai_messages = list(filter_by_type(dfs_iterate(result), AIMessage))
+    return _sum_usage(ai_messages)
 
 
 def log_token_usage(result: Any) -> None:
@@ -184,8 +199,5 @@ def log_token_usage(result: Any) -> None:
         result: The dict returned by ``agent.invoke(...)``, or the list
             of dicts returned by ``agent.batch(...)``.
     """
-    try:
-        usage = get_token_usage(result)
-    except TypeError:
-        return
+    usage = get_token_usage(result)
     logger.info(format_token_usage(usage))
