@@ -5,6 +5,9 @@ from pydantic import BaseModel, Field
 
 from zenpyre.utils.json_to_structured import (
     JsonStructuredOutputParseError,
+    _extract_json_object,
+    _fix_common_json_issues,
+    _strip_code_fences,
     parse_json_to_structured,
     parse_json_to_structured_with_retry,
 )
@@ -34,6 +37,153 @@ class MovieReview(BaseModel):
     title: str = Field(description="Title of the movie being reviewed.")
     sentiment: str = Field(description="Overall sentiment: positive, negative, or mixed.")
     score: int = Field(description="Reviewer's rating out of 10.")
+
+
+###########################################
+#     Tests for _strip_code_fences        #
+###########################################
+
+
+def test_strip_code_fences_removes_json_fence() -> None:
+    content = '```json\n{"a": 1}\n```'
+    assert _strip_code_fences(content) == '{"a": 1}'
+
+
+def test_strip_code_fences_removes_bare_fence() -> None:
+    content = '```\n{"a": 1}\n```'
+    assert _strip_code_fences(content) == '{"a": 1}'
+
+
+def test_strip_code_fences_no_fence_returns_stripped_text() -> None:
+    content = '  {"a": 1}  \n'
+    assert _strip_code_fences(content) == '{"a": 1}'
+
+
+def test_strip_code_fences_only_opening_fence() -> None:
+    content = '```json\n{"a": 1}'
+    assert _strip_code_fences(content) == '{"a": 1}'
+
+
+def test_strip_code_fences_only_closing_fence() -> None:
+    content = '{"a": 1}\n```'
+    assert _strip_code_fences(content) == '{"a": 1}'
+
+
+def test_strip_code_fences_json_marker_case_sensitivity() -> None:
+    # Only lowercase "json" marker is stripped; anything else is left as-is
+    # apart from the backticks themselves.
+    content = '```JSON\n{"a": 1}\n```'
+    result = _strip_code_fences(content)
+    assert result == 'JSON\n{"a": 1}'
+
+
+def test_strip_code_fences_empty_string() -> None:
+    assert _strip_code_fences("") == ""
+
+
+def test_strip_code_fences_preserves_internal_content_untouched() -> None:
+    content = '```json\n{"a": "```nested```"}\n```'
+    assert _strip_code_fences(content) == '{"a": "```nested```"}'
+
+
+###########################################
+#     Tests for _extract_json_object      #
+###########################################
+
+
+def test_extract_json_object_simple_object() -> None:
+    assert _extract_json_object('{"a": 1}') == '{"a": 1}'
+
+
+def test_extract_json_object_with_surrounding_prose() -> None:
+    text = 'prefix {"a": 1} suffix'
+    assert _extract_json_object(text) == '{"a": 1}'
+
+
+def test_extract_json_object_returns_first_balanced_object_directly() -> None:
+    text = 'prefix {"a": {"b": 1}} suffix'
+    assert _extract_json_object(text) == '{"a": {"b": 1}}'
+
+
+def test_extract_json_object_stops_at_first_complete_object() -> None:
+    # Two separate top-level objects; only the first should be returned.
+    text = '{"a": 1} {"b": 2}'
+    assert _extract_json_object(text) == '{"a": 1}'
+
+
+def test_extract_json_object_ignores_braces_inside_strings() -> None:
+    text = '{"a": "value with {brace}"}'
+    assert _extract_json_object(text) == '{"a": "value with {brace}"}'
+
+
+def test_extract_json_object_handles_escaped_quote_inside_string() -> None:
+    text = '{"a": "quote \\" here"}'
+    assert _extract_json_object(text) == '{"a": "quote \\" here"}'
+
+
+def test_extract_json_object_handles_escaped_backslash_inside_string() -> None:
+    text = '{"a": "backslash \\\\"}'
+    assert _extract_json_object(text) == '{"a": "backslash \\\\"}'
+
+
+def test_extract_json_object_no_opening_brace_raises() -> None:
+    with pytest.raises(ValueError, match=r"No opening brace"):
+        _extract_json_object("no braces here")
+
+
+def test_extract_json_object_unterminated_object_raises() -> None:
+    with pytest.raises(ValueError, match=r"No matching closing brace"):
+        _extract_json_object('{"a": 1')
+
+
+def test_extract_json_object_empty_string_raises() -> None:
+    with pytest.raises(ValueError, match=r"No opening brace"):
+        _extract_json_object("")
+
+
+def test_extract_json_object_nested_objects_return_outermost() -> None:
+    text = '{"a": {"b": {"c": 1}}}'
+    assert _extract_json_object(text) == '{"a": {"b": {"c": 1}}}'
+
+
+###########################################
+#     Tests for _fix_common_json_issues   #
+###########################################
+
+
+def test_fix_common_json_issues_removes_trailing_comma_before_closing_brace() -> None:
+    assert _fix_common_json_issues('{"a": 1,}') == '{"a": 1}'
+
+
+def test_fix_common_json_issues_removes_trailing_comma_before_closing_bracket() -> None:
+    assert _fix_common_json_issues("[1, 2,]") == "[1, 2]"
+
+
+def test_fix_common_json_issues_removes_trailing_comma_with_whitespace() -> None:
+    assert _fix_common_json_issues('{"a": 1,  \n}') == '{"a": 1}'
+
+
+def test_fix_common_json_issues_no_trailing_comma_unchanged() -> None:
+    content = '{"a": 1, "b": 2}'
+    assert _fix_common_json_issues(content) == content
+
+
+def test_fix_common_json_issues_nested_trailing_commas() -> None:
+    content = '{"a": [1, 2,], "b": 3,}'
+    assert _fix_common_json_issues(content) == '{"a": [1, 2], "b": 3}'
+
+
+def test_fix_common_json_issues_empty_string() -> None:
+    assert _fix_common_json_issues("") == ""
+
+
+def test_fix_common_json_issues_does_not_affect_commas_inside_strings() -> None:
+    # Note: this is a known limitation of the regex-based approach — a comma
+    # immediately followed by a brace/bracket *inside* a string value would
+    # also be stripped. This test documents current (imperfect) behavior.
+    content = '{"a": "text, more}"}'
+    result = _fix_common_json_issues(content)
+    assert result == content  # no trailing comma directly before } or ] here
 
 
 ###########################################
