@@ -43,7 +43,7 @@ from pydantic import BaseModel, ValidationError
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
 
