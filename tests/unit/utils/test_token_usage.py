@@ -14,6 +14,7 @@ from langchain_core.messages import (
 )
 
 from zenpyre.utils.token_usage import (
+    _sum_usage,
     format_token_usage,
     get_batch_token_usage,
     get_invoke_token_usage,
@@ -77,6 +78,79 @@ def test_format_token_usage_output_wider_than_input_and_total() -> None:
     assert format_token_usage(usage) == (
         "Token usage\n  Input tokens:        5\n  Output tokens: 123,456\n  Total tokens:       99"
     )
+
+
+######################################################
+#     Tests for _sum_usage                            #
+######################################################
+
+
+def test_sum_usage_empty_list_returns_zeros() -> None:
+    result = _sum_usage([])
+    assert result == UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+
+
+def test_sum_usage_single_message() -> None:
+    messages = [
+        AIMessage(
+            content="hi",
+            usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+        )
+    ]
+    result = _sum_usage(messages)
+    assert result == UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15)
+
+
+def test_sum_usage_sums_multiple_messages() -> None:
+    messages = [
+        AIMessage(
+            content="a",
+            usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+        ),
+        AIMessage(
+            content="b",
+            usage_metadata=UsageMetadata(input_tokens=20, output_tokens=8, total_tokens=28),
+        ),
+    ]
+    result = _sum_usage(messages)
+    assert result == UsageMetadata(input_tokens=30, output_tokens=13, total_tokens=43)
+
+
+def test_sum_usage_skips_message_without_usage_metadata() -> None:
+    messages = [
+        AIMessage(content="no usage here"),
+        AIMessage(
+            content="hi",
+            usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+        ),
+    ]
+    result = _sum_usage(messages)
+    assert result == UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15)
+
+
+def test_sum_usage_all_messages_without_usage_metadata_returns_zeros() -> None:
+    messages = [AIMessage(content="a"), AIMessage(content="b")]
+    result = _sum_usage(messages)
+    assert result == UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+
+
+def test_sum_usage_missing_individual_usage_fields() -> None:
+    messages = [Mock(spec=AIMessage, content="a", usage_metadata={"input_tokens": 7})]
+    result = _sum_usage(messages)
+    assert result == UsageMetadata(input_tokens=7, output_tokens=0, total_tokens=0)
+
+
+def test_sum_usage_total_tokens_independent_of_input_output() -> None:
+    # total_tokens can exceed input_tokens + output_tokens when a provider
+    # reports extra token categories (e.g. reasoning tokens).
+    messages = [
+        AIMessage(
+            content="a",
+            usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=20),
+        )
+    ]
+    result = _sum_usage(messages)
+    assert result == UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=20)
 
 
 ######################################################
@@ -202,6 +276,17 @@ def test_get_invoke_token_usage_single_system_message_returns_zeros() -> None:
     assert result == UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
 
 
+def test_get_invoke_token_usage_delegates_to_sum_usage() -> None:
+    messages = [AIMessage(content="hi")]
+    with patch(
+        f"{MODULE}._sum_usage",
+        return_value=UsageMetadata(input_tokens=1, output_tokens=2, total_tokens=3),
+    ) as mock_sum:
+        result = get_invoke_token_usage({"messages": messages})
+    mock_sum.assert_called_once_with(messages)
+    assert result == UsageMetadata(input_tokens=1, output_tokens=2, total_tokens=3)
+
+
 ######################################################
 #     Tests for get_batch_token_usage                #
 ######################################################
@@ -294,7 +379,7 @@ def test_get_batch_token_usage_passes_each_result_to_get_invoke_token_usage() ->
 
 
 ######################################################
-#     Tests for get_token_usage                     #
+#     Tests for get_token_usage                      #
 ######################################################
 
 # --- dict input (single invoke result) ---
@@ -310,6 +395,11 @@ def test_get_token_usage_dict_empty_messages_returns_zeros() -> None:
     assert result == UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
 
 
+def test_get_token_usage_dict_missing_messages_key_returns_zeros() -> None:
+    result = get_token_usage({})
+    assert result == UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+
+
 def test_get_token_usage_dict_sums_ai_messages() -> None:
     messages = [
         AIMessage(
@@ -321,12 +411,44 @@ def test_get_token_usage_dict_sums_ai_messages() -> None:
     assert result == UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15)
 
 
-def test_get_token_usage_dict_delegates_to_get_invoke_token_usage() -> None:
-    with patch(f"{MODULE}.get_invoke_token_usage") as mock_invoke:
-        mock_invoke.return_value = UsageMetadata(input_tokens=1, output_tokens=2, total_tokens=3)
-        result = get_token_usage({"messages": []})
-    mock_invoke.assert_called_once_with({"messages": []})
-    assert result == UsageMetadata(input_tokens=1, output_tokens=2, total_tokens=3)
+def test_get_token_usage_dict_sums_multiple_ai_messages() -> None:
+    messages = [
+        AIMessage(
+            content="a",
+            usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+        ),
+        AIMessage(
+            content="b",
+            usage_metadata=UsageMetadata(input_tokens=20, output_tokens=8, total_tokens=28),
+        ),
+    ]
+    result = get_token_usage({"messages": messages})
+    assert result == UsageMetadata(input_tokens=30, output_tokens=13, total_tokens=43)
+
+
+def test_get_token_usage_dict_skips_non_ai_messages() -> None:
+    messages = [
+        HumanMessage(content="hello"),
+        SystemMessage(content="you are a bot"),
+        AIMessage(
+            content="hi",
+            usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+        ),
+    ]
+    result = get_token_usage({"messages": messages})
+    assert result == UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15)
+
+
+def test_get_token_usage_dict_skips_ai_message_without_usage_metadata() -> None:
+    messages = [
+        AIMessage(content="no usage here"),
+        AIMessage(
+            content="hi",
+            usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+        ),
+    ]
+    result = get_token_usage({"messages": messages})
+    assert result == UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15)
 
 
 # --- BaseMessage input ---
@@ -353,13 +475,10 @@ def test_get_token_usage_base_message_without_usage_returns_zeros() -> None:
     assert result == UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
 
 
-def test_get_token_usage_base_message_delegates_to_get_invoke_token_usage() -> None:
-    message = AIMessage(content="hi")
-    with patch(f"{MODULE}.get_invoke_token_usage") as mock_invoke:
-        mock_invoke.return_value = UsageMetadata(input_tokens=1, output_tokens=2, total_tokens=3)
-        result = get_token_usage(message)
-    mock_invoke.assert_called_once_with(message)
-    assert result == UsageMetadata(input_tokens=1, output_tokens=2, total_tokens=3)
+def test_get_token_usage_single_non_ai_message_returns_zeros() -> None:
+    message = HumanMessage(content="hello")
+    result = get_token_usage(message)
+    assert result == UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
 
 
 # --- list input (batch result) ---
@@ -398,16 +517,34 @@ def test_get_token_usage_list_sums_across_batch() -> None:
     assert result == UsageMetadata(input_tokens=30, output_tokens=13, total_tokens=43)
 
 
-def test_get_token_usage_list_delegates_to_get_batch_token_usage() -> None:
-    batch = [{"messages": []}]
-    with patch(f"{MODULE}.get_batch_token_usage") as mock_batch:
-        mock_batch.return_value = UsageMetadata(input_tokens=1, output_tokens=2, total_tokens=3)
-        result = get_token_usage(batch)
-    mock_batch.assert_called_once_with(batch)
+def test_get_token_usage_list_of_bare_messages() -> None:
+    batch = [
+        AIMessage(
+            content="a",
+            usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+        ),
+        HumanMessage(content="hello"),
+        AIMessage(
+            content="b",
+            usage_metadata=UsageMetadata(input_tokens=20, output_tokens=8, total_tokens=28),
+        ),
+    ]
+    result = get_token_usage(batch)
+    assert result == UsageMetadata(input_tokens=30, output_tokens=13, total_tokens=43)
+
+
+def test_get_token_usage_delegates_to_sum_usage() -> None:
+    message = AIMessage(content="hi")
+    with patch(
+        f"{MODULE}._sum_usage",
+        return_value=UsageMetadata(input_tokens=1, output_tokens=2, total_tokens=3),
+    ) as mock_sum:
+        result = get_token_usage(message)
+    mock_sum.assert_called_once_with([message])
     assert result == UsageMetadata(input_tokens=1, output_tokens=2, total_tokens=3)
 
 
-# --- invalid input ---
+# --- inputs with no AIMessage anywhere ---
 
 
 @pytest.mark.parametrize(
@@ -420,14 +557,8 @@ def test_get_token_usage_list_delegates_to_get_batch_token_usage() -> None:
         pytest.param({1, 2, 3}, id="set"),
     ],
 )
-def test_get_token_usage_invalid_type_raises_type_error(result: object) -> None:
-    with pytest.raises(TypeError, match=r"Expected a BaseMessage, a dict"):
-        get_token_usage(result)
-
-
-def test_get_token_usage_invalid_type_error_message_includes_type_name() -> None:
-    with pytest.raises(TypeError, match=r"int"):
-        get_token_usage(42)
+def test_get_token_usage_non_message_input_returns_zeros(result: object) -> None:
+    assert get_token_usage(result) == UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
 
 
 ######################################################
@@ -501,6 +632,25 @@ def test_log_token_usage_logs_exactly_once(caplog: pytest.LogCaptureFixture) -> 
     assert len(caplog.records) == 1
 
 
-def test_log_token_usage_invalid_type_does_not_log(caplog: pytest.LogCaptureFixture) -> None:
-    log_token_usage(123)
-    assert caplog.records == []
+def test_log_token_usage_non_message_input_logs_zeros(caplog: pytest.LogCaptureFixture) -> None:
+    # get_token_usage never raises for inputs with no AIMessage in them,
+    # so log_token_usage logs all-zero usage for these rather than
+    # silently skipping (there is no longer a try/except around the call).
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage(123)
+    expected_usage = UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+    assert caplog.messages == [format_token_usage(expected_usage)]
+
+
+def test_log_token_usage_delegates_to_get_token_usage(caplog: pytest.LogCaptureFixture) -> None:
+    with (
+        patch(
+            f"{MODULE}.get_token_usage",
+            return_value=UsageMetadata(input_tokens=1, output_tokens=2, total_tokens=3),
+        ) as mock_get_usage,
+        caplog.at_level(logging.INFO, logger=MODULE),
+    ):
+        log_token_usage({"messages": []})
+    mock_get_usage.assert_called_once_with({"messages": []})
+    expected_usage = UsageMetadata(input_tokens=1, output_tokens=2, total_tokens=3)
+    assert caplog.messages == [format_token_usage(expected_usage)]
