@@ -1,5 +1,3 @@
-"""Unit tests for DocumentListLoader."""
-
 from __future__ import annotations
 
 from langchain_core.document_loaders import BaseLoader

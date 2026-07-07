@@ -1,5 +1,3 @@
-"""Unit tests for resolve_document_loader."""
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

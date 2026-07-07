@@ -1,5 +1,3 @@
-"""Unit tests for inspect_embeddings."""
-
 from __future__ import annotations
 
 from unittest.mock import MagicMock

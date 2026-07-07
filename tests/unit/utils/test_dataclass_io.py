@@ -1,5 +1,3 @@
-"""Unit tests for load_dataclasses and save_dataclasses."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

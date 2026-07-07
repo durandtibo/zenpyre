@@ -1,5 +1,3 @@
-"""Unit tests for resolve_embeddings."""
-
 from __future__ import annotations
 
 import pytest

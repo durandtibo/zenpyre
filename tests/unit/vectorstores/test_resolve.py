@@ -1,5 +1,3 @@
-"""Unit tests for resolve_vector_store."""
-
 from __future__ import annotations
 
 import pytest
