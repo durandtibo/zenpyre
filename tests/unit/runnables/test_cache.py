@@ -4,73 +4,15 @@ import asyncio
 from typing import TYPE_CHECKING, Any
 
 import pytest
-from langchain_core.runnables import Runnable, RunnableConfig, RunnableLambda
+from langchain_core.runnables import RunnableLambda
 
+from tests.unit.runnables.helpers import TrackingRunnable
 from zenpyre.runnables import CachingRunnable
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 MODULE = "zenpyre.runnables.cache"
-
-
-class _TrackingRunnable(Runnable[str, str | None]):
-    """A runnable that records how it was called (invoke vs.
-
-    batch vs. ainvoke vs. abatch), so tests can verify CachingRunnable
-    calls the wrapped runnable's batch/abatch for cache misses instead
-    of looping invoke/ainvoke per miss.
-    """
-
-    def __init__(self, none_on: str | None = None) -> None:
-        self.none_on = none_on
-        self.invoke_calls: list[str] = []
-        self.batch_calls: list[list[str]] = []
-        self.ainvoke_calls: list[str] = []
-        self.abatch_calls: list[list[str]] = []
-
-    def _apply(self, x: str) -> str | None:
-        return None if x == self.none_on else x.upper()
-
-    def invoke(
-        self,
-        input: str,  # noqa: A002
-        config: RunnableConfig | None = None,  # noqa: ARG002
-        **kwargs: Any,  # noqa: ARG002
-    ) -> str | None:
-        self.invoke_calls.append(input)
-        return self._apply(input)
-
-    def batch(
-        self,
-        inputs: list[str],
-        config: RunnableConfig | list[RunnableConfig] | None = None,  # noqa: ARG002
-        *,
-        return_exceptions: bool = False,  # noqa: ARG002
-        **kwargs: Any,  # noqa: ARG002
-    ) -> list[str | None]:
-        self.batch_calls.append(list(inputs))
-        return [self._apply(x) for x in inputs]
-
-    async def ainvoke(
-        self,
-        input: str,  # noqa: A002
-        config: RunnableConfig | None = None,  # noqa: ARG002
-        **kwargs: Any,  # noqa: ARG002
-    ) -> str | None:
-        self.ainvoke_calls.append(input)
-        return self._apply(input)
-
-    async def abatch(
-        self,
-        inputs: list[str],
-        config: RunnableConfig | list[RunnableConfig] | None = None,  # noqa: ARG002
-        *,
-        return_exceptions: bool = False,  # noqa: ARG002
-        **kwargs: Any,  # noqa: ARG002
-    ) -> list[str | None]:
-        self.abatch_calls.append(list(inputs))
-        return [self._apply(x) for x in inputs]
 
 
 def _identity_key(x: str) -> str:
@@ -131,7 +73,7 @@ def test_caching_runnable_repr_contains_class_name(tmp_path: Path) -> None:
 
 
 def test_caching_runnable_invoke_no_cache_dir_always_calls_inner() -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache_dir=None)
     assert cached.invoke("a") == "A"
     assert cached.invoke("a") == "A"
@@ -149,14 +91,14 @@ def test_caching_runnable_invoke_returns_correct_result(tmp_path: Path) -> None:
 
 
 def test_caching_runnable_invoke_cache_miss_calls_inner(tmp_path: Path) -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache_dir=tmp_path, key_fn=_identity_key)
     cached.invoke("a")
     assert inner.invoke_calls == ["a"]
 
 
 def test_caching_runnable_invoke_cache_hit_does_not_call_inner(tmp_path: Path) -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache_dir=tmp_path, key_fn=_identity_key)
     cached.invoke("a")
     inner.invoke_calls.clear()
@@ -187,7 +129,7 @@ def test_caching_runnable_invoke_key_with_dot_not_truncated(tmp_path: Path) -> N
 def test_caching_runnable_invoke_corrupt_cache_treated_as_miss(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache_dir=tmp_path, key_fn=_identity_key)
     filepath = tmp_path / "a.pkl"
     filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -239,7 +181,7 @@ def test_caching_runnable_invoke_propagates_inner_exception(tmp_path: Path) -> N
 
 
 def test_caching_runnable_ainvoke_no_cache_dir_uses_inner_ainvoke() -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache_dir=None)
     result = asyncio.run(cached.ainvoke("a"))
     assert result == "A"
@@ -248,7 +190,7 @@ def test_caching_runnable_ainvoke_no_cache_dir_uses_inner_ainvoke() -> None:
 
 
 def test_caching_runnable_ainvoke_cache_miss_then_hit(tmp_path: Path) -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache_dir=tmp_path, key_fn=_identity_key)
 
     result1 = asyncio.run(cached.ainvoke("a"))
@@ -264,7 +206,7 @@ def test_caching_runnable_ainvoke_cache_miss_then_hit(tmp_path: Path) -> None:
 def test_caching_runnable_ainvoke_corrupt_cache_treated_as_miss(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache_dir=tmp_path, key_fn=_identity_key)
     filepath = tmp_path / "a.pkl"
     filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -323,7 +265,7 @@ def test_caching_runnable_batch_empty_list_returns_empty_list(tmp_path: Path) ->
 
 
 def test_caching_runnable_batch_no_cache_dir_delegates_to_inner_batch() -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache_dir=None)
     results = cached.batch(["a", "b"])
     assert results == ["A", "B"]
@@ -338,7 +280,7 @@ def test_caching_runnable_batch_returns_correct_results(tmp_path: Path) -> None:
 
 
 def test_caching_runnable_batch_calls_inner_batch_only_for_misses(tmp_path: Path) -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache_dir=tmp_path, key_fn=_identity_key)
     cached.invoke("a")  # pre-populate the cache for "a"
     inner.invoke_calls.clear()
@@ -362,7 +304,7 @@ def test_caching_runnable_batch_writes_cache_for_new_misses(tmp_path: Path) -> N
 
 
 def test_caching_runnable_batch_second_call_all_hits(tmp_path: Path) -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache_dir=tmp_path, key_fn=_identity_key)
     cached.batch(["a", "b"])
     inner.batch_calls.clear()
@@ -412,7 +354,7 @@ def test_caching_runnable_abatch_empty_list_returns_empty_list(tmp_path: Path) -
 
 
 def test_caching_runnable_abatch_no_cache_dir_delegates_to_inner_abatch() -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache_dir=None)
     results = asyncio.run(cached.abatch(["a", "b"]))
     assert results == ["A", "B"]
@@ -420,7 +362,7 @@ def test_caching_runnable_abatch_no_cache_dir_delegates_to_inner_abatch() -> Non
 
 
 def test_caching_runnable_abatch_calls_inner_abatch_only_for_misses(tmp_path: Path) -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache_dir=tmp_path, key_fn=_identity_key)
     asyncio.run(cached.ainvoke("a"))  # pre-populate the cache for "a"
     inner.ainvoke_calls.clear()
@@ -433,7 +375,7 @@ def test_caching_runnable_abatch_calls_inner_abatch_only_for_misses(tmp_path: Pa
 
 
 def test_caching_runnable_abatch_second_call_all_hits(tmp_path: Path) -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache_dir=tmp_path, key_fn=_identity_key)
     asyncio.run(cached.abatch(["a", "b"]))
     inner.abatch_calls.clear()
@@ -468,7 +410,7 @@ def test_caching_runnable_abatch_return_exceptions_does_not_cache_failure(tmp_pa
 
 
 def test_caching_runnable_ignore_none_false_caches_none_result(tmp_path: Path) -> None:
-    inner = _TrackingRunnable(none_on="a")
+    inner = TrackingRunnable(none_on="a")
     cached = CachingRunnable(runnable=inner, cache_dir=tmp_path, key_fn=_identity_key)
 
     result1 = cached.invoke("a")
@@ -485,7 +427,7 @@ def test_caching_runnable_ignore_none_false_caches_none_result(tmp_path: Path) -
 
 
 def test_caching_runnable_ignore_none_true_does_not_cache_none_result(tmp_path: Path) -> None:
-    inner = _TrackingRunnable(none_on="a")
+    inner = TrackingRunnable(none_on="a")
     cached = CachingRunnable(
         runnable=inner, cache_dir=tmp_path, key_fn=_identity_key, ignore_none=True
     )
@@ -497,7 +439,7 @@ def test_caching_runnable_ignore_none_true_does_not_cache_none_result(tmp_path: 
 
 
 def test_caching_runnable_ignore_none_true_none_result_is_a_miss_next_call(tmp_path: Path) -> None:
-    inner = _TrackingRunnable(none_on="a")
+    inner = TrackingRunnable(none_on="a")
     cached = CachingRunnable(
         runnable=inner, cache_dir=tmp_path, key_fn=_identity_key, ignore_none=True
     )
@@ -517,7 +459,7 @@ def test_caching_runnable_ignore_none_true_existing_none_cache_treated_as_miss(
     import pickle
 
     (tmp_path / "planted.pkl").write_bytes(pickle.dumps(None))
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(
         runnable=inner, cache_dir=tmp_path, key_fn=_identity_key, ignore_none=True
     )
@@ -534,7 +476,7 @@ def test_caching_runnable_ignore_none_true_existing_none_cache_treated_as_miss_a
     import pickle
 
     (tmp_path / "planted.pkl").write_bytes(pickle.dumps(None))
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     cached = CachingRunnable(
         runnable=inner, cache_dir=tmp_path, key_fn=_identity_key, ignore_none=True
     )
@@ -546,7 +488,7 @@ def test_caching_runnable_ignore_none_true_existing_none_cache_treated_as_miss_a
 
 
 def test_caching_runnable_ignore_none_true_non_none_results_still_cached(tmp_path: Path) -> None:
-    inner = _TrackingRunnable(none_on="skip-me")
+    inner = TrackingRunnable(none_on="skip-me")
     cached = CachingRunnable(
         runnable=inner, cache_dir=tmp_path, key_fn=_identity_key, ignore_none=True
     )
@@ -561,7 +503,7 @@ def test_caching_runnable_ignore_none_true_non_none_results_still_cached(tmp_pat
 
 
 def test_caching_runnable_ignore_none_true_batch_mixed_results(tmp_path: Path) -> None:
-    inner = _TrackingRunnable(none_on="b")
+    inner = TrackingRunnable(none_on="b")
     cached = CachingRunnable(
         runnable=inner, cache_dir=tmp_path, key_fn=_identity_key, ignore_none=True
     )
@@ -575,7 +517,7 @@ def test_caching_runnable_ignore_none_true_batch_mixed_results(tmp_path: Path) -
 
 
 def test_caching_runnable_ignore_none_true_abatch_mixed_results(tmp_path: Path) -> None:
-    inner = _TrackingRunnable(none_on="b")
+    inner = TrackingRunnable(none_on="b")
     cached = CachingRunnable(
         runnable=inner, cache_dir=tmp_path, key_fn=_identity_key, ignore_none=True
     )
@@ -589,7 +531,7 @@ def test_caching_runnable_ignore_none_true_abatch_mixed_results(tmp_path: Path) 
 
 
 def test_caching_runnable_ignore_none_true_ainvoke_does_not_cache_none(tmp_path: Path) -> None:
-    inner = _TrackingRunnable(none_on="a")
+    inner = TrackingRunnable(none_on="a")
     cached = CachingRunnable(
         runnable=inner, cache_dir=tmp_path, key_fn=_identity_key, ignore_none=True
     )
