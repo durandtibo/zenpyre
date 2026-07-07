@@ -37,7 +37,7 @@ class SerializableHasher(BaseHasher[Serializable]):
         ```pycon
         >>> from langchain_core.messages import HumanMessage
         >>> from coola.hashing import get_default_registry
-        >>> from zenpyre.utils.hashing import SerializableHasher
+        >>> from zenpyre.runnables.hashing import SerializableHasher
         >>> registry = get_default_registry()
         >>> hasher = SerializableHasher()
         >>> hasher
