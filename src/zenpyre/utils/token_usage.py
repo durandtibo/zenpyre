@@ -133,12 +133,20 @@ def get_token_usage(result: Any) -> UsageMetadata:
     return _sum_usage(ai_messages)
 
 
-def log_token_usage(result: Any) -> None:
+def log_token_usage(result: Any, *, only_if_nonzero: bool = True) -> None:
     """Log the token usage for a single invocation or a batch of them.
 
     Args:
         result: The dict returned by ``agent.invoke(...)``, or the list
             of dicts returned by ``agent.batch(...)``.
+        only_if_nonzero: If ``True`` (the default), nothing is logged
+            when ``result`` has no ``total_tokens`` (i.e.
+            ``total_tokens == 0``), which is typically the case when
+            ``result`` contains no ``AIMessage`` with usage metadata.
+            Set to ``False`` to always log, even when ``total_tokens``
+            is zero.
     """
     usage = get_token_usage(result)
+    if only_if_nonzero and not usage.get("total_tokens", 0):
+        return
     logger.info(format_token_usage(usage))
