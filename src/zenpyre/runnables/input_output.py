@@ -3,28 +3,13 @@ output."""
 
 from __future__ import annotations
 
-__all__ = ["InputOutputPair", "InputOutputRunnable"]
+__all__ = ["InputOutputRunnable"]
 
-from dataclasses import dataclass
 from typing import Any, Generic
 
 from langchain_core.runnables import Runnable, RunnableConfig
-from langchain_core.runnables.utils import Input, Output
 
-
-@dataclass(frozen=True)
-class InputOutputPair(Generic[Input, Output]):
-    r"""A frozen pair holding a runnable's input alongside the output it
-    produced.
-
-    Args:
-        input: The input value passed to the wrapped runnable.
-        output: The output value produced by the wrapped runnable for
-            ``input``.
-    """
-
-    input: Input
-    output: Output
+from zenpyre.runnables.utils import Input, InputOutputPair, Output
 
 
 class InputOutputRunnable(Runnable[Input, InputOutputPair[Input, Output]], Generic[Input, Output]):
