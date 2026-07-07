@@ -1,5 +1,3 @@
-"""Unit tests for get_invoke_token_usage."""
-
 from __future__ import annotations
 
 import logging

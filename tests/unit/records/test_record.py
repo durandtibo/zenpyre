@@ -1,5 +1,3 @@
-"""Unit tests for Record."""
-
 from __future__ import annotations
 
 from dataclasses import FrozenInstanceError

@@ -1,5 +1,3 @@
-"""Unit tests for sort_by_metadata (Record version)."""
-
 from __future__ import annotations
 
 import pytest

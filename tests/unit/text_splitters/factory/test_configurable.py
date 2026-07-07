@@ -1,5 +1,3 @@
-"""Unit tests for ConfigurableTextSplitterFactory."""
-
 from __future__ import annotations
 
 from coola.equality import objects_are_equal

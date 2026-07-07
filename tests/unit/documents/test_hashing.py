@@ -1,5 +1,3 @@
-"""Unit tests for hash_document."""
-
 from __future__ import annotations
 
 import re

@@ -1,6 +1,3 @@
-"""Unit tests for filter_by_metadata, filter_by_metadata_range, and
-filter_by_metadata_values (Record version)."""
-
 from __future__ import annotations
 
 import pytest
