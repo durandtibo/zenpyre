@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
-from coola.hashing import HasherRegistry, get_default_registry
+from coola.hashing import HasherRegistry, get_default_registry, hash_object
 from langchain_core.load import Serializable
 from langchain_core.messages import AIMessage, HumanMessage
 
@@ -13,6 +14,14 @@ from zenpyre.runnables.hashing import SerializableHasher
 @pytest.fixture
 def registry() -> HasherRegistry:
     return get_default_registry()
+
+
+@pytest.mark.parametrize("data", [HumanMessage(content="hello"), AIMessage(content="hello")])
+@pytest.mark.parametrize("length", [16, 32, 64])
+def test_hash_object(data: Any, length: int) -> None:
+    h = hash_object(data, length=length)
+    assert isinstance(h, str)
+    assert len(h) == length
 
 
 ########################################
