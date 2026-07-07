@@ -1,68 +1,12 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any
 
 import pytest
-from langchain_core.runnables import Runnable, RunnableConfig, RunnableLambda
+from langchain_core.runnables import RunnableLambda
 
+from tests.unit.runnables.helpers import TrackingRunnable
 from zenpyre.runnables import InputOutputPair, InputOutputRunnable
-
-
-class _TrackingRunnable(Runnable[str, str]):
-    """A runnable that records how it was called (invoke vs.
-
-    batch vs. ainvoke vs. abatch), so tests can verify
-    InputOutputRunnable delegates to the right method on the wrapped
-    runnable instead of silently falling back to Runnable's default per-
-    item implementation.
-    """
-
-    def __init__(self) -> None:
-        self.invoke_calls: list[str] = []
-        self.batch_calls: list[list[str]] = []
-        self.ainvoke_calls: list[str] = []
-        self.abatch_calls: list[list[str]] = []
-
-    def invoke(
-        self,
-        input: str,  # noqa: A002
-        config: RunnableConfig | None = None,  # noqa: ARG002
-        **kwargs: Any,  # noqa: ARG002
-    ) -> str:
-        self.invoke_calls.append(input)
-        return input.upper()
-
-    def batch(
-        self,
-        inputs: list[str],
-        config: RunnableConfig | list[RunnableConfig] | None = None,  # noqa: ARG002
-        *,
-        return_exceptions: bool = False,  # noqa: ARG002
-        **kwargs: Any,  # noqa: ARG002
-    ) -> list[str]:
-        self.batch_calls.append(list(inputs))
-        return [x.upper() for x in inputs]
-
-    async def ainvoke(
-        self,
-        input: str,  # noqa: A002
-        config: RunnableConfig | None = None,  # noqa: ARG002
-        **kwargs: Any,  # noqa: ARG002
-    ) -> str:
-        self.ainvoke_calls.append(input)
-        return input.upper()
-
-    async def abatch(
-        self,
-        inputs: list[str],
-        config: RunnableConfig | list[RunnableConfig] | None = None,  # noqa: ARG002
-        *,
-        return_exceptions: bool = False,  # noqa: ARG002
-        **kwargs: Any,  # noqa: ARG002
-    ) -> list[str]:
-        self.abatch_calls.append(list(inputs))
-        return [x.upper() for x in inputs]
 
 
 def _failing_lambda(fail_on: str) -> RunnableLambda:
@@ -117,7 +61,7 @@ def test_input_output_runnable_ainvoke_pairs_input_and_output() -> None:
 
 
 def test_input_output_runnable_ainvoke_uses_inner_ainvoke() -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     wrapped = InputOutputRunnable(inner)
     asyncio.run(wrapped.ainvoke("hello"))
     assert inner.ainvoke_calls == ["hello"]
@@ -158,7 +102,7 @@ def test_input_output_runnable_batch_uses_inner_batch_not_inner_invoke() -> None
     # This is the key behavior distinguishing our override from the
     # default Runnable.batch (which would call inner.invoke once per
     # item via a thread pool instead of inner.batch once).
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     wrapped = InputOutputRunnable(inner)
     wrapped.batch(["a", "b", "c"])
     assert inner.batch_calls == [["a", "b", "c"]]
@@ -208,7 +152,7 @@ def test_input_output_runnable_abatch_pairs_inputs_and_outputs_in_order() -> Non
 
 
 def test_input_output_runnable_abatch_uses_inner_abatch_not_inner_ainvoke() -> None:
-    inner = _TrackingRunnable()
+    inner = TrackingRunnable()
     wrapped = InputOutputRunnable(inner)
     asyncio.run(wrapped.abatch(["a", "b", "c"]))
     assert inner.abatch_calls == [["a", "b", "c"]]
