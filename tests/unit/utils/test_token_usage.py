@@ -379,40 +379,106 @@ def test_log_token_usage_batch_result(caplog: pytest.LogCaptureFixture) -> None:
     assert caplog.messages == [format_token_usage(expected_usage)]
 
 
-def test_log_token_usage_empty_dict_logs_zeros(caplog: pytest.LogCaptureFixture) -> None:
+# --- default behavior (only_if_nonzero=True): skip logging on all-zero usage ---
+
+
+def test_log_token_usage_empty_dict_logs_nothing_by_default(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     with caplog.at_level(logging.INFO, logger=MODULE):
         log_token_usage({})
-    expected_usage = UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
-    assert caplog.messages == [format_token_usage(expected_usage)]
+    assert caplog.records == []
 
 
-def test_log_token_usage_empty_list_logs_zeros(caplog: pytest.LogCaptureFixture) -> None:
+def test_log_token_usage_empty_list_logs_nothing_by_default(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     with caplog.at_level(logging.INFO, logger=MODULE):
         log_token_usage([])
-    expected_usage = UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+    assert caplog.records == []
+
+
+def test_log_token_usage_ai_message_without_usage_metadata_logs_nothing_by_default(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    result = {"messages": [AIMessage(content="no usage")]}
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage(result)
+    assert caplog.records == []
+
+
+def test_log_token_usage_non_message_input_logs_nothing_by_default(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    # get_token_usage never raises for inputs with no AIMessage in them; it
+    # returns all-zero usage, and by default log_token_usage skips logging
+    # in that case.
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage(123)
+    assert caplog.records == []
+
+
+def test_log_token_usage_logs_when_total_tokens_nonzero(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    result = {
+        "messages": [
+            AIMessage(
+                content="hi",
+                usage_metadata=UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=10),
+            )
+        ]
+    }
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage(result)
+    expected_usage = UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=10)
     assert caplog.messages == [format_token_usage(expected_usage)]
+
+
+def test_log_token_usage_logs_nothing_when_total_tokens_zero_even_if_others_nonzero(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    # Only total_tokens is checked, so a provider reporting input/output
+    # tokens but total_tokens == 0 still results in nothing being logged.
+    result = {
+        "messages": [
+            AIMessage(
+                content="hi",
+                usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=0),
+            )
+        ]
+    }
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage(result)
+    assert caplog.records == []
 
 
 def test_log_token_usage_logs_at_info_level(caplog: pytest.LogCaptureFixture) -> None:
+    result = {
+        "messages": [
+            AIMessage(
+                content="hi",
+                usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+            )
+        ]
+    }
     with caplog.at_level(logging.INFO, logger=MODULE):
-        log_token_usage({})
+        log_token_usage(result)
     assert caplog.records[0].levelno == logging.INFO
 
 
 def test_log_token_usage_logs_exactly_once(caplog: pytest.LogCaptureFixture) -> None:
+    result = {
+        "messages": [
+            AIMessage(
+                content="hi",
+                usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+            )
+        ]
+    }
     with caplog.at_level(logging.INFO, logger=MODULE):
-        log_token_usage({})
+        log_token_usage(result)
     assert len(caplog.records) == 1
-
-
-def test_log_token_usage_non_message_input_logs_zeros(caplog: pytest.LogCaptureFixture) -> None:
-    # get_token_usage never raises for inputs with no AIMessage in them,
-    # so log_token_usage logs all-zero usage for these rather than
-    # silently skipping (there is no longer a try/except around the call).
-    with caplog.at_level(logging.INFO, logger=MODULE):
-        log_token_usage(123)
-    expected_usage = UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
-    assert caplog.messages == [format_token_usage(expected_usage)]
 
 
 def test_log_token_usage_delegates_to_get_token_usage(caplog: pytest.LogCaptureFixture) -> None:
@@ -426,4 +492,51 @@ def test_log_token_usage_delegates_to_get_token_usage(caplog: pytest.LogCaptureF
         log_token_usage({"messages": []})
     mock_get_usage.assert_called_once_with({"messages": []})
     expected_usage = UsageMetadata(input_tokens=1, output_tokens=2, total_tokens=3)
+    assert caplog.messages == [format_token_usage(expected_usage)]
+
+
+# --- only_if_nonzero=False: always log, even when total_tokens is zero ---
+
+
+def test_log_token_usage_only_if_nonzero_false_logs_zeros(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage({}, only_if_nonzero=False)
+    expected_usage = UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+    assert caplog.messages == [format_token_usage(expected_usage)]
+
+
+def test_log_token_usage_only_if_nonzero_false_empty_list_logs_zeros(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage([], only_if_nonzero=False)
+    expected_usage = UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+    assert caplog.messages == [format_token_usage(expected_usage)]
+
+
+def test_log_token_usage_only_if_nonzero_false_non_message_input_logs_zeros(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage(123, only_if_nonzero=False)
+    expected_usage = UsageMetadata(input_tokens=0, output_tokens=0, total_tokens=0)
+    assert caplog.messages == [format_token_usage(expected_usage)]
+
+
+def test_log_token_usage_only_if_nonzero_false_still_logs_nonzero_usage(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    result = {
+        "messages": [
+            AIMessage(
+                content="hi",
+                usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+            )
+        ]
+    }
+    with caplog.at_level(logging.INFO, logger=MODULE):
+        log_token_usage(result, only_if_nonzero=False)
+    expected_usage = UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15)
     assert caplog.messages == [format_token_usage(expected_usage)]
