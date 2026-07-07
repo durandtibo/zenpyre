@@ -40,6 +40,7 @@ class TypedDuckDBDocumentStore(BaseDuckDBDocumentStore):
             native typed columns; all other metadata fields go into the
             ``extra`` JSON overflow column.  Defaults to ``None``,
             which stores all metadata as JSON only.
+        **kwargs: Additional keyword arguments to pass to ``duckdb.connect``.
 
     Example:
         ```pycon
@@ -79,11 +80,12 @@ class TypedDuckDBDocumentStore(BaseDuckDBDocumentStore):
         self,
         path: Path | str = ":memory:",
         metadata_schema: dict[str, str] | None = None,
+        **kwargs: Any,
     ) -> None:
-
-        super().__init__(path)
+        super().__init__(path, **kwargs)
         self._schema: dict[str, str] = metadata_schema or {}
-        self._conn.execute(self._build_create_table())
+        if not kwargs.get("read_only", False):
+            self._conn.execute(self._build_create_table())
 
     def add_documents(self, docs: list[Document]) -> None:
         for doc in docs:

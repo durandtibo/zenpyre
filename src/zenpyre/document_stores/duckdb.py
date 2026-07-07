@@ -3,13 +3,13 @@ metadata."""
 
 from __future__ import annotations
 
-__all__ = ["DuckDBDocumentStore", "prepare_duckdb_path"]
+__all__ = ["BaseDuckDBDocumentStore", "DuckDBDocumentStore", "prepare_duckdb_path"]
 
 import json
 import logging
 from typing import TYPE_CHECKING, Any
 
-from coola.display import InlineDisplayMixin
+from coola.display import MultilineDisplayMixin
 from coola.utils.path import sanitize_path
 from langchain_core.documents import Document
 
@@ -26,14 +26,15 @@ if is_duckdb_available():  # pragma: no cover
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-class BaseDuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
+class BaseDuckDBDocumentStore(BaseDocumentStore, MultilineDisplayMixin):
     r"""Define a base class for DuckDB-backed store for LangChain
     documents."""
 
-    def __init__(self, path: Path | str) -> None:
+    def __init__(self, path: Path | str, **kwargs: Any) -> None:
         check_duckdb()
         self._path = prepare_duckdb_path(path)
-        self._conn = duckdb.connect(str(self._path))
+        self._kwargs = kwargs
+        self._conn = duckdb.connect(str(self._path), **kwargs)
 
     def delete(self, doc_id: str) -> None:
         self._conn.execute("DELETE FROM documents WHERE id = ?", [doc_id])
@@ -69,7 +70,7 @@ class BaseDuckDBDocumentStore(BaseDocumentStore, InlineDisplayMixin):
         self._conn.sql("DESCRIBE documents").show()
 
     def _get_repr_kwargs(self) -> dict[str, Any]:
-        return {"count": self.count(), "path": self._path}
+        return {"count": self.count(), "path": self._path} | self._kwargs
 
 
 _CREATE_TABLE = """
@@ -94,6 +95,7 @@ class DuckDBDocumentStore(BaseDuckDBDocumentStore):
     Args:
         path: Path to the DuckDB file, or ``":memory:"`` for an
             in-memory database (useful for testing).
+        **kwargs: Additional keyword arguments to pass to ``duckdb.connect``.
 
     Example:
         ```pycon
@@ -128,9 +130,10 @@ class DuckDBDocumentStore(BaseDuckDBDocumentStore):
         ```
     """
 
-    def __init__(self, path: Path | str = ":memory:") -> None:
-        super().__init__(path)
-        self._conn.execute(_CREATE_TABLE)
+    def __init__(self, path: Path | str = ":memory:", **kwargs: Any) -> None:
+        super().__init__(path, **kwargs)
+        if not kwargs.get("read_only", False):
+            self._conn.execute(_CREATE_TABLE)
 
     def add_documents(self, docs: list[Document]) -> None:
         for doc in docs:

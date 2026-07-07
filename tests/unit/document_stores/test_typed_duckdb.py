@@ -3,16 +3,29 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from typing import TYPE_CHECKING
 
 import pytest
 from langchain_core.documents import Document
 
 from zenpyre.document_stores import TypedDuckDBDocumentStore
 from zenpyre.testing.fixtures import duckdb_available
+from zenpyre.utils.imports import is_duckdb_available
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+if is_duckdb_available():
+    from duckdb import InvalidInputException
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def store_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    return tmp_path_factory.mktemp("store")
 
 
 @pytest.fixture
@@ -30,7 +43,16 @@ def typed_store() -> TypedDuckDBDocumentStore:
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
+def store_read_only(store_path: Path, docs: list[Document]) -> TypedDuckDBDocumentStore:
+    path = store_path / "data.duckdb"
+    store = TypedDuckDBDocumentStore(path)
+    store.add_documents(docs)
+    store._conn.close()
+    return TypedDuckDBDocumentStore(path, read_only=True)
+
+
+@pytest.fixture(scope="module")
 def docs() -> list[Document]:
     return [
         Document(
@@ -101,6 +123,15 @@ def test_add_documents_upsert_replaces_existing(store: TypedDuckDBDocumentStore)
 @duckdb_available
 def test_add_documents_empty(store: TypedDuckDBDocumentStore) -> None:
     store.add_documents([])
+
+
+@duckdb_available
+def test_add_documents_when_read_only(store_read_only: TypedDuckDBDocumentStore) -> None:
+    with pytest.raises(
+        InvalidInputException,
+        match=r'Cannot execute statement of type "INSERT" on database "data" which is attached in read-only mode!',
+    ):
+        store_read_only.add_documents([Document(id="1", page_content="Original", metadata={})])
 
 
 # --- count ---

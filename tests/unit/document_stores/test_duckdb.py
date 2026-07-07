@@ -11,10 +11,19 @@ from langchain_core.documents import Document
 from zenpyre.document_stores import DuckDBDocumentStore
 from zenpyre.document_stores.duckdb import prepare_duckdb_path
 from zenpyre.testing.fixtures import duckdb_available
+from zenpyre.utils.imports import is_duckdb_available
+
+if is_duckdb_available():
+    from duckdb import InvalidInputException
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def store_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    return tmp_path_factory.mktemp("store")
 
 
 @pytest.fixture
@@ -22,7 +31,16 @@ def store() -> DuckDBDocumentStore:
     return DuckDBDocumentStore(":memory:")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
+def store_read_only(store_path: Path, docs: list[Document]) -> DuckDBDocumentStore:
+    path = store_path / "data.duckdb"
+    store = DuckDBDocumentStore(path)
+    store.add_documents(docs)
+    store._conn.close()
+    return DuckDBDocumentStore(path, read_only=True)
+
+
+@pytest.fixture(scope="module")
 def docs() -> list[Document]:
     return [
         Document(
@@ -91,6 +109,15 @@ def test_add_documents_upsert_replaces_existing(store: DuckDBDocumentStore) -> N
 @duckdb_available
 def test_add_documents_empty(store: DuckDBDocumentStore) -> None:
     store.add_documents([])
+
+
+@duckdb_available
+def test_add_documents_when_read_only(store_read_only: DuckDBDocumentStore) -> None:
+    with pytest.raises(
+        InvalidInputException,
+        match=r'Cannot execute statement of type "INSERT" on database "data" which is attached in read-only mode!',
+    ):
+        store_read_only.add_documents([Document(id="1", page_content="Original", metadata={})])
 
 
 # --- count ---
