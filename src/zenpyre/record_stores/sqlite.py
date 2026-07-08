@@ -197,17 +197,11 @@ class SQLiteRecordStore(BaseSQLiteRecordStore):
 
     def add_records(self, records: list[Record]) -> None:
         if records:
-            try:
-                self._conn.executemany(
-                    "INSERT OR REPLACE INTO records VALUES (?, ?)",
-                    [(record.id, json.dumps(record.metadata)) for record in records],
-                )
-                self._conn.commit()
-            except sqlite3.OperationalError as exc:
-                if "readonly" in str(exc).lower():
-                    msg = "Cannot execute INSERT: database is opened in read-only mode."
-                    raise sqlite3.OperationalError(msg) from exc
-                raise
+            self._conn.executemany(
+                "INSERT OR REPLACE INTO records VALUES (?, ?)",
+                [(record.id, json.dumps(record.metadata)) for record in records],
+            )
+            self._conn.commit()
         logger.info("Added %s records", f"{len(records):,}")
 
     def get(self, record_id: str) -> Record | None:
