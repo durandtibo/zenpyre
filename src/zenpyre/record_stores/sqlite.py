@@ -11,6 +11,7 @@ import sqlite3
 from typing import TYPE_CHECKING, Any
 
 from coola.display import MultilineDisplayMixin
+from typing_extensions import Self
 
 from zenpyre.record_stores.base import BaseRecordStore
 from zenpyre.records import Record
@@ -45,6 +46,10 @@ class BaseSQLiteRecordStore(BaseRecordStore, MultilineDisplayMixin):
         self._database = database
         self._kwargs = kwargs
         self._conn = sqlite3.connect(database, **kwargs)
+
+    def close(self) -> None:
+        """Close the underlying SQLite connection."""
+        self._conn.close()
 
     def delete(self, record_id: str) -> None:
         self._conn.execute("DELETE FROM records WHERE id = ?", (record_id,))
@@ -85,6 +90,12 @@ class BaseSQLiteRecordStore(BaseRecordStore, MultilineDisplayMixin):
 
     def _get_repr_kwargs(self) -> dict[str, Any]:
         return {"count": self.count(), "database": self._database} | self._kwargs
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, *exc_info: object) -> None:
+        self.close()
 
 
 _CREATE_TABLE = """
