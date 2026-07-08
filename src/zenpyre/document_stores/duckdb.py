@@ -3,17 +3,17 @@ metadata."""
 
 from __future__ import annotations
 
-__all__ = ["BaseDuckDBDocumentStore", "DuckDBDocumentStore", "prepare_duckdb_path"]
+__all__ = ["BaseDuckDBDocumentStore", "DuckDBDocumentStore"]
 
 import json
 import logging
 from typing import TYPE_CHECKING, Any
 
 from coola.display import MultilineDisplayMixin
-from coola.utils.path import sanitize_path
 from langchain_core.documents import Document
 
 from zenpyre.document_stores.base import BaseDocumentStore
+from zenpyre.utils.duckdb import prepare_duckdb_path
 from zenpyre.utils.imports import check_duckdb, is_duckdb_available
 
 if TYPE_CHECKING:
@@ -218,29 +218,3 @@ class DuckDBDocumentStore(BaseDuckDBDocumentStore):
             page_content=page_content,
             metadata=json.loads(metadata_json) if metadata_json else {},
         )
-
-
-def prepare_duckdb_path(path: Path | str) -> Path | str:
-    """Prepare a path for use with ``duckdb.connect``.
-
-    If ``path`` is the special in-memory sentinel (``":memory:"``), it is
-    returned unchanged. Otherwise, ``path`` is sanitized and its parent
-    directory is created if it does not already exist, so that DuckDB
-    can create the database file without failing on a missing directory.
-
-    Args:
-        path: The DuckDB connection target -- either the in-memory
-            sentinel ``":memory:"``, or a filesystem path to a database
-            file.
-
-    Returns:
-        ``":memory:"`` unchanged, or the sanitized, absolute ``Path``
-        whose parent directory is guaranteed to exist.
-    """
-    if isinstance(path, str) and path == ":memory:":
-        return path
-
-    path = sanitize_path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    logger.debug("Ensured parent directory exists: %s", path.parent)
-    return path
