@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator
 from typing import TYPE_CHECKING
 
 import pytest
@@ -23,17 +23,21 @@ def store_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 @pytest.fixture
-def store() -> SQLiteRecordStore:
-    return SQLiteRecordStore(":memory:")
+def store() -> Generator[SQLiteRecordStore, None, None]:
+    with SQLiteRecordStore(":memory:") as store:
+        yield store
 
 
 @pytest.fixture(scope="module")
-def store_read_only(store_path: Path, records: list[Record]) -> SQLiteRecordStore:
+def store_read_only(
+    store_path: Path, records: list[Record]
+) -> Generator[SQLiteRecordStore, None, None]:
     path = store_path / "data.sqlite"
     store = SQLiteRecordStore.from_path(path)
     store.add_records(records)
     store._conn.close()
-    return SQLiteRecordStore.from_path(path, read_only=True)
+    with SQLiteRecordStore.from_path(path, read_only=True) as store:
+        yield store
 
 
 @pytest.fixture(scope="module")
@@ -66,19 +70,19 @@ def records() -> list[Record]:
 
 
 def test_init_defaults_to_in_memory() -> None:
-    store = SQLiteRecordStore()
-    assert store.count() == 0
+    with SQLiteRecordStore() as store:
+        assert store.count() == 0
 
 
 def test_init_accepts_sqlite_connect_kwargs() -> None:
-    store = SQLiteRecordStore(":memory:", timeout=5.0)
-    assert store.count() == 0
+    with SQLiteRecordStore(":memory:", timeout=5.0) as store:
+        assert store.count() == 0
 
 
 def test_init_creates_table() -> None:
-    store = SQLiteRecordStore(":memory:")
-    assert "records" in store.get_columns_info() or True  # table exists implicitly
-    assert store.count() == 0
+    with SQLiteRecordStore(":memory:") as store:
+        assert "records" in store.get_columns_info() or True  # table exists implicitly
+        assert store.count() == 0
 
 
 # --- from_path ---
@@ -86,15 +90,15 @@ def test_init_creates_table() -> None:
 
 def test_from_path_creates_file_backed_store(store_path: Path) -> None:
     path = store_path / "from_path.sqlite"
-    store = SQLiteRecordStore.from_path(path)
-    store.add_records([Record(id="1", metadata={"a": 1})])
-    assert store.count() == 1
-    assert path.exists()
+    with SQLiteRecordStore.from_path(path) as store:
+        store.add_records([Record(id="1", metadata={"a": 1})])
+        assert store.count() == 1
+        assert path.exists()
 
 
 def test_from_path_memory_uses_shared_cache_uri() -> None:
-    store = SQLiteRecordStore.from_path(":memory:")
-    assert store.count() == 0
+    with SQLiteRecordStore.from_path(":memory:") as store:
+        assert store.count() == 0
 
 
 def test_from_path_read_only_can_read_existing_data(store_read_only: SQLiteRecordStore) -> None:
@@ -108,8 +112,8 @@ def test_from_path_read_only_rejects_writes(store_read_only: SQLiteRecordStore) 
 
 def test_from_path_forwards_kwargs(store_path: Path) -> None:
     path = store_path / "from_path_kwargs.sqlite"
-    store = SQLiteRecordStore.from_path(path, timeout=1.0)
-    assert store.count() == 0
+    with SQLiteRecordStore.from_path(path, timeout=1.0) as store:
+        assert store.count() == 0
 
 
 # --- repr/str ---
