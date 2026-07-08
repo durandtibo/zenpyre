@@ -1,0 +1,633 @@
+from __future__ import annotations
+
+from collections.abc import Iterator
+from typing import TYPE_CHECKING
+
+import pytest
+
+from zenpyre.record_stores import DuckDBRecordStore
+from zenpyre.records import Record
+from zenpyre.testing.fixtures import duckdb_available
+from zenpyre.utils.imports import is_duckdb_available
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+if is_duckdb_available():
+    from duckdb import InvalidInputException
+
+# ---------------------------------------------------------------------------
+# Fixtures
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def store_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    return tmp_path_factory.mktemp("store")
+
+
+@pytest.fixture
+def store() -> DuckDBRecordStore:
+    return DuckDBRecordStore(":memory:")
+
+
+@pytest.fixture(scope="module")
+def store_read_only(store_path: Path, records: list[Record]) -> DuckDBRecordStore:
+    path = store_path / "data.duckdb"
+    store = DuckDBRecordStore(path)
+    store.add_records(records)
+    store._conn.close()
+    return DuckDBRecordStore(path, read_only=True)
+
+
+@pytest.fixture(scope="module")
+def records() -> list[Record]:
+    return [
+        Record(
+            id="1",
+            metadata={"author": "Alice", "year": 2022, "category": "Programming"},
+        ),
+        Record(
+            id="2",
+            metadata={"author": "Alice", "year": 2023, "category": "Programming"},
+        ),
+        Record(
+            id="3",
+            metadata={"author": "Bob", "year": 2021, "category": "History"},
+        ),
+        Record(
+            id="4",
+            metadata={"author": "Bob", "year": 2020, "category": "History"},
+        ),
+    ]
+
+
+##################################################
+#     Tests for DuckDBRecordStore                #
+##################################################
+
+# --- repr/str ---
+
+
+@duckdb_available
+def test_repr(store: DuckDBRecordStore) -> None:
+    assert repr(store).startswith("DuckDBRecordStore(")
+
+
+@duckdb_available
+def test_str(store: DuckDBRecordStore) -> None:
+    assert repr(store).startswith("DuckDBRecordStore(")
+
+
+# --- add_records ---
+
+
+@duckdb_available
+def test_add_records_increases_count(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    assert store.count() == len(records)
+
+
+@duckdb_available
+def test_add_records_upsert_replaces_existing(store: DuckDBRecordStore) -> None:
+    store.add_records([Record(id="1", metadata={"status": "original"})])
+    store.add_records([Record(id="1", metadata={"status": "updated"})])
+    assert store.count() == 1
+    assert store.get("1").metadata == {"status": "updated"}
+
+
+@duckdb_available
+def test_add_records_empty(store: DuckDBRecordStore) -> None:
+    store.add_records([])
+
+
+@duckdb_available
+def test_add_records_when_read_only(store_read_only: DuckDBRecordStore) -> None:
+    with pytest.raises(
+        InvalidInputException,
+        match=r'Cannot execute statement of type "INSERT" on database "data" which is attached in read-only mode!',
+    ):
+        store_read_only.add_records([Record(id="1", metadata={"status": "original"})])
+
+
+# --- count ---
+
+
+@duckdb_available
+def test_count_empty_store(store: DuckDBRecordStore) -> None:
+    assert store.count() == 0
+
+
+@duckdb_available
+def test_count_after_adding(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    assert store.count() == len(records)
+
+
+# --- get ---
+
+
+@duckdb_available
+def test_get_existing_record(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    assert store.get("1") == records[0]
+
+
+@duckdb_available
+def test_get_missing_record_returns_none(store: DuckDBRecordStore) -> None:
+    assert store.get("nonexistent") is None
+
+
+@duckdb_available
+def test_get_round_trips_metadata(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    assert store.get("1").metadata == records[0].metadata
+
+
+# --- get_many ---
+
+
+@duckdb_available
+def test_get_many_returns_correct_length(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    assert len(store.get_many(["1", "2", "99"])) == 3
+
+
+@duckdb_available
+def test_get_many_returns_none_for_missing(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    result = store.get_many(["1", "99", "2"])
+    assert result[1] is None
+
+
+@duckdb_available
+def test_get_many_preserves_order(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    result = store.get_many(["3", "1", "2"])
+    assert [r.id for r in result] == ["3", "1", "2"]
+
+
+# --- all ---
+
+
+@duckdb_available
+def test_all_empty_store(store: DuckDBRecordStore) -> None:
+    assert store.all() == []
+
+
+@duckdb_available
+def test_all_returns_all_records(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    result = store.all()
+    assert len(result) == len(records)
+    assert {r.id for r in result} == {d.id for d in records}
+
+
+# --- filter ---
+
+
+@duckdb_available
+def test_filter_no_args_returns_all(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    assert len(store.filter()) == len(records)
+
+
+@duckdb_available
+def test_filter_single_field(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    result = store.filter(author="Alice")
+    assert all(r.metadata["author"] == "Alice" for r in result)
+    assert len(result) == 2
+
+
+@duckdb_available
+def test_filter_multiple_fields(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    result = store.filter(author="Alice", category="Programming")
+    assert len(result) == 2
+
+
+@duckdb_available
+def test_filter_no_match_returns_empty(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    assert store.filter(author="Charlie") == []
+
+
+@duckdb_available
+def test_filter_preserves_full_record(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    result = store.filter(author="Bob", category="History")
+    assert all(
+        r.metadata == d.metadata
+        for r, d in zip(
+            sorted(result, key=lambda x: x.id),
+            sorted([d for d in records if d.metadata["author"] == "Bob"], key=lambda x: x.id),
+        )
+    )
+
+
+@duckdb_available
+def test_filter_empty_store_returns_empty(store: DuckDBRecordStore) -> None:
+    assert store.filter(author="Alice") == []
+
+
+# --- delete ---
+
+
+@duckdb_available
+def test_delete_removes_record(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    store.delete("1")
+    assert store.count() == len(records) - 1
+    assert store.get("1") is None
+
+
+@duckdb_available
+def test_delete_nonexistent_is_silent(store: DuckDBRecordStore) -> None:
+    store.delete("nonexistent")
+
+
+# --- delete_many ---
+
+
+@duckdb_available
+def test_delete_many_removes_records(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    store.delete_many(["1", "3"])
+    assert store.count() == len(records) - 2
+    assert store.get("1") is None
+    assert store.get("3") is None
+
+
+@duckdb_available
+def test_delete_many_preserves_other_records(
+    store: DuckDBRecordStore, records: list[Record]
+) -> None:
+    store.add_records(records)
+    store.delete_many(["1", "3"])
+    assert store.get("2") is not None
+    assert store.get("4") is not None
+
+
+@duckdb_available
+def test_delete_many_empty_list_is_no_op(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    store.delete_many([])
+    assert store.count() == len(records)
+
+
+@duckdb_available
+def test_delete_many_nonexistent_ids_are_silent(store: DuckDBRecordStore) -> None:
+    store.delete_many(["99", "100"])
+
+
+@duckdb_available
+def test_delete_many_single_id(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    store.delete_many(["2"])
+    assert store.count() == len(records) - 1
+    assert store.get("2") is None
+
+
+# --- check_ids ---
+
+
+@duckdb_available
+def test_check_ids_all_found(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    found, missing = store.check_ids(["1", "2", "3", "4"])
+    assert found == ["1", "2", "3", "4"]
+    assert missing == []
+
+
+@duckdb_available
+def test_check_ids_all_missing(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    found, missing = store.check_ids(["99", "100"])
+    assert found == []
+    assert missing == ["99", "100"]
+
+
+@duckdb_available
+def test_check_ids_mixed(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    found, missing = store.check_ids(["1", "99", "3", "42"])
+    assert found == ["1", "3"]
+    assert missing == ["99", "42"]
+
+
+@duckdb_available
+def test_check_ids_preserves_order(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    found, missing = store.check_ids(["3", "99", "1", "42", "2"])
+    assert found == ["3", "1", "2"]
+    assert missing == ["99", "42"]
+
+
+@duckdb_available
+def test_check_ids_empty_input_returns_empty_lists(store: DuckDBRecordStore) -> None:
+    found, missing = store.check_ids([])
+    assert found == []
+    assert missing == []
+
+
+@duckdb_available
+def test_check_ids_empty_store_returns_all_missing(store: DuckDBRecordStore) -> None:
+    found, missing = store.check_ids(["1", "2"])
+    assert found == []
+    assert missing == ["1", "2"]
+
+
+@duckdb_available
+def test_check_ids_returns_tuple_of_two_lists(
+    store: DuckDBRecordStore, records: list[Record]
+) -> None:
+    store.add_records(records)
+    result = store.check_ids(["1", "99"])
+    assert isinstance(result, tuple)
+    assert len(result) == 2
+    assert isinstance(result[0], list)
+    assert isinstance(result[1], list)
+
+
+# --- columns_info ---
+
+
+@duckdb_available
+def test_get_columns_info_returns_dict(store: DuckDBRecordStore) -> None:
+    result = store.get_columns_info()
+    assert isinstance(result, dict)
+
+
+@duckdb_available
+def test_get_columns_info_keys_are_column_names(store: DuckDBRecordStore) -> None:
+    result = store.get_columns_info()
+    expected_columns = {row[0] for row in store._conn.sql("DESCRIBE records").fetchall()}
+    assert set(result.keys()) == expected_columns
+
+
+@duckdb_available
+def test_get_columns_info_values_are_strings(store: DuckDBRecordStore) -> None:
+    result = store.get_columns_info()
+    assert all(isinstance(v, str) for v in result.values())
+
+
+@duckdb_available
+def test_get_columns_info_matches_describe_output(store: DuckDBRecordStore) -> None:
+    """Cross-check against the raw DESCRIBE output as the source of
+    truth."""
+    rows = store._conn.sql("DESCRIBE records").fetchall()
+    expected = {row[0]: row[1] for row in rows}
+    assert store.get_columns_info() == expected
+
+
+@duckdb_available
+def test_get_columns_info_non_empty_for_created_table(store: DuckDBRecordStore) -> None:
+    """The records table is created in __init__, so this should never be
+    empty for a freshly constructed store."""
+    result = store.get_columns_info()
+    assert len(result) > 0
+
+
+@duckdb_available
+def test_get_columns_info_does_not_mutate_between_calls(store: DuckDBRecordStore) -> None:
+    first = store.get_columns_info()
+    second = store.get_columns_info()
+    assert first == second
+    assert first is not second  # each call builds a fresh dict
+
+
+@duckdb_available
+def test_show_columns_info_does_not_raise(
+    store: DuckDBRecordStore, capsys: pytest.CaptureFixture[str]
+) -> None:
+    store.show_columns_info()  # should not raise
+    captured = capsys.readouterr()
+    assert captured.out != ""
+
+
+@duckdb_available
+def test_show_columns_info_output_contains_column_names(
+    store: DuckDBRecordStore, capsys: pytest.CaptureFixture[str]
+) -> None:
+    expected_columns = store.get_columns_info().keys()
+    store.show_columns_info()
+    captured = capsys.readouterr()
+    for col in expected_columns:
+        assert col in captured.out
+
+
+@duckdb_available
+def test_show_columns_info_returns_none(store: DuckDBRecordStore) -> None:
+    assert store.show_columns_info() is None
+
+
+# --- lazy_all ---
+
+
+@duckdb_available
+def test_lazy_all_empty_store_yields_nothing(store: DuckDBRecordStore) -> None:
+    assert list(store.lazy_all()) == []
+
+
+@duckdb_available
+def test_lazy_all_returns_generator(store: DuckDBRecordStore) -> None:
+    result = store.lazy_all()
+    assert isinstance(result, Iterator)
+
+
+@duckdb_available
+def test_lazy_all_yields_one_record_at_a_time(
+    store: DuckDBRecordStore, records: list[Record]
+) -> None:
+    store.add_records(records)
+    gen = store.lazy_all()
+    first = next(gen)
+    assert isinstance(first, Record)
+
+
+@duckdb_available
+def test_lazy_all_returns_all_records(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    result = list(store.lazy_all())
+    assert len(result) == len(records)
+    assert {r.id for r in result} == {d.id for d in records}
+
+
+@duckdb_available
+def test_lazy_all_matches_all(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    assert list(store.lazy_all()) == store.all()
+
+
+@duckdb_available
+def test_lazy_all_yields_record_instances(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    result = list(store.lazy_all())
+    assert all(isinstance(rec, Record) for rec in result)
+
+
+@duckdb_available
+def test_lazy_all_preserves_metadata(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    result = {rec.id: rec for rec in store.lazy_all()}
+    for rec in records:
+        assert result[rec.id].metadata == rec.metadata
+
+
+@duckdb_available
+def test_lazy_all_does_not_mutate_store(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    list(store.lazy_all())
+    assert store.count() == len(records)
+
+
+@duckdb_available
+def test_lazy_all_single_record(store: DuckDBRecordStore) -> None:
+    store.add_records([Record(id="1", metadata={})])
+    result = list(store.lazy_all())
+    assert len(result) == 1
+    assert result[0].id == "1"
+
+
+@duckdb_available
+def test_lazy_all_is_lazy_not_exhausted_on_creation(
+    store: DuckDBRecordStore, records: list[Record]
+) -> None:
+    """Calling lazy_all() should not itself execute the query eagerly
+    consuming results before iteration begins; adding records after
+    creating the generator but before the first next() call should still
+    be reflected, confirming the query executes lazily."""
+    gen = store.lazy_all()
+    store.add_records(records)
+    result = list(gen)
+    assert len(result) == len(records)
+
+
+@duckdb_available
+def test_lazy_all_independent_generators_do_not_interfere(
+    store: DuckDBRecordStore, records: list[Record]
+) -> None:
+    """Two separate lazy_all() generators should each independently
+    yield the full set of records, since each uses its own cursor."""
+    store.add_records(records)
+    gen1 = store.lazy_all()
+    gen2 = store.lazy_all()
+    first_from_gen1 = next(gen1)
+    result2 = list(gen2)
+    remaining_from_gen1 = list(gen1)
+
+    assert len(result2) == len(records)
+    assert len(remaining_from_gen1) + 1 == len(records)
+    assert first_from_gen1.id not in {d.id for d in remaining_from_gen1}
+
+
+# --- iter_batches ---
+
+
+@duckdb_available
+def test_iter_batches_empty_store_yields_nothing(store: DuckDBRecordStore) -> None:
+    assert list(store.iter_batches()) == []
+
+
+@duckdb_available
+def test_iter_batches_returns_generator(store: DuckDBRecordStore) -> None:
+    result = store.iter_batches()
+    assert isinstance(result, Iterator)
+
+
+@duckdb_available
+def test_iter_batches_default_batch_size(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    batches = list(store.iter_batches())
+    assert len(batches) == 1
+    assert len(batches[0]) == len(records)
+
+
+@duckdb_available
+def test_iter_batches_yields_correct_batch_sizes(
+    store: DuckDBRecordStore, records: list[Record]
+) -> None:
+    store.add_records(records)
+    batches = list(store.iter_batches(batch_size=2))
+    assert [len(b) for b in batches] == [2, 2]
+
+
+@duckdb_available
+def test_iter_batches_last_batch_may_be_smaller(
+    store: DuckDBRecordStore, records: list[Record]
+) -> None:
+    store.add_records(records)
+    batches = list(store.iter_batches(batch_size=3))
+    assert [len(b) for b in batches] == [3, 1]
+
+
+@duckdb_available
+def test_iter_batches_batch_size_larger_than_store(
+    store: DuckDBRecordStore, records: list[Record]
+) -> None:
+    store.add_records(records)
+    batches = list(store.iter_batches(batch_size=100))
+    assert len(batches) == 1
+    assert len(batches[0]) == len(records)
+
+
+@duckdb_available
+def test_iter_batches_batch_size_one(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    batches = list(store.iter_batches(batch_size=1))
+    assert [len(b) for b in batches] == [1, 1, 1, 1]
+
+
+@duckdb_available
+def test_iter_batches_returns_all_records(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    result = [rec for batch in store.iter_batches(batch_size=2) for rec in batch]
+    assert len(result) == len(records)
+    assert {r.id for r in result} == {d.id for d in records}
+
+
+@duckdb_available
+def test_iter_batches_matches_all(store: DuckDBRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    flattened = [rec for batch in store.iter_batches(batch_size=2) for rec in batch]
+    assert flattened == store.all()
+
+
+@duckdb_available
+def test_iter_batches_batches_contain_record_instances(
+    store: DuckDBRecordStore, records: list[Record]
+) -> None:
+    store.add_records(records)
+    batches = list(store.iter_batches(batch_size=2))
+    assert all(isinstance(rec, Record) for batch in batches for rec in batch)
+
+
+@duckdb_available
+def test_iter_batches_zero_batch_size_raises(store: DuckDBRecordStore) -> None:
+    with pytest.raises(ValueError, match="batch_size must be a positive integer"):
+        list(store.iter_batches(batch_size=0))
+
+
+@duckdb_available
+def test_iter_batches_negative_batch_size_raises(store: DuckDBRecordStore) -> None:
+    with pytest.raises(ValueError, match="batch_size must be a positive integer"):
+        list(store.iter_batches(batch_size=-1))
+
+
+@duckdb_available
+def test_iter_batches_error_raised_before_any_query(store: DuckDBRecordStore) -> None:
+    """The ValueError should be raised eagerly on the first call to
+    next(), not silently swallowed by generator laziness."""
+    gen = store.iter_batches(batch_size=0)
+    with pytest.raises(ValueError, match="batch_size"):
+        next(gen)
+
+
+@duckdb_available
+def test_iter_batches_does_not_mutate_store(
+    store: DuckDBRecordStore, records: list[Record]
+) -> None:
+    store.add_records(records)
+    list(store.iter_batches(batch_size=2))
+    assert store.count() == len(records)
