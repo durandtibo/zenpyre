@@ -48,7 +48,7 @@ class BaseSQLiteRecordStore(BaseRecordStore, MultilineDisplayMixin):
         self._conn = sqlite3.connect(database, **kwargs)
 
     def close(self) -> None:
-        """Close the underlying SQLite connection."""
+        logger.info(f"Closing SQLite at {self._database}")
         self._conn.close()
 
     def delete(self, record_id: str) -> None:

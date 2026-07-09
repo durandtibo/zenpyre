@@ -57,6 +57,9 @@ class InMemoryRecordStore(BaseRecordStore, InlineDisplayMixin):
     def __init__(self) -> None:
         self._records: dict[str, Record] = {}
 
+    def close(self) -> None:
+        return  # Do nothing because it is in memory
+
     def add_records(self, records: list[Record]) -> None:
         missing_ids = [i for i, record in enumerate(records) if not record.id]
         if missing_ids:

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterator
+    from typing import Self
 
     from zenpyre.records import Record
 
@@ -22,18 +23,21 @@ class BaseRecordStore(ABC):
 
     To implement a custom record store, subclass
     :class:`BaseRecordStore` and implement all abstract methods.
+
+    Implementations are expected to support use as a context manager
+    (``with SomeRecordStore(...) as store: ...``), which calls
+    :meth:`close` automatically on exit.
     """
 
     @abstractmethod
     def add_records(self, records: list[Record]) -> None:
         """Add or replace records in the store.
 
-        Records whose ``id`` already exists should be replaced (upsert
-        semantics). Unlike a plain ``id``-carrying object,
-        :class:`~zenpyre.records.Record` always has a required ``id``
-        (there is no equivalent of "a document with no id"), so
-        implementations do not need to validate its presence -- though
-        they may still choose to reject an empty string.
+        Records whose ``id`` already exists are replaced (upsert
+        semantics).  Since :class:`~zenpyre.records.Record` always has
+        a required ``id``, implementations do not need to validate its
+        presence, though they may still choose to reject an empty
+        string.
 
         Args:
             records: The list of :class:`~zenpyre.records.Record`
@@ -129,8 +133,35 @@ class BaseRecordStore(ABC):
         """Lazily iterate over all records without loading them all into
         memory at once.
 
-        Returns:
-            A generator yielding one ``Record`` at a time.
+        This is the streaming equivalent of :meth:`all`. The default
+        implementation delegates to :meth:`iter_batches` and flattens
+        the batches; implementations may override this with a more
+        direct row-by-row cursor for a smaller memory footprint.
+
+        Args:
+            batch_size: The batch size used internally when pulling
+                records from the underlying store. Does not affect the
+                granularity of what is yielded -- records are always
+                yielded one at a time.
+
+        Yields:
+            One :class:`~zenpyre.records.Record` at a time, in the
+                same order as :meth:`all`.
+
+        Example:
+            ```pycon
+            >>> from zenpyre.record_stores import InMemoryRecordStore
+            >>> from zenpyre.records import Record
+            >>> store = InMemoryRecordStore()
+            >>> store.add_records([Record(id=str(i), metadata={"index": i}) for i in range(3)])
+            >>> for record in store.lazy_all():
+            ...     print(record.id)
+            ...
+            0
+            1
+            2
+
+            ```
         """
         for batch in self.iter_batches(batch_size=batch_size):
             yield from batch
@@ -176,3 +207,20 @@ class BaseRecordStore(ABC):
         Returns:
             The number of records currently stored.
         """
+
+    @abstractmethod
+    def close(self) -> None:
+        r"""Close the store and release any underlying resources (e.g.
+        database connections, file handles).
+
+        Implementations should make repeated calls to ``close()``
+        safe (i.e. idempotent), since :meth:`__exit__` calls it
+        unconditionally and callers may also close a store manually
+        before using it as a context manager.
+        """
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, *exc_info: object) -> None:
+        self.close()

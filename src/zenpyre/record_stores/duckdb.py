@@ -35,6 +35,10 @@ class BaseDuckDBRecordStore(BaseRecordStore, MultilineDisplayMixin):
         self._kwargs = kwargs
         self._conn = duckdb.connect(str(self._path), **kwargs)
 
+    def close(self) -> None:
+        logger.info(f"Closing DuckDB at {self._path}")
+        self._conn.close()
+
     def delete(self, record_id: str) -> None:
         self._conn.execute("DELETE FROM records WHERE id = ?", [record_id])
 

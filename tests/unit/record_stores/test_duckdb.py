@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator
 from typing import TYPE_CHECKING
 
 import pytest
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 if is_duckdb_available():
-    from duckdb import InvalidInputException
+    import duckdb
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -27,17 +27,21 @@ def store_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 @pytest.fixture
-def store() -> DuckDBRecordStore:
-    return DuckDBRecordStore(":memory:")
+def store() -> Generator[DuckDBRecordStore, None, None]:
+    with DuckDBRecordStore(":memory:") as store:
+        yield store
 
 
 @pytest.fixture(scope="module")
-def store_read_only(store_path: Path, records: list[Record]) -> DuckDBRecordStore:
+def store_read_only(
+    store_path: Path, records: list[Record]
+) -> Generator[DuckDBRecordStore, None, None]:
     path = store_path / "data.duckdb"
     store = DuckDBRecordStore(path)
     store.add_records(records)
     store._conn.close()
-    return DuckDBRecordStore(path, read_only=True)
+    with DuckDBRecordStore(path, read_only=True) as store:
+        yield store
 
 
 @pytest.fixture(scope="module")
@@ -104,7 +108,7 @@ def test_add_records_empty(store: DuckDBRecordStore) -> None:
 @duckdb_available
 def test_add_records_when_read_only(store_read_only: DuckDBRecordStore) -> None:
     with pytest.raises(
-        InvalidInputException,
+        duckdb.InvalidInputException,
         match=r'Cannot execute statement of type "INSERT" on database "data" which is attached in read-only mode!',
     ):
         store_read_only.add_records([Record(id="1", metadata={"status": "original"})])
@@ -631,3 +635,68 @@ def test_iter_batches_does_not_mutate_store(
     store.add_records(records)
     list(store.iter_batches(batch_size=2))
     assert store.count() == len(records)
+
+
+# --- close ---
+
+
+@duckdb_available
+def test_close_closes_underlying_connection(store: DuckDBRecordStore) -> None:
+    store.close()
+    with pytest.raises(duckdb.ConnectionException, match=r"Connection already closed!"):
+        store.count()
+
+
+@duckdb_available
+def test_close_is_idempotent(store: DuckDBRecordStore) -> None:
+    store.close()
+    store.close()  # should not raise
+
+
+@duckdb_available
+def test_close_returns_none(store: DuckDBRecordStore) -> None:
+    assert store.close() is None
+
+
+# --- context manager ---
+
+
+@duckdb_available
+def test_context_manager_returns_self() -> None:
+    with DuckDBRecordStore(":memory:") as store:
+        assert isinstance(store, DuckDBRecordStore)
+
+
+@duckdb_available
+def test_context_manager_closes_on_normal_exit() -> None:
+    with DuckDBRecordStore(":memory:") as store:
+        store.add_records([Record(id="1", metadata={})])
+        assert store.count() == 1
+
+    with pytest.raises(duckdb.ConnectionException, match=r"Connection already closed!"):
+        store.count()
+
+
+@duckdb_available
+def test_context_manager_closes_on_exception() -> None:
+    msg = "boom"
+    with pytest.raises(ValueError, match="boom"), DuckDBRecordStore(":memory:") as store:
+        raise ValueError(msg)
+
+    with pytest.raises(duckdb.ConnectionException, match=r"Connection already closed!"):
+        store.count()
+
+
+@duckdb_available
+def test_context_manager_usable_for_reads_and_writes() -> None:
+    with DuckDBRecordStore(":memory:") as store:
+        store.add_records(
+            [
+                Record(id="1", metadata={"author": "Alice"}),
+                Record(id="2", metadata={"author": "Bob"}),
+            ]
+        )
+        assert store.count() == 2
+        assert store.filter(author="Alice")[0].id == "1"
+        store.delete("1")
+        assert store.count() == 1
