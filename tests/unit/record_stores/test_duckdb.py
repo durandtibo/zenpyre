@@ -235,6 +235,7 @@ def test_filter_empty_store_returns_empty(store: DuckDBRecordStore) -> None:
     assert store.filter(author="Alice") == []
 
 
+@duckdb_available
 def test_filter_integer_metadata_value(store: DuckDBRecordStore, records: list[Record]) -> None:
     store.add_records(records)
     result = store.filter(year=2022)
@@ -242,6 +243,7 @@ def test_filter_integer_metadata_value(store: DuckDBRecordStore, records: list[R
     assert result[0].id == "1"
 
 
+@duckdb_available
 def test_filter_integer_value_no_match_returns_empty(
     store: DuckDBRecordStore, records: list[Record]
 ) -> None:
