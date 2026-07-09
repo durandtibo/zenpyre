@@ -19,10 +19,11 @@ class BaseDocumentStore(ABC):
 
     Defines the common interface that all document store implementations
     must provide.  Concrete implementations include
-    :class:`~zenpyre.document_stores.InMemoryDocumentStore` (JSON metadata)
-    and
-    :class:`~zenpyre.document_stores.TypedInMemoryDocumentStore` (typed
-    columns + JSON overflow).
+    :class:`~zenpyre.document_stores.InMemoryDocumentStore`,
+    :class:`~zenpyre.document_stores.SQLiteDocumentStore`,
+    :class:`~zenpyre.document_stores.DuckDBDocumentStore`, and their
+    typed variants which store known metadata fields as native columns
+    for faster filtering.
 
     To implement a custom document store, subclass
     :class:`BaseDocumentStore` and implement all abstract methods.
@@ -136,8 +137,15 @@ class BaseDocumentStore(ABC):
         """Lazily iterate over all documents without loading them all
         into memory at once.
 
-        Returns:
-            A generator yielding one ``Document`` at a time.
+        Args:
+            batch_size: The batch size used internally when pulling
+                documents from the underlying store. Does not affect
+                the granularity of what is yielded — documents are
+                always yielded one at a time.
+
+        Yields:
+            One :class:`~langchain_core.documents.Document` at a time,
+            in the same order as :meth:`all`.
         """
         for batch in self.iter_batches(batch_size=batch_size):
             yield from batch
