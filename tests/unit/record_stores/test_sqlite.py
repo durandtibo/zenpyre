@@ -624,3 +624,61 @@ def test_iter_batches_does_not_mutate_store(
     store.add_records(records)
     list(store.iter_batches(batch_size=2))
     assert store.count() == len(records)
+
+
+# --- close ---
+
+
+def test_close_closes_underlying_connection(store: SQLiteRecordStore) -> None:
+    store.close()
+    with pytest.raises(sqlite3.ProgrammingError, match=r"closed database"):
+        store.count()
+
+
+def test_close_is_idempotent(store: SQLiteRecordStore) -> None:
+    store.close()
+    store.close()  # should not raise
+
+
+def test_close_returns_none(store: SQLiteRecordStore) -> None:
+    assert store.close() is None
+
+
+# --- context manager ---
+
+
+def test_context_manager_returns_self() -> None:
+    with SQLiteRecordStore(":memory:") as store:
+        assert isinstance(store, SQLiteRecordStore)
+
+
+def test_context_manager_closes_on_normal_exit() -> None:
+    with SQLiteRecordStore(":memory:") as store:
+        store.add_records([Record(id="1", metadata={})])
+        assert store.count() == 1
+
+    with pytest.raises(sqlite3.ProgrammingError, match=r"closed database"):
+        store.count()
+
+
+def test_context_manager_closes_on_exception() -> None:
+    msg = "boom"
+    with pytest.raises(ValueError, match="boom"), SQLiteRecordStore(":memory:") as store:
+        raise ValueError(msg)
+
+    with pytest.raises(sqlite3.ProgrammingError, match=r"closed database"):
+        store.count()
+
+
+def test_context_manager_usable_for_reads_and_writes() -> None:
+    with SQLiteRecordStore(":memory:") as store:
+        store.add_records(
+            [
+                Record(id="1", metadata={"author": "Alice"}),
+                Record(id="2", metadata={"author": "Bob"}),
+            ]
+        )
+        assert store.count() == 2
+        assert store.filter(author="Alice")[0].id == "1"
+        store.delete("1")
+        assert store.count() == 1

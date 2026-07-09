@@ -479,3 +479,58 @@ def test_iter_batches_does_not_mutate_store(
     store.add_records(records)
     list(store.iter_batches(batch_size=2))
     assert store.count() == len(records)
+
+
+# --- close ---
+
+
+def test_close_closes_underlying_connection(store: InMemoryRecordStore) -> None:
+    store.close()
+    store.count()
+
+
+def test_close_is_idempotent(store: InMemoryRecordStore) -> None:
+    store.close()
+    store.close()  # should not raise
+
+
+def test_close_returns_none(store: InMemoryRecordStore) -> None:
+    assert store.close() is None
+
+
+# --- context manager ---
+
+
+def test_context_manager_returns_self() -> None:
+    with InMemoryRecordStore() as store:
+        assert isinstance(store, InMemoryRecordStore)
+
+
+def test_context_manager_closes_on_normal_exit() -> None:
+    with InMemoryRecordStore() as store:
+        store.add_records([Record(id="1", metadata={})])
+        assert store.count() == 1
+
+    assert store.count() == 1
+
+
+def test_context_manager_closes_on_exception() -> None:
+    msg = "boom"
+    with pytest.raises(ValueError, match="boom"), InMemoryRecordStore() as store:
+        raise ValueError(msg)
+
+    assert store.count() == 0
+
+
+def test_context_manager_usable_for_reads_and_writes() -> None:
+    with InMemoryRecordStore() as store:
+        store.add_records(
+            [
+                Record(id="1", metadata={"author": "Alice"}),
+                Record(id="2", metadata={"author": "Bob"}),
+            ]
+        )
+        assert store.count() == 2
+        assert store.filter(author="Alice")[0].id == "1"
+        store.delete("1")
+        assert store.count() == 1
