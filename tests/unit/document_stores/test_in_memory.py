@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator
 
 import pytest
 from langchain_core.documents import Document
@@ -13,8 +13,9 @@ from zenpyre.document_stores import InMemoryDocumentStore
 
 
 @pytest.fixture
-def store() -> InMemoryDocumentStore:
-    return InMemoryDocumentStore()
+def store() -> Generator[InMemoryDocumentStore, None, None]:
+    with InMemoryDocumentStore() as store:
+        yield store
 
 
 @pytest.fixture

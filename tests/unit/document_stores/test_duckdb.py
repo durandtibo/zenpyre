@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator
 from typing import TYPE_CHECKING
 
 import pytest
@@ -27,17 +27,21 @@ def store_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 @pytest.fixture
-def store() -> DuckDBDocumentStore:
-    return DuckDBDocumentStore(":memory:")
+def store() -> Generator[DuckDBDocumentStore, None, None]:
+    with DuckDBDocumentStore(":memory:") as store:
+        yield store
 
 
 @pytest.fixture(scope="module")
-def store_read_only(store_path: Path, docs: list[Document]) -> DuckDBDocumentStore:
+def store_read_only(
+    store_path: Path, docs: list[Document]
+) -> Generator[DuckDBDocumentStore, None, None]:
     path = store_path / "data.duckdb"
     store = DuckDBDocumentStore(path)
     store.add_documents(docs)
     store._conn.close()
-    return DuckDBDocumentStore(path, read_only=True)
+    with DuckDBDocumentStore(path, read_only=True) as store:
+        yield store
 
 
 @pytest.fixture(scope="module")

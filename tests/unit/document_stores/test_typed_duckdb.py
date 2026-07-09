@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator
 from typing import TYPE_CHECKING
 
 import pytest
@@ -27,27 +27,32 @@ def store_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 @pytest.fixture
-def store() -> TypedDuckDBDocumentStore:
+def store() -> Generator[TypedDuckDBDocumentStore, None, None]:
     """In-memory store with no schema."""
-    return TypedDuckDBDocumentStore(":memory:")
+    with TypedDuckDBDocumentStore(":memory:") as store:
+        yield store
 
 
 @pytest.fixture
-def typed_store() -> TypedDuckDBDocumentStore:
+def typed_store() -> Generator[TypedDuckDBDocumentStore, None, None]:
     """In-memory store with a typed schema."""
-    return TypedDuckDBDocumentStore(
+    with TypedDuckDBDocumentStore(
         ":memory:",
         metadata_schema={"author": "VARCHAR", "year": "INTEGER", "category": "VARCHAR"},
-    )
+    ) as store:
+        yield store
 
 
 @pytest.fixture(scope="module")
-def store_read_only(store_path: Path, docs: list[Document]) -> TypedDuckDBDocumentStore:
+def store_read_only(
+    store_path: Path, docs: list[Document]
+) -> Generator[TypedDuckDBDocumentStore, None, None]:
     path = store_path / "data.duckdb"
     store = TypedDuckDBDocumentStore(path)
     store.add_documents(docs)
     store._conn.close()
-    return TypedDuckDBDocumentStore(path, read_only=True)
+    with TypedDuckDBDocumentStore(path, read_only=True) as store:
+        yield store
 
 
 @pytest.fixture(scope="module")
