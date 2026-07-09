@@ -303,6 +303,20 @@ def test_filter_empty_store_returns_empty(store: SQLiteRecordStore) -> None:
     assert store.filter(author="Alice") == []
 
 
+def test_filter_integer_metadata_value(store: SQLiteRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    result = store.filter(year=2022)
+    assert len(result) == 1
+    assert result[0].id == "1"
+
+
+def test_filter_integer_value_no_match_returns_empty(
+    store: SQLiteRecordStore, records: list[Record]
+) -> None:
+    store.add_records(records)
+    assert store.filter(year=9999) == []
+
+
 # --- delete ---
 
 
@@ -527,6 +541,12 @@ def test_lazy_all_single_record(store: SQLiteRecordStore) -> None:
     result = list(store.lazy_all())
     assert len(result) == 1
     assert result[0].id == "1"
+
+
+def test_lazy_all_accepts_batch_size_kwarg(store: SQLiteRecordStore, records: list[Record]) -> None:
+    store.add_records(records)
+    result = list(store.lazy_all(batch_size=2))
+    assert len(result) == len(records)
 
 
 # --- iter_batches ---
