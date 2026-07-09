@@ -53,6 +53,9 @@ class InMemoryDocumentStore(BaseDocumentStore, InlineDisplayMixin):
     def __init__(self) -> None:
         self._docs: dict[str, Document] = {}
 
+    def close(self) -> None:
+        return  # Do nothing because it is in memory
+
     def add_documents(self, docs: list[Document]) -> None:
         missing_ids = [i for i, doc in enumerate(docs) if not doc.id]
         if missing_ids:

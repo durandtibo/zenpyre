@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 if is_duckdb_available():
-    from duckdb import InvalidInputException
+    import duckdb
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -114,7 +114,7 @@ def test_add_documents_empty(store: DuckDBDocumentStore) -> None:
 @duckdb_available
 def test_add_documents_when_read_only(store_read_only: DuckDBDocumentStore) -> None:
     with pytest.raises(
-        InvalidInputException,
+        duckdb.InvalidInputException,
         match=r'Cannot execute statement of type "INSERT" on database "data" which is attached in read-only mode!',
     ):
         store_read_only.add_documents([Document(id="1", page_content="Original", metadata={})])
@@ -647,3 +647,68 @@ def test_iter_batches_does_not_mutate_store(
     store.add_documents(docs)
     list(store.iter_batches(batch_size=2))
     assert store.count() == len(docs)
+
+
+# --- close ---
+
+
+@duckdb_available
+def test_close_closes_underlying_connection(store: DuckDBDocumentStore) -> None:
+    store.close()
+    with pytest.raises(duckdb.ConnectionException, match=r"Connection already closed!"):
+        store.count()
+
+
+@duckdb_available
+def test_close_is_idempotent(store: DuckDBDocumentStore) -> None:
+    store.close()
+    store.close()  # should not raise
+
+
+@duckdb_available
+def test_close_returns_none(store: DuckDBDocumentStore) -> None:
+    assert store.close() is None
+
+
+# --- context manager ---
+
+
+@duckdb_available
+def test_context_manager_returns_self() -> None:
+    with DuckDBDocumentStore(":memory:") as store:
+        assert isinstance(store, DuckDBDocumentStore)
+
+
+@duckdb_available
+def test_context_manager_closes_on_normal_exit() -> None:
+    with DuckDBDocumentStore(":memory:") as store:
+        store.add_documents([Document(id="1", page_content="hello", metadata={})])
+        assert store.count() == 1
+
+    with pytest.raises(duckdb.ConnectionException, match=r"Connection already closed!"):
+        store.count()
+
+
+@duckdb_available
+def test_context_manager_closes_on_exception() -> None:
+    msg = "boom"
+    with pytest.raises(ValueError, match="boom"), DuckDBDocumentStore(":memory:") as store:
+        raise ValueError(msg)
+
+    with pytest.raises(duckdb.ConnectionException, match=r"Connection already closed!"):
+        store.count()
+
+
+@duckdb_available
+def test_context_manager_usable_for_reads_and_writes() -> None:
+    with DuckDBDocumentStore(":memory:") as store:
+        store.add_documents(
+            [
+                Document(id="1", page_content="hello", metadata={"author": "Alice"}),
+                Document(id="2", page_content="world", metadata={"author": "Bob"}),
+            ]
+        )
+        assert store.count() == 2
+        assert store.filter(author="Alice")[0].id == "1"
+        store.delete("1")
+        assert store.count() == 1
