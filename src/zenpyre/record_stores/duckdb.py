@@ -36,7 +36,7 @@ class BaseDuckDBRecordStore(BaseRecordStore, MultilineDisplayMixin):
         self._conn = duckdb.connect(str(self._path), **kwargs)
 
     def close(self) -> None:
-        logger.info(f"Closing DuckDB at {self._path}")
+        logger.info("Closing DuckDB at %s", self._path)
         self._conn.close()
 
     def delete(self, record_id: str) -> None:
@@ -167,7 +167,7 @@ class DuckDBRecordStore(BaseDuckDBRecordStore):
         where = " AND ".join(conditions)
         rows = self._conn.execute(
             f"SELECT id, metadata FROM records WHERE {where}",  # noqa: S608
-            [str(v) for v in metadata_filters.values()],
+            list(metadata_filters.values()),
         ).fetchall()
         return [self._row_to_record(row) for row in rows]
 

@@ -336,6 +336,22 @@ def test_filter_mixed_schema_and_extra_fields(typed_store: TypedSQLiteRecordStor
     assert result[0].id == "1"
 
 
+def test_filter_integer_typed_column(
+    typed_store: TypedSQLiteRecordStore, records: list[Record]
+) -> None:
+    typed_store.add_records(records)
+    result = typed_store.filter(year=2022)
+    assert len(result) == 1
+    assert result[0].id == "1"
+
+
+def test_filter_integer_typed_column_no_match(
+    typed_store: TypedSQLiteRecordStore, records: list[Record]
+) -> None:
+    typed_store.add_records(records)
+    assert typed_store.filter(year=9999) == []
+
+
 # --- delete ---
 
 
@@ -518,6 +534,14 @@ def test_lazy_all_single_record(store: TypedSQLiteRecordStore) -> None:
     result = list(store.lazy_all())
     assert len(result) == 1
     assert result[0].id == "1"
+
+
+def test_lazy_all_accepts_batch_size_kwarg(
+    store: TypedSQLiteRecordStore, records: list[Record]
+) -> None:
+    store.add_records(records)
+    result = list(store.lazy_all(batch_size=2))
+    assert len(result) == len(records)
 
 
 # --- iter_batches ---

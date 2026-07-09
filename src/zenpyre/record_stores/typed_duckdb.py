@@ -113,7 +113,7 @@ class TypedDuckDBRecordStore(BaseDuckDBRecordStore):
                 conditions.append(f"{key} = ?")
             else:
                 conditions.append(f"json_extract_string(extra, '$.{key}') = ?")
-            values.append(str(value))
+            values.append(value)
 
         where = " AND ".join(conditions)
         rows = self._conn.execute(

@@ -161,7 +161,7 @@ class TypedSQLiteRecordStore(BaseSQLiteRecordStore):
                 conditions.append(f"{key} = ?")
             else:
                 conditions.append(f"json_extract(extra, '$.{key}') = ?")
-            values.append(str(value))
+            values.append(value)
 
         where = " AND ".join(conditions)
         rows = self._conn.execute(
@@ -188,12 +188,6 @@ class TypedSQLiteRecordStore(BaseSQLiteRecordStore):
     def all(self) -> list[Record]:
         rows = self._conn.execute("SELECT * FROM records").fetchall()
         return [self._row_to_record(row) for row in rows]
-
-    def lazy_all(self) -> Generator[Record, None, None]:
-        cursor = self._conn.cursor()
-        cursor.execute("SELECT * FROM records")
-        for row in cursor:
-            yield self._row_to_record(row)
 
     def iter_batches(self, batch_size: int = 1000) -> Generator[list[Record], None, None]:
         if batch_size < 1:

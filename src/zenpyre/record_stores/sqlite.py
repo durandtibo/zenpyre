@@ -48,7 +48,7 @@ class BaseSQLiteRecordStore(BaseRecordStore, MultilineDisplayMixin):
         self._conn = sqlite3.connect(database, **kwargs)
 
     def close(self) -> None:
-        logger.info(f"Closing SQLite at {self._database}")
+        logger.info("Closing SQLite at %s", self._database)
         self._conn.close()
 
     def delete(self, record_id: str) -> None:
@@ -228,7 +228,7 @@ class SQLiteRecordStore(BaseSQLiteRecordStore):
         where = " AND ".join(conditions)
         rows = self._conn.execute(
             f"SELECT id, metadata FROM records WHERE {where}",  # noqa: S608
-            [str(v) for v in metadata_filters.values()],
+            list(metadata_filters.values()),
         ).fetchall()
         return [self._row_to_record(row) for row in rows]
 
@@ -250,12 +250,6 @@ class SQLiteRecordStore(BaseSQLiteRecordStore):
     def all(self) -> list[Record]:
         rows = self._conn.execute("SELECT id, metadata FROM records").fetchall()
         return [self._row_to_record(row) for row in rows]
-
-    def lazy_all(self) -> Generator[Record, None, None]:
-        cursor = self._conn.cursor()
-        cursor.execute("SELECT id, metadata FROM records")
-        for row in cursor:
-            yield self._row_to_record(row)
 
     def iter_batches(self, batch_size: int = 32) -> Generator[list[Record], None, None]:
         if batch_size < 1:
