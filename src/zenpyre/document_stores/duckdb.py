@@ -36,6 +36,10 @@ class BaseDuckDBDocumentStore(BaseDocumentStore, MultilineDisplayMixin):
         self._kwargs = kwargs
         self._conn = duckdb.connect(str(self._path), **kwargs)
 
+    def close(self) -> None:
+        logger.info("Closing DuckDB at %s", self._path)
+        self._conn.close()
+
     def delete(self, doc_id: str) -> None:
         self._conn.execute("DELETE FROM documents WHERE id = ?", [doc_id])
 
@@ -172,7 +176,7 @@ class DuckDBDocumentStore(BaseDuckDBDocumentStore):
         where = " AND ".join(conditions)
         rows = self._conn.execute(
             f"SELECT id, page_content, metadata FROM documents WHERE {where}",  # noqa: S608
-            [str(v) for v in metadata_filters.values()],
+            list(metadata_filters.values()),
         ).fetchall()
         return [self._row_to_doc(row) for row in rows]
 

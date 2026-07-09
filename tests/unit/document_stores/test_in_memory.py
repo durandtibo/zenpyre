@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator
 
 import pytest
 from langchain_core.documents import Document
@@ -13,8 +13,9 @@ from zenpyre.document_stores import InMemoryDocumentStore
 
 
 @pytest.fixture
-def store() -> InMemoryDocumentStore:
-    return InMemoryDocumentStore()
+def store() -> Generator[InMemoryDocumentStore, None, None]:
+    with InMemoryDocumentStore() as store:
+        yield store
 
 
 @pytest.fixture
@@ -489,3 +490,58 @@ def test_iter_batches_does_not_mutate_store(
     store.add_documents(docs)
     list(store.iter_batches(batch_size=2))
     assert store.count() == len(docs)
+
+
+# --- close ---
+
+
+def test_close_is_no_op(store: InMemoryDocumentStore) -> None:
+    store.close()
+    store.count()  # still usable after close
+
+
+def test_close_is_idempotent(store: InMemoryDocumentStore) -> None:
+    store.close()
+    store.close()  # should not raise
+
+
+def test_close_returns_none(store: InMemoryDocumentStore) -> None:
+    assert store.close() is None
+
+
+# --- context manager ---
+
+
+def test_context_manager_returns_self() -> None:
+    with InMemoryDocumentStore() as store:
+        assert isinstance(store, InMemoryDocumentStore)
+
+
+def test_context_manager_closes_on_normal_exit() -> None:
+    with InMemoryDocumentStore() as store:
+        store.add_documents([Document(id="1", page_content="hello", metadata={})])
+        assert store.count() == 1
+
+    assert store.count() == 1  # in-memory: still accessible after close
+
+
+def test_context_manager_closes_on_exception() -> None:
+    msg = "boom"
+    with pytest.raises(ValueError, match="boom"), InMemoryDocumentStore() as store:
+        raise ValueError(msg)
+
+    assert store.count() == 0
+
+
+def test_context_manager_usable_for_reads_and_writes() -> None:
+    with InMemoryDocumentStore() as store:
+        store.add_documents(
+            [
+                Document(id="1", page_content="hello", metadata={"author": "Alice"}),
+                Document(id="2", page_content="world", metadata={"author": "Bob"}),
+            ]
+        )
+        assert store.count() == 2
+        assert store.filter(author="Alice")[0].id == "1"
+        store.delete("1")
+        assert store.count() == 1

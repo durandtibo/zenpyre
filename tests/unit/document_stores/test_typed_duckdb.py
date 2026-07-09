@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator
 from typing import TYPE_CHECKING
 
 import pytest
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 if is_duckdb_available():
-    from duckdb import InvalidInputException
+    import duckdb
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -27,27 +27,32 @@ def store_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 @pytest.fixture
-def store() -> TypedDuckDBDocumentStore:
+def store() -> Generator[TypedDuckDBDocumentStore, None, None]:
     """In-memory store with no schema."""
-    return TypedDuckDBDocumentStore(":memory:")
+    with TypedDuckDBDocumentStore(":memory:") as store:
+        yield store
 
 
 @pytest.fixture
-def typed_store() -> TypedDuckDBDocumentStore:
+def typed_store() -> Generator[TypedDuckDBDocumentStore, None, None]:
     """In-memory store with a typed schema."""
-    return TypedDuckDBDocumentStore(
+    with TypedDuckDBDocumentStore(
         ":memory:",
         metadata_schema={"author": "VARCHAR", "year": "INTEGER", "category": "VARCHAR"},
-    )
+    ) as store:
+        yield store
 
 
 @pytest.fixture(scope="module")
-def store_read_only(store_path: Path, docs: list[Document]) -> TypedDuckDBDocumentStore:
+def store_read_only(
+    store_path: Path, docs: list[Document]
+) -> Generator[TypedDuckDBDocumentStore, None, None]:
     path = store_path / "data.duckdb"
     store = TypedDuckDBDocumentStore(path)
     store.add_documents(docs)
     store._conn.close()
-    return TypedDuckDBDocumentStore(path, read_only=True)
+    with TypedDuckDBDocumentStore(path, read_only=True) as store:
+        yield store
 
 
 @pytest.fixture(scope="module")
@@ -126,7 +131,7 @@ def test_add_documents_empty(store: TypedDuckDBDocumentStore) -> None:
 @duckdb_available
 def test_add_documents_when_read_only(store_read_only: TypedDuckDBDocumentStore) -> None:
     with pytest.raises(
-        InvalidInputException,
+        duckdb.InvalidInputException,
         match=r'Cannot execute statement of type "INSERT" on database "data" which is attached in read-only mode!',
     ):
         store_read_only.add_documents([Document(id="1", page_content="Original", metadata={})])
@@ -267,6 +272,24 @@ def test_filter_mixed_schema_and_extra_fields(typed_store: TypedDuckDBDocumentSt
     result = typed_store.filter(author="Alice", publisher="O'Reilly")
     assert len(result) == 1
     assert result[0].id == "1"
+
+
+@duckdb_available
+def test_filter_integer_typed_column(
+    typed_store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    typed_store.add_documents(docs)
+    result = typed_store.filter(year=2022)
+    assert len(result) == 1
+    assert result[0].id == "1"
+
+
+@duckdb_available
+def test_filter_integer_typed_column_no_match(
+    typed_store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    typed_store.add_documents(docs)
+    assert typed_store.filter(year=9999) == []
 
 
 # --- delete ---
@@ -699,3 +722,71 @@ def test_show_columns_info_output_contains_column_names(
 @duckdb_available
 def test_show_columns_info_returns_none(store: TypedDuckDBDocumentStore) -> None:
     assert store.show_columns_info() is None
+
+
+# --- close ---
+
+
+@duckdb_available
+def test_close_closes_underlying_connection(store: TypedDuckDBDocumentStore) -> None:
+    store.close()
+    with pytest.raises(duckdb.ConnectionException, match=r"Connection already closed!"):
+        store.count()
+
+
+@duckdb_available
+def test_close_is_idempotent(store: TypedDuckDBDocumentStore) -> None:
+    store.close()
+    store.close()  # should not raise
+
+
+@duckdb_available
+def test_close_returns_none(store: TypedDuckDBDocumentStore) -> None:
+    assert store.close() is None
+
+
+# --- context manager ---
+
+
+@duckdb_available
+def test_context_manager_returns_self() -> None:
+    with TypedDuckDBDocumentStore(":memory:") as store:
+        assert isinstance(store, TypedDuckDBDocumentStore)
+
+
+@duckdb_available
+def test_context_manager_closes_on_normal_exit() -> None:
+    with TypedDuckDBDocumentStore(":memory:") as store:
+        store.add_documents([Document(id="1", page_content="hello", metadata={})])
+        assert store.count() == 1
+
+    with pytest.raises(duckdb.ConnectionException, match=r"Connection already closed!"):
+        store.count()
+
+
+@duckdb_available
+def test_context_manager_closes_on_exception() -> None:
+    msg = "boom"
+    with (
+        pytest.raises(ValueError, match="boom"),
+        TypedDuckDBDocumentStore(":memory:") as store,
+    ):
+        raise ValueError(msg)
+
+    with pytest.raises(duckdb.ConnectionException, match=r"Connection already closed!"):
+        store.count()
+
+
+@duckdb_available
+def test_context_manager_usable_for_reads_and_writes() -> None:
+    with TypedDuckDBDocumentStore(":memory:") as store:
+        store.add_documents(
+            [
+                Document(id="1", page_content="hello", metadata={"author": "Alice"}),
+                Document(id="2", page_content="world", metadata={"author": "Bob"}),
+            ]
+        )
+        assert store.count() == 2
+        assert store.filter(author="Alice")[0].id == "1"
+        store.delete("1")
+        assert store.count() == 1

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterator
+    from typing import Self
 
     from langchain_core.documents import Document
 
@@ -25,6 +26,10 @@ class BaseDocumentStore(ABC):
 
     To implement a custom document store, subclass
     :class:`BaseDocumentStore` and implement all abstract methods.
+
+    Implementations are expected to support use as a context manager
+    (``with SomeDocumentStore(...) as store: ...``), which calls
+    :meth:`close` automatically on exit.
     """
 
     @abstractmethod
@@ -178,3 +183,20 @@ class BaseDocumentStore(ABC):
         Returns:
             The number of documents currently stored.
         """
+
+    @abstractmethod
+    def close(self) -> None:
+        r"""Close the store and release any underlying resources (e.g.
+        database connections, file handles).
+
+        Implementations should make repeated calls to ``close()``
+        safe (i.e. idempotent), since :meth:`__exit__` calls it
+        unconditionally and callers may also close a store manually
+        before using it as a context manager.
+        """
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, *exc_info: object) -> None:
+        self.close()
