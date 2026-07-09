@@ -141,6 +141,58 @@ def test_from_path_with_schema(store_path: Path) -> None:
         assert store.get("1").metadata["year"] == 2022
 
 
+def test_init_read_only_connection_with_existing_table_does_not_raise(
+    store_read_only: TypedSQLiteDocumentStore, docs: list[Document]
+) -> None:
+    """Constructing against a read-only connection should not raise when
+    the table already exists, since CREATE TABLE IF NOT EXISTS is a no-
+    op in that case and never attempts a write.
+
+    Note: this does NOT exercise the except sqlite3.OperationalError
+    branch itself (see test_init_read_only_connection_without_existing_table_swallows_operational_error
+    for that) — it just confirms the common case still works.
+    """
+    with store_read_only:
+        assert store_read_only.count() == len(docs)
+
+
+def test_init_read_only_connection_without_existing_table_swallows_operational_error(
+    store_path: Path,
+) -> None:
+    """When the docs table does NOT already exist, CREATE TABLE IF NOT
+    EXISTS must attempt an actual write. Against a read-only connection
+    this raises sqlite3.OperationalError, which __init__ must swallow
+    (per the comment: "assume the table already exists") rather than
+    propagate.
+
+    This is the test that actually exercises the except branch: if
+    someone removes the try/except around the CREATE TABLE call,
+    this test starts raising OperationalError and fails.
+    """
+    path = store_path / "no_table_yet.sqlite"
+    # Create the underlying file without ever creating the `docs`
+    # table, bypassing TypedSQLiteDocumentStore entirely.
+    raw_conn = sqlite3.connect(path)
+    raw_conn.execute("CREATE TABLE unrelated (x INTEGER)")
+    raw_conn.commit()
+    raw_conn.close()
+
+    # __init__ must not raise, even though the CREATE TABLE attempt
+    # inside it fails with OperationalError on this read-only
+    # connection (the `docs` table genuinely doesn't exist yet).
+    # Follow-on sanity check: since the table was never actually
+    # created, subsequent queries fail with "no such table" rather
+    # than silently returning empty results — confirming the except
+    # branch really did swallow a genuine failure rather than the
+    # table having been created some other way.
+    with (
+        TypedSQLiteDocumentStore.from_path(path, read_only=True) as store,
+        pytest.raises(sqlite3.OperationalError, match=r"no such table"),
+    ):
+        store.count()
+    store.close()
+
+
 # --- repr/str ---
 
 
