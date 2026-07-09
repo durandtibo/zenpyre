@@ -247,6 +247,22 @@ def test_filter_empty_store_returns_empty(store: DuckDBDocumentStore) -> None:
     assert store.filter(author="Alice") == []
 
 
+@duckdb_available
+def test_filter_integer_metadata_value(store: DuckDBDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
+    result = store.filter(year=2022)
+    assert len(result) == 1
+    assert result[0].id == "1"
+
+
+@duckdb_available
+def test_filter_integer_value_no_match_returns_empty(
+    store: DuckDBDocumentStore, docs: list[Document]
+) -> None:
+    store.add_documents(docs)
+    assert store.filter(year=9999) == []
+
+
 # --- delete ---
 
 

@@ -274,6 +274,24 @@ def test_filter_mixed_schema_and_extra_fields(typed_store: TypedDuckDBDocumentSt
     assert result[0].id == "1"
 
 
+@duckdb_available
+def test_filter_integer_typed_column(
+    typed_store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    typed_store.add_documents(docs)
+    result = typed_store.filter(year=2022)
+    assert len(result) == 1
+    assert result[0].id == "1"
+
+
+@duckdb_available
+def test_filter_integer_typed_column_no_match(
+    typed_store: TypedDuckDBDocumentStore, docs: list[Document]
+) -> None:
+    typed_store.add_documents(docs)
+    assert typed_store.filter(year=9999) == []
+
+
 # --- delete ---
 
 
