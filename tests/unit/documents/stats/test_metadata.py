@@ -34,9 +34,9 @@ def high_cardinality_docs() -> list[Document]:
     return [Document(id=str(i), page_content="x", metadata={"uid": f"uid-{i}"}) for i in range(10)]
 
 
-################################################
+###############################################
 #     Tests for compute_doc_metadata_stats     #
-################################################
+###############################################
 
 
 # --- Return type and non-mutation ---
@@ -160,6 +160,10 @@ def test_compute_doc_metadata_stats_no_metadata_docs() -> None:
 
 
 def test_compute_doc_metadata_stats_messy_docs(messy_docs: list[Document]) -> None:
+    # source values arrive in order: "a.pdf", None, "", 123.
+    # The sample (n_sample_values=3) fills up with "a.pdf", None, "" - by the
+    # time the new distinct value 123 arrives the cap is already reached, so
+    # it's excluded and the key is marked truncated.
     assert compute_doc_metadata_stats(messy_docs) == {
         "count": 5,
         "missing_metadata_count": 1,
@@ -181,8 +185,8 @@ def test_compute_doc_metadata_stats_messy_docs(messy_docs: list[Document]) -> No
                 "missing_in_docs": 1,
                 "value_types": ["NoneType", "int", "str"],
                 "none_or_empty_count": 2,
-                "unique_values_sample": ["", "a.pdf", 123],
-                "unique_values_sample_truncated": False,
+                "unique_values_sample": ["", None, "a.pdf"],
+                "unique_values_sample_truncated": True,
             },
         },
     }
@@ -194,8 +198,8 @@ def test_compute_doc_metadata_stats_messy_docs(messy_docs: list[Document]) -> No
 def test_compute_doc_metadata_stats_default_n_sample_values_caps_at_three(
     high_cardinality_docs: list[Document],
 ) -> None:
-    result = compute_doc_metadata_stats(high_cardinality_docs)
-    assert result == {
+    # Deterministic: first 3 distinct values encountered, in document order.
+    assert compute_doc_metadata_stats(high_cardinality_docs) == {
         "count": 10,
         "missing_metadata_count": 0,
         "avg_keys": 1,
@@ -208,12 +212,11 @@ def test_compute_doc_metadata_stats_default_n_sample_values_caps_at_three(
                 "missing_in_docs": 0,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
-                "unique_values_sample": result["per_key"]["uid"]["unique_values_sample"],
+                "unique_values_sample": ["uid-0", "uid-1", "uid-2"],
                 "unique_values_sample_truncated": True,
             },
         },
     }
-    assert len(result["per_key"]["uid"]["unique_values_sample"]) == 3
 
 
 def test_compute_doc_metadata_stats_n_sample_values_none_tracks_all(
@@ -286,8 +289,7 @@ def test_compute_doc_metadata_stats_n_sample_values_exact_boundary() -> None:
 
 def test_compute_doc_metadata_stats_n_sample_values_one_more_than_boundary() -> None:
     docs = [Document(id=str(i), page_content="x", metadata={"k": i}) for i in range(4)]
-    result = compute_doc_metadata_stats(docs, n_sample_values=3)
-    assert result == {
+    assert compute_doc_metadata_stats(docs, n_sample_values=3) == {
         "count": 4,
         "missing_metadata_count": 0,
         "avg_keys": 1,
@@ -300,12 +302,40 @@ def test_compute_doc_metadata_stats_n_sample_values_one_more_than_boundary() -> 
                 "missing_in_docs": 0,
                 "value_types": ["int"],
                 "none_or_empty_count": 0,
-                "unique_values_sample": result["per_key"]["k"]["unique_values_sample"],
+                "unique_values_sample": [0, 1, 2],
                 "unique_values_sample_truncated": True,
             },
         },
     }
-    assert len(result["per_key"]["k"]["unique_values_sample"]) == 3
+
+
+def test_compute_doc_metadata_stats_repeated_value_does_not_count_against_cap() -> None:
+    # The same value repeated should not itself trigger truncation - only a
+    # *new* distinct value arriving once the sample is full does.
+    docs = [
+        Document(id="1", page_content="x", metadata={"k": "a"}),
+        Document(id="2", page_content="y", metadata={"k": "a"}),
+        Document(id="3", page_content="z", metadata={"k": "a"}),
+        Document(id="4", page_content="w", metadata={"k": "a"}),
+    ]
+    assert compute_doc_metadata_stats(docs, n_sample_values=1) == {
+        "count": 4,
+        "missing_metadata_count": 0,
+        "avg_keys": 1,
+        "min_keys": 1,
+        "max_keys": 1,
+        "distinct_keys_seen": 1,
+        "per_key": {
+            "k": {
+                "present_in_docs": 4,
+                "missing_in_docs": 0,
+                "value_types": ["str"],
+                "none_or_empty_count": 0,
+                "unique_values_sample": ["a"],
+                "unique_values_sample_truncated": False,
+            },
+        },
+    }
 
 
 # --- Unhashable values ---
@@ -350,6 +380,31 @@ def test_compute_doc_metadata_stats_unhashable_value_with_n_sample_values_none()
                 "present_in_docs": 1,
                 "missing_in_docs": 0,
                 "value_types": ["list"],
+                "none_or_empty_count": 0,
+                "unique_values_sample": [],
+                "unique_values_sample_truncated": True,
+            },
+        },
+    }
+
+
+def test_compute_doc_metadata_stats_unhashable_non_container_value_marks_truncated() -> None:
+    # bytearray is unhashable but isn't a list/dict/set, so it falls through
+    # to the `values.add(value)` / `value not in values` calls, which raise
+    # TypeError and are caught to mark the key as truncated.
+    docs = [Document(id="1", page_content="x", metadata={"blob": bytearray(b"abc")})]
+    assert compute_doc_metadata_stats(docs) == {
+        "count": 1,
+        "missing_metadata_count": 0,
+        "avg_keys": 1,
+        "min_keys": 1,
+        "max_keys": 1,
+        "distinct_keys_seen": 1,
+        "per_key": {
+            "blob": {
+                "present_in_docs": 1,
+                "missing_in_docs": 0,
+                "value_types": ["bytearray"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": [],
                 "unique_values_sample_truncated": True,
@@ -434,8 +489,7 @@ def test_compute_doc_metadata_stats_thousand_docs() -> None:
         Document(id=str(i), page_content="x", metadata={"source": "x", "idx": i})
         for i in range(1000)
     ]
-    result = compute_doc_metadata_stats(docs)
-    assert result == {
+    assert compute_doc_metadata_stats(docs) == {
         "count": 1000,
         "missing_metadata_count": 0,
         "avg_keys": 2,
@@ -448,7 +502,7 @@ def test_compute_doc_metadata_stats_thousand_docs() -> None:
                 "missing_in_docs": 0,
                 "value_types": ["int"],
                 "none_or_empty_count": 0,
-                "unique_values_sample": result["per_key"]["idx"]["unique_values_sample"],
+                "unique_values_sample": [0, 1, 2],
                 "unique_values_sample_truncated": True,
             },
             "source": {
@@ -461,12 +515,11 @@ def test_compute_doc_metadata_stats_thousand_docs() -> None:
             },
         },
     }
-    assert len(result["per_key"]["idx"]["unique_values_sample"]) == 3
 
 
-######################################
+#####################################
 #     Tests for DocMetadataStats     #
-######################################
+#####################################
 
 
 def test_doc_metadata_stats_starts_at_zero() -> None:
@@ -515,8 +568,7 @@ def test_doc_metadata_stats_custom_n_sample_values_constructor() -> None:
     stats = DocMetadataStats(n_sample_values=1)
     stats.update(Document(id="1", page_content="x", metadata={"source": "a"}))
     stats.update(Document(id="2", page_content="y", metadata={"source": "b"}))
-    result = stats.to_dict()
-    assert result == {
+    assert stats.to_dict() == {
         "count": 2,
         "missing_metadata_count": 0,
         "avg_keys": 1,
@@ -529,9 +581,8 @@ def test_doc_metadata_stats_custom_n_sample_values_constructor() -> None:
                 "missing_in_docs": 0,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
-                "unique_values_sample": result["per_key"]["source"]["unique_values_sample"],
+                "unique_values_sample": ["a"],
                 "unique_values_sample_truncated": True,
             },
         },
     }
-    assert len(result["per_key"]["source"]["unique_values_sample"]) == 1
