@@ -257,6 +257,7 @@ def compute_doc_content_stats_exact(documents: Iterable[Document]) -> dict[str, 
         the length-based fields.
 
     Example:
+        ```pycon
         >>> from langchain_core.documents import Document
         >>> from zenpyre.documents.stats import compute_doc_content_stats_exact
         >>> docs = [
@@ -266,6 +267,8 @@ def compute_doc_content_stats_exact(documents: Iterable[Document]) -> dict[str, 
         >>> stats = compute_doc_content_stats_exact(docs)
         >>> stats["count"]
         2
+
+        ```
 
     See Also:
         ``compute_doc_stats_approx``: an approximate variant using a
