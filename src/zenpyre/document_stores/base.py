@@ -197,8 +197,8 @@ class BaseDocumentStore(ABC):
         r"""Close the store and release any underlying resources (e.g.
         database connections, file handles).
 
-        Implementations should make repeated calls to ``close()``
-        safe (i.e. idempotent), since :meth:`__exit__` calls it
+        Implementations should make repeated calls to ``close()`` safe
+        (i.e. idempotent), since :meth:`__exit__` calls it
         unconditionally and callers may also close a store manually
         before using it as a context manager.
         """
