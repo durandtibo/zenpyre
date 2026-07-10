@@ -88,7 +88,27 @@ def test_compute_doc_content_stats_exact_empty_generator() -> None:
         return
         yield  # pragma: no cover
 
-    assert compute_doc_content_stats_exact(gen())["count"] == 0
+    assert compute_doc_content_stats_exact(gen()) == {
+        "count": 0,
+        "total_chars": 0,
+        "avg_chars": 0,
+        "std_dev_chars": 0,
+        "min_chars": None,
+        "max_chars": None,
+        "min_doc_id": None,
+        "max_doc_id": None,
+        "p50_chars": None,
+        "p90_chars": None,
+        "p99_chars": None,
+        "empty_count": 0,
+        "whitespace_only_count": 0,
+        "none_or_non_str_content_count": 0,
+        "none_id_count": 0,
+        "missing_metadata_count": 0,
+        "duplicate_count": 0,
+        "duplicate_count_exact": True,
+        "percentiles_exact": True,
+    }
 
 
 # --- Core stats ---
