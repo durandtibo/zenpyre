@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class ApproxDocContentStats:
-    """Streaming document health/stats with APPROXIMATE duplicate
+    """Streaming document health/analysis with APPROXIMATE duplicate
     detection and APPROXIMATE percentiles.
 
     Accumulates statistics one document at a time via ``update``, so it
@@ -334,13 +334,13 @@ def compute_doc_content_stats_approx(
     Example:
         ```pycon
         >>> from langchain_core.documents import Document
-        >>> from zenpyre.documents.stats import compute_doc_content_stats_approx
+        >>> from zenpyre.documents.analysis import compute_doc_content_stats_approx
         >>> docs = [
         ...     Document(id="a", page_content="hello"),
         ...     Document(id="b", page_content="hello world"),
         ... ]
-        >>> stats = compute_doc_content_stats_approx(docs, expected_doc_count=1000)
-        >>> stats["count"]
+        >>> analysis = compute_doc_content_stats_approx(docs, expected_doc_count=1000)
+        >>> analysis["count"]
         2
 
         ```
