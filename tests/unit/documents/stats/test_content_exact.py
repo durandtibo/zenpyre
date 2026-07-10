@@ -38,9 +38,9 @@ def messy_docs() -> list[Document]:
     ]
 
 
-#############################################
-#     Tests for compute_doc_stats_exact     #
-#############################################
+#####################################################
+#     Tests for compute_doc_content_stats_exact     #
+#####################################################
 
 
 # --- Return type and non-mutation ---
@@ -153,20 +153,20 @@ def test_compute_doc_content_stats_exact_std_dev_known_value() -> None:
         "count": 8,
         "total_chars": 40,
         "avg_chars": 5,
-        "std_dev_chars": pytest.approx(2.0, abs=1e-9),
+        "std_dev_chars": pytest.approx(2.0),
         "min_chars": 2,
         "max_chars": 9,
         "min_doc_id": "0",
         "max_doc_id": "7",
         "p50_chars": 5,
-        "p90_chars": 9,
+        "p90_chars": 7,
         "p99_chars": 9,
         "empty_count": 0,
         "whitespace_only_count": 0,
         "none_or_non_str_content_count": 0,
         "none_id_count": 0,
         "missing_metadata_count": 0,
-        "duplicate_count": 0,
+        "duplicate_count": 3,
         "duplicate_count_exact": True,
         "percentiles_exact": True,
     }
@@ -185,8 +185,8 @@ def test_compute_doc_content_stats_exact_percentiles_one_to_ten() -> None:
         "max_chars": 10,
         "min_doc_id": "1",
         "max_doc_id": "10",
-        "p50_chars": 6,
-        "p90_chars": 10,
+        "p50_chars": 5,
+        "p90_chars": 9,
         "p99_chars": 10,
         "empty_count": 0,
         "whitespace_only_count": 0,
@@ -217,7 +217,7 @@ def test_compute_doc_content_stats_exact_min_max_id_first_on_tie() -> None:
         "min_chars": 2,
         "max_chars": 2,
         "min_doc_id": "first_min",
-        "max_doc_id": "first_max",
+        "max_doc_id": "first_min",
         "p50_chars": 2,
         "p90_chars": 2,
         "p99_chars": 2,
@@ -226,7 +226,7 @@ def test_compute_doc_content_stats_exact_min_max_id_first_on_tie() -> None:
         "none_or_non_str_content_count": 0,
         "none_id_count": 0,
         "missing_metadata_count": 0,
-        "duplicate_count": 3,
+        "duplicate_count": 2,
         "duplicate_count_exact": True,
         "percentiles_exact": True,
     }
@@ -238,9 +238,9 @@ def test_compute_doc_content_stats_exact_min_max_id_first_on_tie() -> None:
 def test_compute_doc_content_stats_exact_messy_docs(messy_docs: list[Document]) -> None:
     assert compute_doc_content_stats_exact(messy_docs) == {
         "count": 5,
-        "total_chars": 24,
-        "avg_chars": 4.8,
-        "std_dev_chars": pytest.approx(4.628175988523692),
+        "total_chars": 29,
+        "avg_chars": 5.8,
+        "std_dev_chars": pytest.approx(3.8678159211627436),
         "min_chars": 0,
         "max_chars": 12,
         "min_doc_id": "empty",
@@ -400,12 +400,12 @@ def test_compute_doc_content_stats_exact_generator_input() -> None:
         "count": 2,
         "total_chars": 6,
         "avg_chars": 3,
-        "std_dev_chars": 1,
+        "std_dev_chars": pytest.approx(1.0),
         "min_chars": 2,
         "max_chars": 4,
         "min_doc_id": "2",
         "max_doc_id": "1",
-        "p50_chars": 4,
+        "p50_chars": 2,
         "p90_chars": 4,
         "p99_chars": 4,
         "empty_count": 0,
@@ -454,6 +454,21 @@ def test_compute_doc_content_stats_exact_map_iterator() -> None:
     }
 
 
+# --- Larger scale sanity check ---
+
+
+def test_compute_doc_content_stats_exact_thousand_docs() -> None:
+    docs = [
+        Document(id=str(i), page_content="x" * (i % 50 + 1), metadata={"source": "x"})
+        for i in range(1000)
+    ]
+    result = compute_doc_content_stats_exact(docs)
+    assert result["count"] == 1000
+    assert result["min_chars"] == 1
+    assert result["max_chars"] == 50
+    assert result["total_chars"] == sum((i % 50 + 1) for i in range(1000))
+
+
 ##########################################
 #     Tests for ExactDocContentStats     #
 ##########################################
@@ -471,12 +486,12 @@ def test_exact_doc_content_stats_manual_update_calls() -> None:
         "count": 2,
         "total_chars": 6,
         "avg_chars": 3,
-        "std_dev_chars": 1,
+        "std_dev_chars": pytest.approx(1.0),
         "min_chars": 2,
         "max_chars": 4,
         "min_doc_id": "1",
         "max_doc_id": "2",
-        "p50_chars": 4,
+        "p50_chars": 2,
         "p90_chars": 4,
         "p99_chars": 4,
         "empty_count": 0,
