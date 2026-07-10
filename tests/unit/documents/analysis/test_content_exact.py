@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from langchain_core.documents import Document
 
-from zenpyre.documents.stats import (
+from zenpyre.documents.analysis import (
     ExactDocContentStats,
     compute_doc_content_stats_exact,
 )
@@ -111,7 +111,7 @@ def test_compute_doc_content_stats_exact_empty_generator() -> None:
     }
 
 
-# --- Core stats ---
+# --- Core analysis ---
 
 
 def test_compute_doc_content_stats_exact_core_stats(docs: list[Document]) -> None:

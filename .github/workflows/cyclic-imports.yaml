@@ -45,6 +45,7 @@ jobs:
       - name: check zenpyre.documents
         run: |
           python -c "from zenpyre import documents"
+          python -c "from zenpyre.documents import analysis"
 
       - name: check zenpyre.embeddings
         run: |

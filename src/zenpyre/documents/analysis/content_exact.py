@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class ExactDocContentStats:
-    """Streaming document health/stats with EXACT duplicate detection
+    """Streaming document health/analysis with EXACT duplicate detection
     and EXACT percentiles.
 
     Accumulates statistics one document at a time via ``update``, so it
@@ -259,13 +259,13 @@ def compute_doc_content_stats_exact(documents: Iterable[Document]) -> dict[str, 
     Example:
         ```pycon
         >>> from langchain_core.documents import Document
-        >>> from zenpyre.documents.stats import compute_doc_content_stats_exact
+        >>> from zenpyre.documents.analysis import compute_doc_content_stats_exact
         >>> docs = [
         ...     Document(id="a", page_content="hello"),
         ...     Document(id="b", page_content="hello world"),
         ... ]
-        >>> stats = compute_doc_content_stats_exact(docs)
-        >>> stats["count"]
+        >>> analysis = compute_doc_content_stats_exact(docs)
+        >>> analysis["count"]
         2
 
         ```
