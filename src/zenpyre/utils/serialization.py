@@ -18,9 +18,11 @@ def default_serialize(value: Any) -> Any:
     messages, which are Pydantic models) via
     ``model_dump(mode="json")``, converts dataclass instances via
     ``dataclasses.asdict`` followed by recursive serialization of
-    their fields, and recurses into lists/tuples/dicts. Anything
-    else is returned unchanged, on the assumption it's already a
-    plain type (``str``, ``int``, ``bool``, ``None``, ...).
+    their fields (so a Pydantic model or further dataclass nested
+    inside a dataclass field is still converted correctly), and
+    recurses into lists/tuples/dicts. Anything else is returned
+    unchanged, on the assumption it's already a plain type (``str``,
+    ``int``, ``bool``, ``None``, ...).
 
     Used as the default value of :class:`RecordingRunnable`'s
     ``serializer`` argument, applied to the whole assembled metadata
@@ -34,13 +36,21 @@ def default_serialize(value: Any) -> Any:
 
     Example:
         ```pycon
+        >>> import dataclasses
         >>> from pydantic import BaseModel
         >>> from zenpyre.utils.serialization import default_serialize
         >>> class Answer(BaseModel):
         ...     value: int
         ...
+        >>> @dataclasses.dataclass
+        ... class Point:
+        ...     x: int
+        ...     y: int
+        ...
         >>> default_serialize({"result": Answer(value=5), "items": [Answer(value=1), "x"]})
         {'result': {'value': 5}, 'items': [{'value': 1}, 'x']}
+        >>> default_serialize(Point(x=1, y=2))
+        {'x': 1, 'y': 2}
 
         ```
     """
