@@ -7,6 +7,7 @@ __all__ = [
     "ExactDocContentStats",
     "compute_doc_content_stats_approx",
     "compute_doc_content_stats_exact",
+    "print_doc_content_stats",
 ]
 
 from zenpyre.documents.stats.content_approx import (
@@ -17,3 +18,4 @@ from zenpyre.documents.stats.content_exact import (
     ExactDocContentStats,
     compute_doc_content_stats_exact,
 )
+from zenpyre.documents.stats.content_print import print_doc_content_stats
