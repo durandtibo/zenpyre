@@ -123,7 +123,7 @@ class ApproxDocContentStats:
         if doc_id is None:
             self.none_id_count += 1
 
-        content = getattr(doc, "page_content", None)
+        content = doc.page_content
         if not isinstance(content, str):
             self.none_or_non_str_content_count += 1
             content = ""
