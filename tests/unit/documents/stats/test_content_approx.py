@@ -97,7 +97,29 @@ def test_compute_doc_content_stats_approx_empty_generator() -> None:
         return
         yield  # pragma: no cover
 
-    assert compute_doc_content_stats_approx(gen())["count"] == 0
+    assert compute_doc_content_stats_approx(gen()) == {
+        "count": 0,
+        "total_chars": 0,
+        "avg_chars": 0,
+        "std_dev_chars": 0,
+        "min_chars": None,
+        "max_chars": None,
+        "min_doc_id": None,
+        "max_doc_id": None,
+        "p50_chars_approx": None,
+        "p90_chars_approx": None,
+        "p99_chars_approx": None,
+        "empty_count": 0,
+        "whitespace_only_count": 0,
+        "none_or_non_str_content_count": 0,
+        "none_id_count": 0,
+        "missing_metadata_count": 0,
+        "approx_duplicate_count": 0,
+        "duplicate_count_exact": False,
+        "percentiles_exact": False,
+        "bloom_filter_fp_rate": 0.01,
+        "reservoir_sample_size": 0,
+    }
 
 
 # --- Core stats (exact fields: count/total/avg/min/max/doc-ids) ---
