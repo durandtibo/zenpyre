@@ -332,7 +332,9 @@ def compute_doc_content_stats_approx(
         the length-based fields.
 
     Example:
+        ```pycon
         >>> from langchain_core.documents import Document
+        >>> from zenpyre.documents.stats import compute_doc_content_stats_approx
         >>> docs = [
         ...     Document(id="a", page_content="hello"),
         ...     Document(id="b", page_content="hello world"),
@@ -340,6 +342,8 @@ def compute_doc_content_stats_approx(
         >>> stats = compute_doc_content_stats_approx(docs, expected_doc_count=1000)
         >>> stats["count"]
         2
+
+        ```
 
     See Also:
         ``compute_doc_content_stats_exact``: an exact variant using a
