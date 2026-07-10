@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from langchain_core.documents import Document
 
-from zenpyre.documents.stats import (
+from zenpyre.documents.analysis import (
     ApproxDocContentStats,
     compute_doc_content_stats_approx,
 )
@@ -122,7 +122,7 @@ def test_compute_doc_content_stats_approx_empty_generator() -> None:
     }
 
 
-# --- Core stats (exact fields: count/total/avg/min/max/doc-ids) ---
+# --- Core analysis (exact fields: count/total/avg/min/max/doc-ids) ---
 
 
 def test_compute_doc_content_stats_approx_core_exact_fields(docs: list[Document]) -> None:

@@ -7,8 +7,8 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from zenpyre.documents.stats import print_doc_content_stats
-from zenpyre.documents.stats.content_print import (
+from zenpyre.documents.analysis import print_doc_content_stats
+from zenpyre.documents.analysis.content_print import (
     _build_approx_footnote_items,
     _build_bar_chart_items,
     _build_doc_ids_grid,

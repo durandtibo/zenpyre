@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class DocMetadataStats:
-    """Streaming document metadata health/stats.
+    """Streaming document metadata health/analysis.
 
     Accumulates statistics one document at a time via ``update``, so it
     can be fed from a list, a generator, or any other iterable without
@@ -240,13 +240,13 @@ def compute_doc_metadata_stats(
     Example:
         ```pycon
         >>> from langchain_core.documents import Document
-        >>> from zenpyre.documents.stats import compute_doc_metadata_stats
+        >>> from zenpyre.documents.analysis import compute_doc_metadata_stats
         >>> docs = [
         ...     Document(page_content="a", metadata={"source": "a.pdf"}),
         ...     Document(page_content="b", metadata={"source": "b.pdf", "page": 1}),
         ... ]
-        >>> stats = compute_doc_metadata_stats(docs)
-        >>> stats["count"]
+        >>> analysis = compute_doc_metadata_stats(docs)
+        >>> analysis["count"]
         2
 
         ```

@@ -178,7 +178,7 @@ def _build_stats_table(
     non-zero are highlighted in yellow, both the label and the value.
 
     Args:
-        stats: The full stats report dict (as returned by
+        stats: The full analysis report dict (as returned by
             ``compute_doc_content_stats_exact`` or
             ``compute_doc_content_stats_approx``).
         is_exact: Whether the report used exact (``True``) or
@@ -189,7 +189,7 @@ def _build_stats_table(
         p_suffix: Either ``""`` (exact reports, keys like
             ``"p50_chars"``) or ``"_approx"`` (approximate reports,
             keys like ``"p50_chars_approx"``), used to look up the
-            correct percentile keys in ``stats``.
+            correct percentile keys in ``analysis``.
         dup_key: The dict key under which the duplicate count is
             stored — ``"duplicate_count"`` for exact reports or
             ``"approx_duplicate_count"`` for approximate reports.
@@ -202,9 +202,9 @@ def _build_stats_table(
         one data-quality check had a non-zero count.
 
     Examples:
-        >>> stats = {"avg_chars": 5, "empty_count": 0, "duplicate_count": 0}
+        >>> analysis = {"avg_chars": 5, "empty_count": 0, "duplicate_count": 0}
         >>> table, any_issues = _build_stats_table(
-        ...     stats, is_exact=True, p_suffix="", dup_key="duplicate_count", count=10
+        ...     analysis, is_exact=True, p_suffix="", dup_key="duplicate_count", count=10
         ... )
         >>> any_issues
         False
@@ -258,10 +258,10 @@ def _build_overview_line(stats: dict[str, Any], count: int) -> Text:
     report.
 
     Args:
-        stats: The full stats report dict. Only ``total_chars`` is read
+        stats: The full analysis report dict. Only ``total_chars`` is read
             from it.
         count: Total document count, shown as the first part of the
-            line (passed separately from ``stats`` since callers
+            line (passed separately from ``analysis`` since callers
             already need to compute/validate it, e.g. for the empty-
             input early return).
 
@@ -288,7 +288,7 @@ def _build_doc_ids_grid(stats: dict[str, Any]) -> Table:
     are visible without cluttering the table's Min/Max rows.
 
     Args:
-        stats: The full stats report dict. Reads ``min_doc_id`` and
+        stats: The full analysis report dict. Reads ``min_doc_id`` and
             ``max_doc_id``; missing keys render as an empty string.
 
     Returns:
@@ -335,7 +335,7 @@ def _build_bar_chart_items(stats: dict[str, Any], p_suffix: str) -> list[Text]:
     """Build the "length shape" schematic bar chart section.
 
     Collects the available quantile markers (min, p50, p90, p99, max)
-    from ``stats``, and if at least two *distinct* values are present,
+    from ``analysis``, and if at least two *distinct* values are present,
     renders a 5-row block-character bar chart via
     ``_render_bar_chart_rows`` plus a min/max axis label line beneath
     it. Values that are missing (``None``) are excluded from the point
@@ -344,7 +344,7 @@ def _build_bar_chart_items(stats: dict[str, Any], p_suffix: str) -> list[Text]:
     to draw, so the chart is skipped entirely.
 
     Args:
-        stats: The full stats report dict.
+        stats: The full analysis report dict.
         p_suffix: Either ``""`` or ``"_approx"``, used to look up the
             correct percentile keys (mirrors the parameter of the same
             name in ``_build_stats_table``).
@@ -359,14 +359,14 @@ def _build_bar_chart_items(stats: dict[str, Any], p_suffix: str) -> list[Text]:
         from).
 
     Examples:
-        >>> stats = {"min_chars": 1, "max_chars": 10, "p50_chars": 5}
-        >>> items = _build_bar_chart_items(stats, p_suffix="")
+        >>> analysis = {"min_chars": 1, "max_chars": 10, "p50_chars": 5}
+        >>> items = _build_bar_chart_items(analysis, p_suffix="")
         >>> len(items) > 0
         True
         >>> _build_bar_chart_items({"min_chars": 5, "max_chars": 5}, p_suffix="")
         []
-        >>> stats = {"min_chars": 5, "max_chars": 5, "p50_chars": 5, "p90_chars": 5, "p99_chars": 5}
-        >>> _build_bar_chart_items(stats, p_suffix="")
+        >>> analysis = {"min_chars": 5, "max_chars": 5, "p50_chars": 5, "p90_chars": 5, "p99_chars": 5}
+        >>> _build_bar_chart_items(analysis, p_suffix="")
         []
     """
     min_chars = stats.get("min_chars")
@@ -401,7 +401,7 @@ def _build_approx_footnote_items(
     approximate to caveat), so this returns an empty list.
 
     Args:
-        stats: The full stats report dict. Reads
+        stats: The full analysis report dict. Reads
             ``bloom_filter_fp_rate`` and ``reservoir_sample_size``.
         is_exact: Whether the report used exact computation. If
             ``True``, no footnote is produced.
@@ -415,8 +415,8 @@ def _build_approx_footnote_items(
         or an empty list if ``is_exact`` is ``True``.
 
     Examples:
-        >>> stats = {"bloom_filter_fp_rate": 0.01, "reservoir_sample_size": 100}
-        >>> items = _build_approx_footnote_items(stats, is_exact=False, count=100)
+        >>> analysis = {"bloom_filter_fp_rate": 0.01, "reservoir_sample_size": 100}
+        >>> items = _build_approx_footnote_items(analysis, is_exact=False, count=100)
         >>> len(items)
         1
         >>> _build_approx_footnote_items({}, is_exact=True, count=10)
@@ -442,7 +442,7 @@ def print_doc_content_stats(
     title: str = "Document Content Stats",
     console: Console | None = None,
 ) -> None:
-    """Render a document-content-stats report (from
+    """Render a document-content-analysis report (from
     ``compute_doc_content_stats_exact`` or
     ``compute_doc_content_stats_approx``) as a single wide table, with
     one row per metric, followed by a schematic length-distribution bar
@@ -478,7 +478,7 @@ def print_doc_content_stats(
         None. Output is printed directly to ``console``.
 
     Examples:
-        >>> stats = {
+        >>> analysis = {
         ...     "count": 2, "total_chars": 10, "avg_chars": 5,
         ...     "std_dev_chars": 1, "min_chars": 4, "max_chars": 6,
         ...     "min_doc_id": "a", "max_doc_id": "b",
@@ -488,7 +488,7 @@ def print_doc_content_stats(
         ...     "missing_metadata_count": 0, "duplicate_count": 0,
         ...     "duplicate_count_exact": True, "percentiles_exact": True,
         ... }
-        >>> print_doc_content_stats(stats)  # doctest: +SKIP
+        >>> print_doc_content_stats(analysis)  # doctest: +SKIP
     """
     console = console or get_console()
 
