@@ -29,8 +29,8 @@ class Answer(BaseModel):
 
 class FakeChatModel:
     """Minimal stand-in for BaseChatModel: only implements
-    with_structured_output, returning a fixed dict shaped like the
-    real ``include_raw=True`` contract."""
+    with_structured_output, returning a fixed dict shaped like the real
+    ``include_raw=True`` contract."""
 
     def __init__(
         self,
