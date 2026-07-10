@@ -21,10 +21,26 @@ jobs:
         run: |
           python -c "import zenpyre"
 
+      - name: check zenpyre.agents
+        run: |
+          python -c "from zenpyre import agents"
+
+      - name: check zenpyre.chat_models
+        run: |
+          python -c "from zenpyre import chat_models"
+
+      - name: check zenpyre.data_processors
+        run: |
+          python -c "from zenpyre import data_processors"
+
       - name: check zenpyre.document_loaders
         run: |
           python -c "from zenpyre import document_loaders"
           python -c "from zenpyre.document_loaders import factory"
+
+      - name: check zenpyre.document_stores
+        run: |
+          python -c "from zenpyre import document_stores"
 
       - name: check zenpyre.documents
         run: |
@@ -35,9 +51,21 @@ jobs:
           python -c "from zenpyre import embeddings"
           python -c "from zenpyre.embeddings import factory"
 
+      - name: check zenpyre.ingestors
+        run: |
+          python -c "from zenpyre import ingestors"
+
+      - name: check zenpyre.record_stores
+        run: |
+          python -c "from zenpyre import record_stores"
+
       - name: check zenpyre.records
         run: |
           python -c "from zenpyre import records"
+
+      - name: check zenpyre.runnables
+        run: |
+          python -c "from zenpyre import runnables"
 
       - name: check zenpyre.testing
         run: |
