@@ -387,13 +387,29 @@ def test_approx_doc_content_stats_manual_update_calls() -> None:
     stats = ApproxDocContentStats(reservoir_size=FULL_RESERVOIR)
     stats.update(Document(id="1", page_content="aa", metadata={"source": "x"}))
     stats.update(Document(id="2", page_content="bbbb", metadata={"source": "x"}))
-    result = stats.to_dict()
-    assert result["count"] == 2
-    assert result["avg_chars"] == 3
-    assert result["min_doc_id"] == "1"
-    assert result["max_doc_id"] == "2"
-    assert result["p50_chars_approx"] == 2
-    assert result["p90_chars_approx"] == 4
+    assert stats.to_dict() == {
+        "count": 2,
+        "total_chars": 6,
+        "avg_chars": 3,
+        "std_dev_chars": pytest.approx(1.0),
+        "min_chars": 2,
+        "max_chars": 4,
+        "min_doc_id": "1",
+        "max_doc_id": "2",
+        "p50_chars_approx": 2,
+        "p90_chars_approx": 4,
+        "p99_chars_approx": 4,
+        "empty_count": 0,
+        "whitespace_only_count": 0,
+        "none_or_non_str_content_count": 0,
+        "none_id_count": 0,
+        "missing_metadata_count": 0,
+        "approx_duplicate_count": 0,
+        "duplicate_count_exact": False,
+        "percentiles_exact": False,
+        "bloom_filter_fp_rate": 0.01,
+        "reservoir_sample_size": 2,
+    }
 
 
 def test_approx_doc_content_stats_to_dict_is_idempotent() -> None:
@@ -404,7 +420,29 @@ def test_approx_doc_content_stats_to_dict_is_idempotent() -> None:
 
 def test_approx_doc_content_stats_accepts_prebuilt_bloom_filter() -> None:
     bloom = BloomFilter(expected_items=10, fp_rate=0.001)
-    stats = ApproxDocContentStats(_bloom=bloom)
+    stats = ApproxDocContentStats(_bloom=bloom, reservoir_size=FULL_RESERVOIR)
     stats.update(Document(id="1", page_content="abc", metadata={"source": "x"}))
     stats.update(Document(id="2", page_content="abc", metadata={"source": "x"}))
-    assert stats.to_dict()["approx_duplicate_count"] == 1
+    assert stats.to_dict() == {
+        "count": 2,
+        "total_chars": 6,
+        "avg_chars": 3,
+        "std_dev_chars": 0,
+        "min_chars": 3,
+        "max_chars": 3,
+        "min_doc_id": "1",
+        "max_doc_id": "1",
+        "p50_chars_approx": 3,
+        "p90_chars_approx": 3,
+        "p99_chars_approx": 3,
+        "empty_count": 0,
+        "whitespace_only_count": 0,
+        "none_or_non_str_content_count": 0,
+        "none_id_count": 0,
+        "missing_metadata_count": 0,
+        "approx_duplicate_count": 1,
+        "duplicate_count_exact": False,
+        "percentiles_exact": False,
+        "bloom_filter_fp_rate": 0.01,  # note: dataclass default field, NOT bloom's own fp_rate
+        "reservoir_sample_size": 2,
+    }
