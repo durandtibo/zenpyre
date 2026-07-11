@@ -474,7 +474,7 @@ def test_subclass_field_without_default_does_not_raise_at_class_definition() -> 
 def test_extra_must_be_passed_by_keyword() -> None:
     """Extra is keyword-only, so passing it positionally must fail."""
     with pytest.raises(TypeError):
-        DummyConfig("a", {"x": 1})  # type: ignore[misc]
+        DummyConfig("a", {"x": 1})
 
 
 # --- __hash__ shadowing guard (regression coverage) ---

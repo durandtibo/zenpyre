@@ -6,7 +6,7 @@ from unittest.mock import patch
 import pytest
 from coola.hashing import hash_object
 
-from zenpyre.utils.config import BaseConfig
+from zenpyre.utils.config import MISSING, BaseConfig
 
 MODULE = "zenpyre.utils.config.base"
 
@@ -16,12 +16,20 @@ MODULE = "zenpyre.utils.config.base"
 
 
 class SimpleConfig(BaseConfig):
-    """A minimal concrete subclass implementing only to_kwargs,
+    """A minimal concrete subclass implementing to_kwargs and get_value,
     mirroring the pattern shown in BaseConfig's own class docstring."""
 
     def __init__(self, model: str, extra: dict[str, Any] | None = None) -> None:
         self.model = model
         self.extra = extra or {}
+
+    def get_value(self, name: str, default: Any = MISSING) -> Any:
+        kwargs = self.to_kwargs()
+        if name in kwargs:
+            return kwargs[name]
+        if default is not MISSING:
+            return default
+        raise KeyError(name)
 
     def to_kwargs(self) -> dict[str, Any]:
         return {"model": self.model, **self.extra}
@@ -35,6 +43,14 @@ class WrapperConfig(BaseConfig):
         self.inner = inner
         self.label = label
 
+    def get_value(self, name: str, default: Any = MISSING) -> Any:
+        kwargs = self.to_kwargs()
+        if name in kwargs:
+            return kwargs[name]
+        if default is not MISSING:
+            return default
+        raise KeyError(name)
+
     def to_kwargs(self) -> dict[str, Any]:
         return {"inner": self.inner, "label": self.label}
 
@@ -45,6 +61,14 @@ class ListWrapperConfig(BaseConfig):
 
     def __init__(self, items: list[Any]) -> None:
         self.items = items
+
+    def get_value(self, name: str, default: Any = MISSING) -> Any:
+        kwargs = self.to_kwargs()
+        if name in kwargs:
+            return kwargs[name]
+        if default is not MISSING:
+            return default
+        raise KeyError(name)
 
     def to_kwargs(self) -> dict[str, Any]:
         return {"items": self.items}
@@ -62,7 +86,7 @@ def config() -> SimpleConfig:
 
 def test_base_config_is_abstract() -> None:
     with pytest.raises(TypeError):
-        BaseConfig()  # type: ignore[abstract]
+        BaseConfig()
 
 
 def test_subclass_is_instance_of_base_config(config: SimpleConfig) -> None:
@@ -71,10 +95,28 @@ def test_subclass_is_instance_of_base_config(config: SimpleConfig) -> None:
 
 def test_subclass_without_to_kwargs_cannot_be_instantiated() -> None:
     class Incomplete(BaseConfig):
+        def get_value(self, name: str, default: Any = MISSING) -> Any:  # noqa: ARG002
+            return getattr(self, name)
+
+    with pytest.raises(TypeError):
+        Incomplete()
+
+
+def test_subclass_without_get_value_cannot_be_instantiated() -> None:
+    class Incomplete(BaseConfig):
+        def to_kwargs(self) -> dict[str, Any]:
+            return {}
+
+    with pytest.raises(TypeError):
+        Incomplete()
+
+
+def test_subclass_without_either_abstract_method_cannot_be_instantiated() -> None:
+    class Incomplete(BaseConfig):
         pass
 
     with pytest.raises(TypeError):
-        Incomplete()  # type: ignore[abstract]
+        Incomplete()
 
 
 # --- to_kwargs ---
@@ -90,7 +132,36 @@ def test_to_kwargs_includes_extra_fields() -> None:
 
 
 def test_to_kwargs_returns_plain_dict(config: SimpleConfig) -> None:
-    assert type(config.to_kwargs()) is dict
+    assert isinstance(config.to_kwargs(), dict)
+
+
+# --- get_value ---
+
+
+def test_get_value_returns_field(config: SimpleConfig) -> None:
+    assert config.get_value("model") == "gpt-4"
+
+
+def test_get_value_returns_extra_entry() -> None:
+    config = SimpleConfig(model="gpt-4", extra={"temperature": 0.2})
+    assert config.get_value("temperature") == 0.2
+
+
+def test_get_value_missing_key_raises_key_error(config: SimpleConfig) -> None:
+    with pytest.raises(KeyError):
+        config.get_value("missing_key")
+
+
+def test_get_value_missing_key_with_default_returns_default(config: SimpleConfig) -> None:
+    assert config.get_value("missing_key", default=42) == 42
+
+
+def test_get_value_missing_key_with_none_default_does_not_raise(config: SimpleConfig) -> None:
+    assert config.get_value("missing_key", default=None) is None
+
+
+def test_get_value_present_field_ignores_default(config: SimpleConfig) -> None:
+    assert config.get_value("model", default="unused") == "gpt-4"
 
 
 # --- cache_key: basic behavior ---

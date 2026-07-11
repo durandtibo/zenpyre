@@ -14,20 +14,26 @@ MISSING = object()
 
 
 class BaseConfig(ABC):
-    """Define the interface for chat model configurations.
+    """Define the interface shared by all configuration classes.
 
-    Concrete subclasses only need to implement :meth:`to_kwargs`;
-    :meth:`cache_key` is derived from it automatically.
+    Concrete subclasses only need to implement :meth:`to_kwargs` and
+    :meth:`get_value`; :meth:`cache_key` is derived from
+    :meth:`to_kwargs` automatically.
 
     Example:
         ```pycon
-        >>> from zenpyre.utils.config import BaseConfig
+        >>> from zenpyre.utils.config import BaseConfig, MISSING
         >>> class ChatModelConfig(BaseConfig):
         ...     def __init__(self, model: str, temperature: float | None = None):
         ...         self.model = model
         ...         self.temperature = temperature
         ...     def get_value(self, name: str, default: Any = MISSING) -> Any:
-        ...         return getattr(self, name)
+        ...         kwargs = self.to_kwargs()
+        ...         if name in kwargs:
+        ...             return kwargs[name]
+        ...         if default is not MISSING:
+        ...             return default
+        ...         raise KeyError(name)
         ...     def to_kwargs(self) -> dict:
         ...         return {"model": self.model, "temperature": self.temperature}
         ...
@@ -38,25 +44,19 @@ class BaseConfig(ABC):
         ```
     """
 
-    # @abstractmethod
+    @abstractmethod
     def get_value(self, name: str, default: Any = MISSING) -> Any:
-        """Get the value of a dataclass field (or ``extra`` entry) by
-        name.
-
-        Checks this config's own dataclass fields first (via ``getattr``,
-        without needing to build the full :meth:`to_kwargs` dict just for
-        a single lookup), then falls back to ``extra`` for keys that only
-        live there.
+        """Get the value of a configuration field by name.
 
         Args:
-            name: The name of the field (or ``extra`` key) to look up.
+            name: The name of the field to look up.
             default: The value to return if ``name`` is not present.
                 If omitted, a missing ``name`` raises ``KeyError``
-                instead. Since ``None`` is a valid field value, omitting
-                ``default`` is the only way to distinguish "not present"
-                from "present but set to ``None``" — passing
-                ``default=None`` explicitly means a missing field
-                silently returns ``None`` instead of raising.
+                instead. Since ``None`` is a valid field value,
+                omitting ``default`` is the only way to distinguish
+                "not present" from "present but set to ``None``" —
+                passing ``default=None`` explicitly means a missing
+                field silently returns ``None`` instead of raising.
 
         Returns:
             The value associated with ``name``, or ``default`` if not
@@ -68,13 +68,25 @@ class BaseConfig(ABC):
 
         Example:
             ```pycon
-            >>> from zenpyre.chat_models import ChatModelConfig
-            >>> config = ChatModelConfig(model="gpt-4", extra={"temperature": 0.2})
-            >>> config.get_value("model")
+            >>> from zenpyre.utils.config import BaseConfig, MISSING
+            >>> class ChatModelConfig(BaseConfig):
+            ...     def __init__(self, model: str, temperature: float | None = None):
+            ...         self.model = model
+            ...         self.temperature = temperature
+            ...     def get_value(self, name: str, default: Any = MISSING) -> Any:
+            ...         kwargs = self.to_kwargs()
+            ...         if name in kwargs:
+            ...             return kwargs[name]
+            ...         if default is not MISSING:
+            ...             return default
+            ...         raise KeyError(name)
+            ...     def to_kwargs(self) -> dict:
+            ...         return {"model": self.model, "temperature": self.temperature}
+            ...
+            >>> cfg = ChatModelConfig(model="gpt-4", temperature=0.2)
+            >>> cfg.get_value("model")
             'gpt-4'
-            >>> config.get_value("temperature")
-            0.2
-            >>> config.get_value("missing_key", default=42)
+            >>> cfg.get_value("missing_key", default=42)
             42
 
             ```
@@ -95,13 +107,18 @@ class BaseConfig(ABC):
 
         Example:
             ```pycon
-            >>> from zenpyre.utils.config import BaseConfig
+            >>> from zenpyre.utils.config import BaseConfig, MISSING
             >>> class ChatModelConfig(BaseConfig):
             ...     def __init__(self, model: str, temperature: float | None = None):
             ...         self.model = model
             ...         self.temperature = temperature
             ...     def get_value(self, name: str, default: Any = MISSING) -> Any:
-            ...         return getattr(self, name)
+            ...         kwargs = self.to_kwargs()
+            ...         if name in kwargs:
+            ...             return kwargs[name]
+            ...         if default is not MISSING:
+            ...             return default
+            ...         raise KeyError(name)
             ...     def to_kwargs(self) -> dict:
             ...         return {"model": self.model, "temperature": self.temperature}
             ...
@@ -145,13 +162,18 @@ class BaseConfig(ABC):
 
         Example:
             ```pycon
-            >>> from zenpyre.utils.config import BaseConfig
+            >>> from zenpyre.utils.config import BaseConfig, MISSING
             >>> class ChatModelConfig(BaseConfig):
             ...     def __init__(self, model: str, temperature: float | None = None):
             ...         self.model = model
             ...         self.temperature = temperature
             ...     def get_value(self, name: str, default: Any = MISSING) -> Any:
-            ...         return getattr(self, name)
+            ...         kwargs = self.to_kwargs()
+            ...         if name in kwargs:
+            ...             return kwargs[name]
+            ...         if default is not MISSING:
+            ...             return default
+            ...         raise KeyError(name)
             ...     def to_kwargs(self) -> dict:
             ...         return {"model": self.model, "temperature": self.temperature}
             ...
