@@ -1,4 +1,5 @@
 ::: zenpyre.utils
+::: zenpyre.utils.config
 ::: zenpyre.utils.dataclass_io
 ::: zenpyre.utils.duckdb
 ::: zenpyre.utils.fallback

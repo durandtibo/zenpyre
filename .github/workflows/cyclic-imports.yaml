@@ -80,6 +80,7 @@ jobs:
       - name: check zenpyre.utils
         run: |
           python -c "from zenpyre import utils"
+          python -c "from zenpyre.utils import config"
           python -c "from zenpyre.utils import fallback"
           python -c "from zenpyre.utils import imports"
           python -c "from zenpyre.utils import rich"
