@@ -11,7 +11,7 @@ from langchain_core.documents import Document
 
 from zenpyre.utils.imports import check_faker, is_faker_available
 
-if TYPE_CHECKING or is_faker_available():
+if TYPE_CHECKING or is_faker_available():  # pragma: no cover
     import faker
 
 __all__ = ["generate_fake_documents"]

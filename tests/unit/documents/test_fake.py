@@ -6,6 +6,7 @@ import pytest
 from langchain_core.documents import Document
 
 from zenpyre.documents.fake import generate_fake_documents
+from zenpyre.testing.fixtures import faker_available
 
 MODULE = "zenpyre.documents.fake"
 
@@ -17,25 +18,30 @@ MODULE = "zenpyre.documents.fake"
 # --- basic generation ---
 
 
+@faker_available
 def test_generate_fake_documents_default_count() -> None:
     docs = generate_fake_documents()
     assert len(docs) == 5
 
 
+@faker_available
 def test_generate_fake_documents_custom_count() -> None:
     docs = generate_fake_documents(n=10)
     assert len(docs) == 10
 
 
+@faker_available
 def test_generate_fake_documents_zero_returns_empty_list() -> None:
     assert generate_fake_documents(n=0) == []
 
 
+@faker_available
 def test_generate_fake_documents_negative_raises() -> None:
     with pytest.raises(ValueError, match=r"'n' must be non-negative"):
         generate_fake_documents(n=-1)
 
 
+@faker_available
 def test_generate_fake_documents_returns_document_instances() -> None:
     docs = generate_fake_documents(n=3)
     assert all(isinstance(doc, Document) for doc in docs)
@@ -44,11 +50,13 @@ def test_generate_fake_documents_returns_document_instances() -> None:
 # --- ids ---
 
 
+@faker_available
 def test_generate_fake_documents_ids_are_sequential() -> None:
     docs = generate_fake_documents(n=3)
     assert [doc.id for doc in docs] == ["doc-0", "doc-1", "doc-2"]
 
 
+@faker_available
 def test_generate_fake_documents_ids_are_unique() -> None:
     docs = generate_fake_documents(n=20)
     ids = [doc.id for doc in docs]
@@ -58,11 +66,13 @@ def test_generate_fake_documents_ids_are_unique() -> None:
 # --- content ---
 
 
+@faker_available
 def test_generate_fake_documents_page_content_is_nonempty_string() -> None:
     docs = generate_fake_documents(n=3, seed=1)
     assert all(isinstance(doc.page_content, str) and doc.page_content for doc in docs)
 
 
+@faker_available
 def test_generate_fake_documents_nb_sentences_is_passed_through() -> None:
     with patch(f"{MODULE}.faker.Faker") as mock_faker_cls:
         mock_fake = mock_faker_cls.return_value
@@ -78,6 +88,7 @@ def test_generate_fake_documents_nb_sentences_is_passed_through() -> None:
 # --- metadata ---
 
 
+@faker_available
 def test_generate_fake_documents_metadata_has_author_and_topic() -> None:
     docs = generate_fake_documents(n=3)
     for doc in docs:
@@ -87,6 +98,7 @@ def test_generate_fake_documents_metadata_has_author_and_topic() -> None:
         assert isinstance(doc.metadata["topic"], str)
 
 
+@faker_available
 def test_generate_fake_documents_metadata_does_not_contain_extra_keys() -> None:
     docs = generate_fake_documents(n=1)
     assert set(docs[0].metadata.keys()) == {"author", "topic"}
@@ -95,6 +107,7 @@ def test_generate_fake_documents_metadata_does_not_contain_extra_keys() -> None:
 # --- seeding / determinism ---
 
 
+@faker_available
 def test_generate_fake_documents_same_seed_same_output() -> None:
     docs1 = generate_fake_documents(n=5, seed=42)
     docs2 = generate_fake_documents(n=5, seed=42)
@@ -102,6 +115,7 @@ def test_generate_fake_documents_same_seed_same_output() -> None:
     assert [d.metadata for d in docs1] == [d.metadata for d in docs2]
 
 
+@faker_available
 def test_generate_fake_documents_different_seed_likely_different_output() -> None:
     """Not a strict guarantee (Faker output could theoretically
     coincide), but with two different seeds and multi-sentence
@@ -112,12 +126,14 @@ def test_generate_fake_documents_different_seed_likely_different_output() -> Non
     assert [d.page_content for d in docs1] != [d.page_content for d in docs2]
 
 
+@faker_available
 def test_generate_fake_documents_no_seed_calls_do_not_raise() -> None:
     # Sanity check that omitting `seed` (the common case) works at all.
     docs = generate_fake_documents(n=2, seed=None)
     assert len(docs) == 2
 
 
+@faker_available
 def test_generate_fake_documents_seed_is_forwarded_to_faker_seed() -> None:
     with patch(f"{MODULE}.faker.Faker") as mock_faker_cls:
         mock_fake = mock_faker_cls.return_value
@@ -130,6 +146,7 @@ def test_generate_fake_documents_seed_is_forwarded_to_faker_seed() -> None:
         mock_faker_cls.seed.assert_called_once_with(123)
 
 
+@faker_available
 def test_generate_fake_documents_no_seed_does_not_call_faker_seed() -> None:
     with patch(f"{MODULE}.faker.Faker") as mock_faker_cls:
         mock_fake = mock_faker_cls.return_value
@@ -145,6 +162,7 @@ def test_generate_fake_documents_no_seed_does_not_call_faker_seed() -> None:
 # --- optional dependency guard ---
 
 
+@faker_available
 def test_generate_fake_documents_raises_if_faker_unavailable() -> None:
     with (
         patch(f"{MODULE}.check_faker", side_effect=RuntimeError),
@@ -153,6 +171,7 @@ def test_generate_fake_documents_raises_if_faker_unavailable() -> None:
         generate_fake_documents(n=1)
 
 
+@faker_available
 def test_generate_fake_documents_checks_availability_before_validating_n() -> None:
     """The availability check should happen unconditionally, even for
     inputs (like a negative n) that would otherwise short-circuit with a
