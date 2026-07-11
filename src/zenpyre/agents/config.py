@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Any
 from zenpyre.utils.config import ExtraFieldsConfig
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
     from typing import Self
 
     from zenpyre.chat_models import BaseChatModelConfig
@@ -72,13 +71,6 @@ class AgentConfig(ExtraFieldsConfig):
     chat_model: BaseChatModelConfig
     system_prompt: str
 
-    # @dataclass(frozen=True) auto-generates its own __hash__ for THIS
-    # class unless __hash__ is present in this class's own body — merely
-    # inheriting one from ExtraFieldsConfig does not stop the override.
-    # Restating it here (rather than repeating its logic) keeps the
-    # single implementation in ExtraFieldsConfig authoritative.
-    __hash__: Callable[[object], int] = ExtraFieldsConfig.__hash__
-
     @classmethod
     def from_kwargs(
         cls, chat_model: BaseChatModelConfig, system_prompt: str, **kwargs: Any
@@ -131,3 +123,11 @@ class AgentConfig(ExtraFieldsConfig):
             ```
         """
         return cls(chat_model=chat_model, system_prompt=system_prompt, extra=kwargs)
+
+    def __hash__(self) -> int:
+        # The auto-generated dataclass __hash__ would hash `extra`
+        # (and any nested BaseConfig field, unless it's independently
+        # hashable) directly, which fails for an unhashable
+        # dict/MappingProxyType. Hashing the (string) cache key
+        # sidesteps that while keeping equal configs hash-equal.
+        return hash(self.cache_key())
