@@ -4,6 +4,7 @@ from __future__ import annotations
 
 __all__ = [
     "check_duckdb",
+    "check_faker",
     "check_langchain_anthropic",
     "check_langchain_chroma",
     "check_langchain_google_genai",
@@ -12,7 +13,9 @@ __all__ = [
     "check_langchain_openai",
     "check_langchain_text_splitters",
     "duckdb_available",
+    "faker_available",
     "is_duckdb_available",
+    "is_faker_available",
     "is_langchain_anthropic_available",
     "is_langchain_chroma_available",
     "is_langchain_google_genai_available",
@@ -28,6 +31,7 @@ __all__ = [
     "langchain_openai_available",
     "langchain_text_splitters_available",
     "raise_duckdb_missing_error",
+    "raise_faker_missing_error",
     "raise_langchain_anthropic_missing_error",
     "raise_langchain_chroma_missing_error",
     "raise_langchain_google_genai_missing_error",
@@ -42,6 +46,12 @@ from zenpyre.utils.imports.duckdb import (
     duckdb_available,
     is_duckdb_available,
     raise_duckdb_missing_error,
+)
+from zenpyre.utils.imports.faker import (
+    check_faker,
+    faker_available,
+    is_faker_available,
+    raise_faker_missing_error,
 )
 from zenpyre.utils.imports.langchain_anthropic import (
     check_langchain_anthropic,

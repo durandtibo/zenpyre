@@ -6,6 +6,10 @@ r"""Define some pytest fixtures for testing.
 from __future__ import annotations
 
 __all__ = [
+    "duckdb_available",
+    "duckdb_not_available",
+    "faker_available",
+    "faker_not_available",
     "langchain_anthropic_available",
     "langchain_anthropic_not_available",
     "langchain_chroma_available",
@@ -26,6 +30,7 @@ import pytest
 
 from zenpyre.utils.imports import (
     is_duckdb_available,
+    is_faker_available,
     is_langchain_anthropic_available,
     is_langchain_chroma_available,
     is_langchain_google_genai_available,
@@ -33,6 +38,20 @@ from zenpyre.utils.imports import (
     is_langchain_ollama_available,
     is_langchain_openai_available,
     is_langchain_text_splitters_available,
+)
+
+duckdb_available: pytest.MarkDecorator = pytest.mark.skipif(
+    not is_duckdb_available(), reason="Requires duckdb"
+)
+duckdb_not_available: pytest.MarkDecorator = pytest.mark.skipif(
+    is_duckdb_available(), reason="Skip if duckdb is available"
+)
+
+faker_available: pytest.MarkDecorator = pytest.mark.skipif(
+    not is_faker_available(), reason="Requires faker"
+)
+faker_not_available: pytest.MarkDecorator = pytest.mark.skipif(
+    is_faker_available(), reason="Skip if faker is available"
 )
 
 langchain_anthropic_available: pytest.MarkDecorator = pytest.mark.skipif(
@@ -49,12 +68,6 @@ langchain_chroma_not_available: pytest.MarkDecorator = pytest.mark.skipif(
     is_langchain_chroma_available(), reason="Skip if langchain_chroma is available"
 )
 
-duckdb_available: pytest.MarkDecorator = pytest.mark.skipif(
-    not is_duckdb_available(), reason="Requires duckdb"
-)
-duckdb_not_available: pytest.MarkDecorator = pytest.mark.skipif(
-    is_duckdb_available(), reason="Skip if duckdb is available"
-)
 
 langchain_google_genai_available: pytest.MarkDecorator = pytest.mark.skipif(
     not is_langchain_google_genai_available(), reason="Requires langchain_google_genai"

@@ -61,6 +61,7 @@ anthropic = [ "langchain-anthropic >= 1.4,<2.0" ]
 # Require python 3.11 because onnxruntime is one of the dependency and needs >= 3.11
 chroma = [ "langchain-chroma >=1.0,<2.0 ; python_version >= '3.11'" ]
 duckdb = [ "duckdb >=1.5,<2.0" ]
+faker = [ "faker >=40.0,<41.0" ]
 google-genai = [ "langchain-google-genai >= 4.2,<5.0" ]
 huggingface = [ "langchain-huggingface >=1.2,<2.0; (sys_platform == 'linux' or (sys_platform == 'darwin' and platform_machine == 'arm64'))" ]
 ollama = [ "langchain-ollama >= 1.1,<2.0" ]
