@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import FrozenInstanceError, dataclass
 from types import MappingProxyType
+from typing import Any
 
 import pytest
 from coola.hashing import hash_string
@@ -156,6 +157,32 @@ def test_subclass_field_collision_also_raises(chat_model: ChatModelConfig) -> No
             system_prompt_id="id-1",
             extra={"max_tokens": 999},
         )
+
+
+# --- get_value ---
+
+
+@pytest.mark.parametrize(("name", "value"), [("system_prompt", "p"), ("max_retries", 3)])
+def test_get_value(chat_model: ChatModelConfig, name: str, value: Any) -> None:
+    config = AgentConfig(
+        chat_model=chat_model, system_prompt="p", system_prompt_id="id-1", extra={"max_retries": 3}
+    )
+    assert config.get_value(name) == value
+
+
+def test_get_value_missing_with_default(chat_model: ChatModelConfig) -> None:
+    config = AgentConfig(
+        chat_model=chat_model, system_prompt="p", system_prompt_id="id-1", extra={"max_retries": 3}
+    )
+    assert config.get_value("missing", 42) == 42
+
+
+def test_get_value_missing_without_default(chat_model: ChatModelConfig) -> None:
+    config = AgentConfig(
+        chat_model=chat_model, system_prompt="p", system_prompt_id="id-1", extra={"max_retries": 3}
+    )
+    with pytest.raises(KeyError, match=r"'missing' not found in config AgentConfig"):
+        config.get_value("missing")
 
 
 # --- to_kwargs ---
