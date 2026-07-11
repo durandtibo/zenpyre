@@ -2,7 +2,7 @@ r"""Document metadata statistics."""
 
 from __future__ import annotations
 
-__all__ = ["DocMetadataStats", "compute_doc_metadata_stats"]
+__all__ = ["MetadataStats", "compute_metadata_stats"]
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class DocMetadataStats:
+class MetadataStats:
     """Streaming document metadata health/analysis.
 
     Accumulates statistics one document at a time via ``update``, so it
@@ -208,7 +208,7 @@ class DocMetadataStats:
         }
 
 
-def compute_doc_metadata_stats(
+def compute_metadata_stats(
     documents: Iterable[Document], n_sample_values: int | None = 3
 ) -> dict[str, Any]:
     """Compute metadata health/statistics over a stream of documents.
@@ -240,18 +240,18 @@ def compute_doc_metadata_stats(
     Example:
         ```pycon
         >>> from langchain_core.documents import Document
-        >>> from zenpyre.documents.analysis import compute_doc_metadata_stats
+        >>> from zenpyre.documents.analysis import compute_metadata_stats
         >>> docs = [
         ...     Document(page_content="a", metadata={"source": "a.pdf"}),
         ...     Document(page_content="b", metadata={"source": "b.pdf", "page": 1}),
         ... ]
-        >>> analysis = compute_doc_metadata_stats(docs)
+        >>> analysis = compute_metadata_stats(docs)
         >>> analysis["count"]
         2
 
         ```
     """
-    stats = DocMetadataStats(n_sample_values=n_sample_values)
+    stats = MetadataStats(n_sample_values=n_sample_values)
     for doc in documents:
         stats.update(doc)
     return stats.to_dict()

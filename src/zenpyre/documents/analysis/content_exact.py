@@ -2,7 +2,7 @@ r"""Content exact document statistics."""
 
 from __future__ import annotations
 
-__all__ = ["ExactDocContentStats", "compute_doc_content_stats_exact"]
+__all__ = ["ExactContentStats", "compute_content_stats_exact"]
 
 import hashlib
 from dataclasses import dataclass, field
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class ExactDocContentStats:
+class ExactContentStats:
     """Streaming document health/analysis with EXACT duplicate detection
     and EXACT percentiles.
 
@@ -233,7 +233,7 @@ class ExactDocContentStats:
         }
 
 
-def compute_doc_content_stats_exact(documents: Iterable[Document]) -> dict[str, Any]:
+def compute_content_stats_exact(documents: Iterable[Document]) -> dict[str, Any]:
     """Compute exact content health/statistics over a stream of
     documents.
 
@@ -259,12 +259,12 @@ def compute_doc_content_stats_exact(documents: Iterable[Document]) -> dict[str, 
     Example:
         ```pycon
         >>> from langchain_core.documents import Document
-        >>> from zenpyre.documents.analysis import compute_doc_content_stats_exact
+        >>> from zenpyre.documents.analysis import compute_content_stats_exact
         >>> docs = [
         ...     Document(id="a", page_content="hello"),
         ...     Document(id="b", page_content="hello world"),
         ... ]
-        >>> analysis = compute_doc_content_stats_exact(docs)
+        >>> analysis = compute_content_stats_exact(docs)
         >>> analysis["count"]
         2
 
@@ -277,7 +277,7 @@ def compute_doc_content_stats_exact(documents: Iterable[Document]) -> dict[str, 
         corpora too large for the exact hash set and length list to fit
         in memory.
     """
-    stats = ExactDocContentStats()
+    stats = ExactContentStats()
     for doc in documents:
         stats.update(doc)
     return stats.to_dict()
