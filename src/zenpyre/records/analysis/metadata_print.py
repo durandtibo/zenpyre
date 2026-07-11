@@ -55,30 +55,37 @@ def print_metadata_stats_report(
 ) -> None:
     """Pretty-print a metadata statistics report using rich.
 
-        Renders the dict returned by ``compute_doc_metadata_stats`` or
-        ``compute_record_metadata_stats`` (they share the same shape) as a
-        human-readable summary panel followed by a per-key table, including
-        inline data-quality warnings (missing keys, mixed types,
-        None/empty values, truncated value samples).
+    Renders the dict returned by ``compute_doc_metadata_stats`` or
+    ``compute_record_metadata_stats`` (they share the same shape) as a
+    human-readable summary panel followed by a per-key table, including
+    inline data-quality warnings (missing keys, mixed types,
+    None/empty values, truncated value samples).
 
     Args:
-            stats: The statistics dict to render, as returned by
-                ``compute_doc_metadata_stats`` or
-                ``compute_record_metadata_stats``.
-            title: Title shown at the top of the summary panel. Defaults
-                to ``"Metadata Report"``.
-            console: A ``rich.console.Console`` instance to print to. If
-                ``None``, the current default console (via
-                ``rich.console.get_console``) is used.
+        stats: The statistics dict to render, as returned by
+            ``compute_doc_metadata_stats`` or
+            ``compute_record_metadata_stats``.
+        title: Title shown at the top of the summary panel. Defaults
+            to ``"Metadata Report"``.
+        console: A ``rich.console.Console`` instance to print to. If
+            ``None``, the current default console (via
+            ``rich.console.get_console``) is used.
 
     Example:
-    ```pycon
-    >>> from zenpyre.documents.stats import compute_doc_metadata_stats
-    >>> from zenpyre.documents.stats_report import print_metadata_stats_report
-    >>> stats = compute_doc_metadata_stats(docs)  # doctest: +SKIP
-    >>> print_metadata_stats_report(stats)  # doctest: +SKIP
+        ```pycon
+        >>> from zenpyre.records import Record
+        >>> from zenpyre.records.analysis import (
+        ...     compute_metadata_stats,
+        ...     print_metadata_stats_report,
+        ... )
+        >>> records = [
+        ...     Record(id="a", metadata={"source": "a.pdf"}),
+        ...     Record(id="b", metadata={"source": "b.pdf", "page": 1}),
+        ... ]
+        >>> stats = compute_metadata_stats(records)
+        >>> print_metadata_stats_report(stats)  # doctest: +SKIP
 
-    ```
+        ```
     """
     console = console or get_console()
 
