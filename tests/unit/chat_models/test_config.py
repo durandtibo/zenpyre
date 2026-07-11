@@ -5,71 +5,7 @@ from types import MappingProxyType
 
 import pytest
 
-from zenpyre.chat_models import BaseChatModelConfig, ChatModelConfig
-
-#########################################
-#     Tests for BaseChatModelConfig     #
-#########################################
-
-
-def test_base_chat_model_config_cannot_be_instantiated() -> None:
-    with pytest.raises(TypeError, match=r"Can't instantiate abstract class"):
-        BaseChatModelConfig()
-
-
-def test_base_chat_model_config_requires_to_kwargs() -> None:
-    class Incomplete(BaseChatModelConfig):
-        pass
-
-    with pytest.raises(TypeError, match=r"to_kwargs"):
-        Incomplete()
-
-
-def test_base_chat_model_config_subclass_only_needs_to_kwargs() -> None:
-    class Minimal(BaseChatModelConfig):
-        def __init__(self, model: str) -> None:
-            self.model = model
-
-        def to_kwargs(self) -> dict:
-            return {"model": self.model}
-
-    cfg = Minimal("gpt-4")
-    assert cfg.to_kwargs() == {"model": "gpt-4"}
-
-
-def test_base_chat_model_config_cache_key_derived_from_to_kwargs() -> None:
-    class Minimal(BaseChatModelConfig):
-        def __init__(self, model: str) -> None:
-            self.model = model
-
-        def to_kwargs(self) -> dict:
-            return {"model": self.model}
-
-    cfg1 = Minimal("gpt-4")
-    cfg2 = Minimal("gpt-4")
-    cfg3 = Minimal("gpt-3.5")
-    assert cfg1.cache_key() == cfg2.cache_key()
-    assert cfg1.cache_key() != cfg3.cache_key()
-
-
-def test_base_chat_model_config_cache_key_respects_length() -> None:
-    class Minimal(BaseChatModelConfig):
-        def __init__(self, model: str) -> None:
-            self.model = model
-
-        def to_kwargs(self) -> dict:
-            return {"model": self.model}
-
-    cfg = Minimal("gpt-4")
-    assert len(cfg.cache_key()) == 64
-    assert len(cfg.cache_key(length=8)) == 8
-    assert len(cfg.cache_key(length=16)) == 16
-
-
-def test_chat_model_config_is_a_base_chat_model_config() -> None:
-    cfg = ChatModelConfig(model="gpt-4")
-    assert isinstance(cfg, BaseChatModelConfig)
-
+from zenpyre.chat_models import ChatModelConfig
 
 #####################################
 #     Tests for ChatModelConfig     #
@@ -223,7 +159,6 @@ def test_from_kwargs_equivalent_to_direct_construction() -> None:
 def test_from_kwargs_returns_chat_model_config_instance() -> None:
     cfg = ChatModelConfig.from_kwargs("gpt-4")
     assert isinstance(cfg, ChatModelConfig)
-    assert isinstance(cfg, BaseChatModelConfig)
 
 
 def test_from_kwargs_duplicate_model_key_raises_type_error() -> None:
