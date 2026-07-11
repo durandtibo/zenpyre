@@ -8,6 +8,8 @@ from coola.hashing import hash_object
 
 from zenpyre.utils.config import BaseConfig
 
+MODULE = "zenpyre.utils.config.base"
+
 # ---------------------------------------------------------------------------
 # Fixtures / test doubles
 # ---------------------------------------------------------------------------
@@ -147,7 +149,7 @@ def test_cache_key_delegates_to_hash_object(config: SimpleConfig) -> None:
     """cache_key must call hash_object with its own to_kwargs() output
     and the requested length, rather than reimplementing hashing
     itself."""
-    with patch("zenpyre.utils.config.hash_object", return_value="deadbeef") as mock:
+    with patch(f"{MODULE}.hash_object", return_value="deadbeef") as mock:
         result = config.cache_key(length=8)
     mock.assert_called_once_with(config.to_kwargs(), length=8)
     assert result == "deadbeef"
