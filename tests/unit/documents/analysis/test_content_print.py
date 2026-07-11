@@ -10,14 +10,12 @@ from rich.text import Text
 from zenpyre.documents.analysis import print_content_stats_report
 from zenpyre.documents.analysis.content_print import (
     _build_approx_footnote_items,
-    _build_bar_chart_items,
     _build_doc_ids_grid,
     _build_overview_line,
     _build_stats_table,
     _build_status_line,
     _format_percentage_of_total,
     _format_value,
-    _render_bar_chart_rows,
 )
 
 
@@ -174,48 +172,6 @@ def test_format_percentage_of_total_has_leading_space() -> None:
     assert result.startswith(" ")
 
 
-############################################
-#     Tests for _render_bar_chart_rows     #
-############################################
-
-
-def test_render_bar_chart_rows_normal_points() -> None:
-    rows = _render_bar_chart_rows([12, 510, 890, 1400, 3200])
-    assert len(rows) == 5
-    assert all(len(r) == 40 for r in rows)
-
-
-def test_render_bar_chart_rows_empty_points() -> None:
-    assert _render_bar_chart_rows([]) == []
-
-
-def test_render_bar_chart_rows_single_point() -> None:
-    assert _render_bar_chart_rows([42]) == []
-
-
-def test_render_bar_chart_rows_all_equal_points() -> None:
-    rows = _render_bar_chart_rows([5, 5, 5], width=10, height=3)
-    assert len(rows) == 3
-    assert all(len(r) == 10 for r in rows)
-
-
-def test_render_bar_chart_rows_custom_width_height() -> None:
-    rows = _render_bar_chart_rows([1, 2, 3], width=10, height=3)
-    assert len(rows) == 3
-    assert all(len(r) == 10 for r in rows)
-
-
-def test_render_bar_chart_rows_bottom_row_reaches_max() -> None:
-    # the highest point should fully fill the bottom row somewhere
-    rows = _render_bar_chart_rows([0, 100], width=5, height=1)
-    assert "█" in rows[0]
-
-
-def test_render_bar_chart_rows_two_points_minimum() -> None:
-    rows = _render_bar_chart_rows([1, 2])
-    assert len(rows) == 5  # default height
-
-
 ########################################
 #     Tests for _build_stats_table     #
 ########################################
@@ -337,49 +293,6 @@ def test_build_status_line_with_issues() -> None:
 def test_build_status_line_returns_text() -> None:
     assert isinstance(_build_status_line(False), Text)
     assert isinstance(_build_status_line(True), Text)
-
-
-############################################
-#     Tests for _build_bar_chart_items     #
-############################################
-
-
-def test_build_bar_chart_items_normal_stats(exact_stats: dict) -> None:
-    items = _build_bar_chart_items(exact_stats, p_suffix="")
-    assert len(items) > 0
-    assert all(isinstance(item, Text) for item in items)
-
-
-def test_build_bar_chart_items_approx_suffix(approx_stats: dict) -> None:
-    items = _build_bar_chart_items(approx_stats, p_suffix="_approx")
-    assert len(items) > 0
-
-
-def test_build_bar_chart_items_single_distinct_point_returns_empty() -> None:
-    stats = {
-        "min_chars": 100,
-        "max_chars": 100,
-        "p50_chars": 100,
-        "p90_chars": 100,
-        "p99_chars": 100,
-    }
-    assert _build_bar_chart_items(stats, p_suffix="") == []
-
-
-def test_build_bar_chart_items_all_none_returns_empty() -> None:
-    stats = {"min_chars": None, "max_chars": None}
-    assert _build_bar_chart_items(stats, p_suffix="") == []
-
-
-def test_build_bar_chart_items_two_distinct_points_enough() -> None:
-    stats = {"min_chars": 1, "max_chars": 10}
-    items = _build_bar_chart_items(stats, p_suffix="")
-    assert len(items) > 0
-
-
-def test_build_bar_chart_items_includes_label_header(exact_stats: dict) -> None:
-    items = _build_bar_chart_items(exact_stats, p_suffix="")
-    assert items[0].plain == "length shape"
 
 
 ##################################################
