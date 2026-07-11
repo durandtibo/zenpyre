@@ -4,12 +4,10 @@ from __future__ import annotations
 
 __all__ = ["AgentConfig"]
 
-import dataclasses
-from dataclasses import dataclass, field
-from types import MappingProxyType
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from zenpyre.utils.config import BaseConfig
+from zenpyre.utils.config import ExtraFieldsConfig
 
 if TYPE_CHECKING:
     from typing import Self
@@ -18,20 +16,30 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class AgentConfig(BaseConfig):
+class AgentConfig(ExtraFieldsConfig):
     r"""A generic LLM agent configuration.
 
     Subclass this to add provider- or agent-specific parameters as
     typed fields (e.g. ``max_tokens`` for OpenAI, ``top_k`` for
     Anthropic). Since this class is frozen, subclasses must also be
-    frozen dataclasses, and any additional fields must declare a
-    default value (dataclass field-ordering rules require defaulted
-    fields to follow other defaulted fields).
+    frozen dataclasses. Additional fields do not need a default value:
+    ``extra`` is declared keyword-only on
+    :class:`~zenpyre.utils.config.ExtraFieldsConfig`, so it doesn't
+    force subclass fields into a particular ordering.
 
     Fields added by subclasses are picked up automatically by
     :meth:`to_kwargs` (and therefore :meth:`cache_key`) via
     introspection; you don't need to override either method just to
     add a field.
+
+    One thing subclasses *do* need to restate: ``@dataclass(frozen=True)``
+    auto-generates a fresh ``__hash__`` for every dataclass-decorated
+    class unless that class's own body defines ``__hash__`` — merely
+    inheriting one does not suppress the override, and the
+    auto-generated version would try to hash the unhashable ``extra``
+    field. Any further subclass should include
+    ``__hash__ = AgentConfig.__hash__`` in its own body, the same way
+    this class restates ``ExtraFieldsConfig.__hash__``.
 
     Attributes:
         chat_model: The chat model configuration (see
@@ -55,68 +63,20 @@ class AgentConfig(BaseConfig):
         ...     max_tokens=1024,
         ... )
         >>> config
-        AgentConfig(chat_model=ChatModelConfig(model='openai:gpt-4o', extra=mappingproxy({})), system_prompt='You are helpful.', extra=mappingproxy({'max_tokens': 1024}))
+        AgentConfig(extra=mappingproxy({'max_tokens': 1024}), chat_model=ChatModelConfig(extra=mappingproxy({}), model='openai:gpt-4o'), system_prompt='You are helpful.')
 
         ```
     """
 
     chat_model: BaseChatModelConfig
     system_prompt: str
-    extra: dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self) -> None:
-        reserved = {f.name for f in dataclasses.fields(self) if f.name != "extra"}
-        collisions = reserved & self.extra.keys()
-        if collisions:
-            msg = (
-                f"'extra' must not contain any of this config's own field names "
-                f"{sorted(reserved)}; got overlapping key(s) {sorted(collisions)} "
-                f"in extra={dict(self.extra)!r}."
-            )
-            raise ValueError(msg)
-        # Wrap `extra` in a read-only view so mutating it after
-        # construction raises, matching the `frozen=True` contract
-        # (which otherwise only prevents reassigning the attribute
-        # itself, not mutating the dict it points to).
-        object.__setattr__(self, "extra", MappingProxyType(dict(self.extra)))
-
-    def to_kwargs(self) -> dict[str, Any]:
-        """Return every dataclass field (including ones declared by a
-        subclass) merged with ``extra``, as a flat dict.
-
-        Fields are collected via introspection
-        (:func:`dataclasses.fields`) rather than hardcoded by name, so
-        a subclass that adds a new typed field (e.g. ``max_tokens``)
-        gets it included here automatically, with no need to override
-        this method.
-
-        Note that ``chat_model`` is included as the actual
-        :class:`~zenpyre.chat_models.BaseChatModelConfig` instance,
-        not a hash string; :meth:`cache_key` is the one that converts
-        it to a stable string for hashing purposes.
-
-        Example:
-            ```pycon
-            >>> from zenpyre.agents import AgentConfig
-            >>> from zenpyre.chat_models import ChatModelConfig
-            >>> cfg = AgentConfig(
-            ...     chat_model=ChatModelConfig(model="gpt-4"),
-            ...     system_prompt="You are helpful.",
-            ...     extra={"max_retries": 3},
-            ... )
-            >>> kwargs = cfg.to_kwargs()
-            >>> kwargs["system_prompt"]
-            'You are helpful.'
-            >>> kwargs["max_retries"]
-            3
-
-            ```
-        """
-        kwargs = {
-            f.name: getattr(self, f.name) for f in dataclasses.fields(self) if f.name != "extra"
-        }
-        kwargs.update(self.extra)
-        return kwargs
+    # @dataclass(frozen=True) auto-generates its own __hash__ for THIS
+    # class unless __hash__ is present in this class's own body — merely
+    # inheriting one from ExtraFieldsConfig does not stop the override.
+    # Restating it here (rather than repeating its logic) keeps the
+    # single implementation in ExtraFieldsConfig authoritative.
+    __hash__ = ExtraFieldsConfig.__hash__
 
     @classmethod
     def from_kwargs(
@@ -170,11 +130,3 @@ class AgentConfig(BaseConfig):
             ```
         """
         return cls(chat_model=chat_model, system_prompt=system_prompt, extra=kwargs)
-
-    def __hash__(self) -> int:
-        # The auto-generated dataclass __hash__ would hash `extra`
-        # (and `chat_model`, unless it's independently hashable)
-        # directly, which fails for an unhashable dict/MappingProxyType.
-        # Hashing the (string) cache key sidesteps that while keeping
-        # equal configs hash-equal.
-        return hash(self.cache_key())

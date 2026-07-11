@@ -4,12 +4,10 @@ from __future__ import annotations
 
 __all__ = ["BaseChatModelConfig", "ChatModelConfig"]
 
-import dataclasses
-from dataclasses import dataclass, field
-from types import MappingProxyType
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from zenpyre.utils.config import BaseConfig
+from zenpyre.utils.config import BaseConfig, ExtraFieldsConfig
 
 if TYPE_CHECKING:
     from typing import Self
@@ -35,8 +33,13 @@ class BaseChatModelConfig(BaseConfig):
 
 
 @dataclass(frozen=True)
-class ChatModelConfig(BaseChatModelConfig):
+class ChatModelConfig(BaseChatModelConfig, ExtraFieldsConfig):
     """A generic chat model configuration.
+
+    ``to_kwargs()``, the ``extra``/field-name collision check, and
+    ``__hash__`` are all inherited from
+    :class:`~zenpyre.utils.config.ExtraFieldsConfig`; this class only
+    needs to declare its own typed field(s).
 
     Args:
         model: The model identifier.
@@ -57,38 +60,13 @@ class ChatModelConfig(BaseChatModelConfig):
     """
 
     model: str
-    extra: dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self) -> None:
-        if "model" in self.extra:
-            msg = (
-                "'extra' must not contain a 'model' key: the 'model' field already "
-                f"provides it (got extra={self.extra!r})."
-            )
-            raise ValueError(msg)
-        # Wrap `extra` in a read-only view so mutating it after
-        # construction raises, matching the `frozen=True` contract
-        # (which otherwise only prevents reassigning the attribute
-        # itself, not mutating the dict it points to).
-        object.__setattr__(self, "extra", MappingProxyType(dict(self.extra)))
-
-    def to_kwargs(self) -> dict[str, Any]:
-        """Return ``model`` merged with ``extra`` as a flat dict.
-
-        Example:
-            ```pycon
-            >>> from zenpyre.chat_models import ChatModelConfig
-            >>> cfg = ChatModelConfig(model="gpt-4", extra={"temperature": 0.2})
-            >>> cfg.to_kwargs()
-            {'model': 'gpt-4', 'temperature': 0.2}
-
-            ```
-        """
-        kwargs = {
-            f.name: getattr(self, f.name) for f in dataclasses.fields(self) if f.name != "extra"
-        }
-        kwargs.update(self.extra)
-        return kwargs
+    # @dataclass(frozen=True) auto-generates its own __hash__ for THIS
+    # class unless __hash__ is present in this class's own body — merely
+    # inheriting one from ExtraFieldsConfig does not stop the override.
+    # Restating it here (rather than repeating its logic) keeps the
+    # single implementation in ExtraFieldsConfig authoritative.
+    __hash__ = ExtraFieldsConfig.__hash__
 
     @classmethod
     def from_kwargs(cls, model: str, **kwargs: Any) -> Self:
@@ -133,10 +111,3 @@ class ChatModelConfig(BaseChatModelConfig):
             ```
         """
         return cls(model=model, extra=kwargs)
-
-    def __hash__(self) -> int:
-        # The auto-generated dataclass __hash__ would hash `extra`
-        # directly, which fails since dicts (and MappingProxyType) are
-        # unhashable. Hashing the (string) cache key sidesteps that
-        # while keeping equal configs hash-equal.
-        return hash(self.cache_key())

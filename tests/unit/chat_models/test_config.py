@@ -7,9 +7,9 @@ import pytest
 
 from zenpyre.chat_models import BaseChatModelConfig, ChatModelConfig
 
-##################################################
-#     Tests for BaseChatModelConfig              #
-##################################################
+#########################################
+#     Tests for BaseChatModelConfig     #
+#########################################
 
 
 def test_base_chat_model_config_cannot_be_instantiated() -> None:
@@ -96,7 +96,9 @@ def test_chat_model_config_extra_stored_as_mapping_proxy() -> None:
 
 
 def test_chat_model_config_extra_with_model_key_raises() -> None:
-    with pytest.raises(ValueError, match=r"'extra' must not contain a 'model' key"):
+    with pytest.raises(
+        ValueError, match=r"'extra' must not contain any of this config's own field names"
+    ):
         ChatModelConfig(model="gpt-4", extra={"model": "gpt-3.5"})
 
 
