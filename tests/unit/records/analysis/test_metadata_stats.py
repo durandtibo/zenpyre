@@ -92,16 +92,16 @@ def test_compute_metadata_stats_core_stats(records: list[Record]) -> None:
         "distinct_keys_seen": 2,
         "per_key": {
             "page": {
-                "present_in_docs": 2,
-                "missing_in_docs": 1,
+                "present_in_records": 2,
+                "missing_in_records": 1,
                 "value_types": ["int"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": [1, 2],
                 "unique_values_sample_truncated": False,
             },
             "source": {
-                "present_in_docs": 3,
-                "missing_in_docs": 0,
+                "present_in_records": 3,
+                "missing_in_records": 0,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": ["a.pdf", "b.pdf"],
@@ -122,8 +122,8 @@ def test_compute_metadata_stats_single_record() -> None:
         "distinct_keys_seen": 1,
         "per_key": {
             "source": {
-                "present_in_docs": 1,
-                "missing_in_docs": 0,
+                "present_in_records": 1,
+                "missing_in_records": 0,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": ["x"],
@@ -183,16 +183,16 @@ def test_compute_metadata_stats_messy_records(messy_records: list[Record]) -> No
         "distinct_keys_seen": 2,
         "per_key": {
             "author": {
-                "present_in_docs": 1,
-                "missing_in_docs": 4,
+                "present_in_records": 1,
+                "missing_in_records": 4,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": ["alice"],
                 "unique_values_sample_truncated": False,
             },
             "source": {
-                "present_in_docs": 4,
-                "missing_in_docs": 1,
+                "present_in_records": 4,
+                "missing_in_records": 1,
                 "value_types": ["NoneType", "int", "str"],
                 "none_or_empty_count": 2,
                 "unique_values_sample": ["", None, "a.pdf"],
@@ -217,8 +217,8 @@ def test_compute_metadata_stats_default_n_sample_values_caps_at_three(
         "distinct_keys_seen": 1,
         "per_key": {
             "uid": {
-                "present_in_docs": 10,
-                "missing_in_docs": 0,
+                "present_in_records": 10,
+                "missing_in_records": 0,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": ["uid-0", "uid-1", "uid-2"],
@@ -240,8 +240,8 @@ def test_compute_metadata_stats_n_sample_values_none_tracks_all(
         "distinct_keys_seen": 1,
         "per_key": {
             "uid": {
-                "present_in_docs": 10,
-                "missing_in_docs": 0,
+                "present_in_records": 10,
+                "missing_in_records": 0,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": sorted(f"uid-{i}" for i in range(10)),
@@ -263,8 +263,8 @@ def test_compute_metadata_stats_n_sample_values_zero(
         "distinct_keys_seen": 1,
         "per_key": {
             "uid": {
-                "present_in_docs": 10,
-                "missing_in_docs": 0,
+                "present_in_records": 10,
+                "missing_in_records": 0,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": [],
@@ -285,8 +285,8 @@ def test_compute_metadata_stats_n_sample_values_exact_boundary() -> None:
         "distinct_keys_seen": 1,
         "per_key": {
             "k": {
-                "present_in_docs": 3,
-                "missing_in_docs": 0,
+                "present_in_records": 3,
+                "missing_in_records": 0,
                 "value_types": ["int"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": [0, 1, 2],
@@ -307,8 +307,8 @@ def test_compute_metadata_stats_n_sample_values_one_more_than_boundary() -> None
         "distinct_keys_seen": 1,
         "per_key": {
             "k": {
-                "present_in_docs": 4,
-                "missing_in_docs": 0,
+                "present_in_records": 4,
+                "missing_in_records": 0,
                 "value_types": ["int"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": [0, 1, 2],
@@ -331,8 +331,8 @@ def test_compute_metadata_stats_repeated_value_does_not_count_against_cap() -> N
         "distinct_keys_seen": 1,
         "per_key": {
             "k": {
-                "present_in_docs": 4,
-                "missing_in_docs": 0,
+                "present_in_records": 4,
+                "missing_in_records": 0,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": ["a"],
@@ -359,8 +359,8 @@ def test_compute_metadata_stats_unhashable_container_value_marks_truncated() -> 
         "distinct_keys_seen": 1,
         "per_key": {
             "tags": {
-                "present_in_docs": 2,
-                "missing_in_docs": 0,
+                "present_in_records": 2,
+                "missing_in_records": 0,
                 "value_types": ["list"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": [],
@@ -381,8 +381,8 @@ def test_compute_metadata_stats_unhashable_container_with_n_sample_values_none()
         "distinct_keys_seen": 1,
         "per_key": {
             "tags": {
-                "present_in_docs": 1,
-                "missing_in_docs": 0,
+                "present_in_records": 1,
+                "missing_in_records": 0,
                 "value_types": ["list"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": [],
@@ -406,8 +406,8 @@ def test_compute_metadata_stats_unhashable_non_container_value_marks_truncated()
         "distinct_keys_seen": 1,
         "per_key": {
             "blob": {
-                "present_in_docs": 1,
-                "missing_in_docs": 0,
+                "present_in_records": 1,
+                "missing_in_records": 0,
                 "value_types": ["bytearray"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": [],
@@ -434,16 +434,16 @@ def test_compute_metadata_stats_generator_input() -> None:
         "distinct_keys_seen": 2,
         "per_key": {
             "page": {
-                "present_in_docs": 1,
-                "missing_in_docs": 1,
+                "present_in_records": 1,
+                "missing_in_records": 1,
                 "value_types": ["int"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": [1],
                 "unique_values_sample_truncated": False,
             },
             "source": {
-                "present_in_docs": 2,
-                "missing_in_docs": 0,
+                "present_in_records": 2,
+                "missing_in_records": 0,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": ["a", "b"],
@@ -474,8 +474,8 @@ def test_compute_metadata_stats_map_iterator() -> None:
         "distinct_keys_seen": 1,
         "per_key": {
             "source": {
-                "present_in_docs": 3,
-                "missing_in_docs": 0,
+                "present_in_records": 3,
+                "missing_in_records": 0,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": ["a.pdf", "b.pdf", "c.pdf"],
@@ -499,16 +499,16 @@ def test_compute_metadata_stats_thousand_records() -> None:
         "distinct_keys_seen": 2,
         "per_key": {
             "idx": {
-                "present_in_docs": 1000,
-                "missing_in_docs": 0,
+                "present_in_records": 1000,
+                "missing_in_records": 0,
                 "value_types": ["int"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": [0, 1, 2],
                 "unique_values_sample_truncated": True,
             },
             "source": {
-                "present_in_docs": 1000,
-                "missing_in_docs": 0,
+                "present_in_records": 1000,
+                "missing_in_records": 0,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": ["x"],
@@ -540,16 +540,16 @@ def test_metadata_stats_manual_update_calls() -> None:
         "distinct_keys_seen": 2,
         "per_key": {
             "page": {
-                "present_in_docs": 1,
-                "missing_in_docs": 1,
+                "present_in_records": 1,
+                "missing_in_records": 1,
                 "value_types": ["int"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": [1],
                 "unique_values_sample_truncated": False,
             },
             "source": {
-                "present_in_docs": 2,
-                "missing_in_docs": 0,
+                "present_in_records": 2,
+                "missing_in_records": 0,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": ["a", "b"],
@@ -578,8 +578,8 @@ def test_metadata_stats_custom_n_sample_values_constructor() -> None:
         "distinct_keys_seen": 1,
         "per_key": {
             "source": {
-                "present_in_docs": 2,
-                "missing_in_docs": 0,
+                "present_in_records": 2,
+                "missing_in_records": 0,
                 "value_types": ["str"],
                 "none_or_empty_count": 0,
                 "unique_values_sample": ["a"],
