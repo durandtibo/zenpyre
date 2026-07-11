@@ -358,3 +358,16 @@ def test_subclass_is_frozen(chat_model: ChatModelConfig) -> None:
     cfg = OpenAIAgentConfig(chat_model=chat_model, system_prompt="p", max_tokens=1024)
     with pytest.raises(FrozenInstanceError):
         cfg.max_tokens = 2048
+
+
+# --- repr/str ---
+
+
+def test_agent_config_repr(chat_model: ChatModelConfig) -> None:
+    cfg = AgentConfig(chat_model=chat_model, system_prompt="p", extra={"max_retries": 3})
+    assert repr(cfg).startswith("AgentConfig(")
+
+
+def test_agent_config_str(chat_model: ChatModelConfig) -> None:
+    cfg = AgentConfig(chat_model=chat_model, system_prompt="p", extra={"max_retries": 3})
+    assert str(cfg).startswith("AgentConfig(")

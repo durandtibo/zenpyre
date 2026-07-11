@@ -7,6 +7,9 @@ __all__ = ["AgentConfig"]
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from coola.display import MultilineDisplayMixin
+from coola.utils.string import truncate_str
+
 from zenpyre.utils.config import ExtraFieldsConfig
 
 if TYPE_CHECKING:
@@ -16,7 +19,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class AgentConfig(ExtraFieldsConfig):
+class AgentConfig(ExtraFieldsConfig, MultilineDisplayMixin):
     r"""A generic LLM agent configuration.
 
     Subclass this to add provider- or agent-specific parameters as
@@ -123,6 +126,11 @@ class AgentConfig(ExtraFieldsConfig):
             ```
         """
         return cls(chat_model=chat_model, system_prompt=system_prompt, extra=kwargs)
+
+    def _get_repr_kwargs(self) -> dict[str, Any]:
+        kwargs = self.to_kwargs()
+        kwargs["system_prompt"] = truncate_str(kwargs["system_prompt"])
+        return kwargs
 
     def __hash__(self) -> int:
         # The auto-generated dataclass __hash__ would hash `extra`
