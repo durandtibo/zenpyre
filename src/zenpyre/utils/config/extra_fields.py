@@ -7,9 +7,12 @@ __all__ = ["ExtraFieldsConfig"]
 import dataclasses
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any
 
 from zenpyre.utils.config.base import BaseConfig
+
+if TYPE_CHECKING:
+    from typing import Self
 
 
 @dataclass(frozen=True, kw_only=True)
