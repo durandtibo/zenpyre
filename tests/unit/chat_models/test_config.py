@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import FrozenInstanceError
 from types import MappingProxyType
+from typing import Any
 
 import pytest
 
@@ -63,6 +64,26 @@ def test_chat_model_config_frozen_applies_to_extra_reassignment_too() -> None:
     cfg = ChatModelConfig(model="gpt-4", extra={"temperature": 0.2})
     with pytest.raises(FrozenInstanceError):
         cfg.extra = {}
+
+
+# --- get_value ---
+
+
+@pytest.mark.parametrize(("name", "value"), [("model", "gpt-4"), ("temperature", 0.2)])
+def test_get_value(name: str, value: Any) -> None:
+    config = ChatModelConfig(model="gpt-4", extra={"temperature": 0.2})
+    assert config.get_value(name) == value
+
+
+def test_get_value_missing_with_default() -> None:
+    config = ChatModelConfig(model="gpt-4", extra={"temperature": 0.2})
+    assert config.get_value("missing", 42) == 42
+
+
+def test_get_value_missing_without_default() -> None:
+    config = ChatModelConfig(model="gpt-4", extra={"temperature": 0.2})
+    with pytest.raises(KeyError, match=r"'missing' not found in config ChatModelConfig"):
+        config.get_value("missing")
 
 
 # -- to_kwargs
