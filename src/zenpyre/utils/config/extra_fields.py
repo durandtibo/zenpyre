@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
-from zenpyre.utils.config.base import BaseConfig
+from zenpyre.utils.config.base import MISSING, BaseConfig
 
 if TYPE_CHECKING:
     from typing import Self
@@ -58,6 +58,43 @@ class ExtraFieldsConfig(BaseConfig):
         # (which otherwise only prevents reassigning the attribute
         # itself, not mutating the dict it points to).
         object.__setattr__(self, "extra", MappingProxyType(dict(self.extra)))
+
+    def get_value(self, name: str, default: Any = MISSING) -> Any:
+        """Get the value of a dataclass field (or ``extra`` entry) by
+        name.
+
+        Checks this config's own dataclass fields first (via ``getattr``,
+        without needing to build the full :meth:`to_kwargs` dict just for
+        a single lookup), then falls back to ``extra`` for keys that only
+        live there.
+
+        Args:
+            name: The name of the field (or ``extra`` key) to look up.
+            default: The value to return if ``name`` is not present.
+                If omitted, a missing ``name`` raises ``KeyError``
+                instead. Since ``None`` is a valid field value, omitting
+                ``default`` is the only way to distinguish "not present"
+                from "present but set to ``None``" — passing
+                ``default=None`` explicitly means a missing field
+                silently returns ``None`` instead of raising.
+
+        Returns:
+            The value associated with ``name``, or ``default`` if not
+                present and ``default`` was given.
+
+        Raises:
+            KeyError: If ``name`` is not present in this config and no
+                ``default`` was given.
+        """
+        if name != "extra" and name in self._get_reserved_fields():
+            return getattr(self, name)
+        if name in self.extra:
+            return self.extra[name]
+        if default is not MISSING:
+            return default
+        available = sorted({*self._get_reserved_fields(), *self.extra})
+        msg = f"{name!r} not found in config {type(self).__name__}; available keys: {available}."
+        raise KeyError(msg)
 
     def to_kwargs(self) -> dict[str, Any]:
         """Return every dataclass field (including ones declared by a

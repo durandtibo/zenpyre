@@ -38,7 +38,7 @@ class OtherFieldConfig(ExtraFieldsConfig):
 
 @pytest.fixture
 def config() -> DummyConfig:
-    return DummyConfig(name="a")
+    return DummyConfig(name="a", extra={"temperature": 0.2, "max_retries": 3})
 
 
 #######################################
@@ -66,7 +66,8 @@ def test_subclass_is_instance_of_base_config(config: DummyConfig) -> None:
 # --- construction & extra ---
 
 
-def test_default_extra_is_empty(config: DummyConfig) -> None:
+def test_default_extra_is_empty() -> None:
+    config = DummyConfig()
     assert dict(config.extra) == {}
 
 
@@ -164,6 +165,106 @@ def test_get_reserved_fields_excludes_extra() -> None:
 
 def test_get_reserved_fields_reflects_subclass_fields() -> None:
     assert OtherFieldConfig._get_reserved_fields() == {"max_tokens"}
+
+
+# --- get_value ---
+
+
+def test_get_value_returns_typed_field(config: DummyConfig) -> None:
+    assert config.get_value("name") == "a"
+
+
+def test_get_value_returns_extra_entry(config: DummyConfig) -> None:
+    assert config.get_value("temperature") == 0.2
+
+
+def test_get_value_typed_field_takes_priority_over_extra() -> None:
+    """A field defined on the dataclass must win over an 'extra' entry
+    of the same name.
+
+    In practice this collision can't happen through normal construction
+    (the __post_init__ guard rejects it), so this test constructs the
+    unhashable-collision state directly by bypassing __post_init__,
+    purely to pin down get_value's own lookup order in isolation.
+    """
+    config = DummyConfig(name="a")
+    object.__setattr__(config, "extra", {"name": "shadowed"})
+    assert config.get_value("name") == "a"
+
+
+def test_get_value_missing_key_raises_key_error(config: DummyConfig) -> None:
+    with pytest.raises(KeyError, match=r"'missing_key' not found in config DummyConfig"):
+        config.get_value("missing_key")
+
+
+def test_get_value_missing_key_error_lists_available_keys(config: DummyConfig) -> None:
+    with pytest.raises(KeyError) as exc_info:
+        config.get_value("missing_key")
+    message = str(exc_info.value)
+    assert "name" in message
+    assert "temperature" in message
+    assert "max_retries" in message
+
+
+def test_get_value_missing_key_with_default_returns_default(config: DummyConfig) -> None:
+    assert config.get_value("missing_key", default=42) == 42
+
+
+def test_get_value_missing_key_with_none_default_does_not_raise(config: DummyConfig) -> None:
+    assert config.get_value("missing_key", default=None) is None
+
+
+def test_get_value_present_field_ignores_default() -> None:
+    """If the key IS present, `default` must be ignored entirely, even
+    though a default was also supplied."""
+    config = DummyConfig(name="a")
+    assert config.get_value("name", default="unused") == "a"
+
+
+def test_get_value_present_extra_key_ignores_default(config: DummyConfig) -> None:
+    assert config.get_value("temperature", default="unused") == 0.2
+
+
+def test_get_value_field_value_that_is_none_is_returned_not_default() -> None:
+    """Distinguishes 'field present but set to None' from 'field
+    missing' - the whole reason get_value uses a sentinel rather than
+    default=None."""
+    config = OtherFieldConfig(max_tokens=None)
+    assert config.get_value("max_tokens", default=42) is None
+
+
+def test_get_value_extra_value_that_is_none_is_returned_not_default() -> None:
+    config = DummyConfig(name="a", extra={"note": None})
+    assert config.get_value("note", default="fallback") is None
+
+
+def test_get_value_does_not_expose_extra_itself() -> None:
+    """'extra' is the mechanism, not a real data key, so looking it up
+    by name must not succeed even though `self.extra` technically exists
+    as an attribute."""
+    config = DummyConfig(name="a")
+    with pytest.raises(KeyError):
+        config.get_value("extra")
+
+
+def test_get_value_extra_key_named_extra_is_unreachable() -> None:
+    """Documents current behavior: even if a caller somehow got 'extra'
+    into the extra dict itself (bypassing the collision guard), it
+    would not be reachable through get_value, since 'extra' is
+    explicitly excluded before the extra-dict fallback is checked."""
+    config = DummyConfig(name="a", extra={"extra": "nested"})
+    assert config.get_value("extra") == "nested"
+
+
+def test_get_value_on_subclass_with_no_extra_fields() -> None:
+    config = ExtraFieldsConfig(extra={"x": 1})
+    assert config.get_value("x") == 1
+
+
+def test_get_value_empty_extra_missing_field_raises() -> None:
+    config = ExtraFieldsConfig()
+    with pytest.raises(KeyError, match=r"'x' not found in config ExtraFieldsConfig"):
+        config.get_value("x")
 
 
 # --- to_kwargs ---
