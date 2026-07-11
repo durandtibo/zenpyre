@@ -6,9 +6,9 @@ from zenpyre.documents.analysis import (
     compute_content_stats_exact,
     compute_metadata_stats,
     print_content_stats_report,
+    print_metadata_stats_report,
 )
 from zenpyre.documents.fake import generate_fake_documents
-from zenpyre.records.analysis import print_metadata_stats_report
 from zenpyre.utils.rich import print_document
 
 
