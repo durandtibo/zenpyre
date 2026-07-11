@@ -2,38 +2,19 @@ r"""Contain chat model configurations."""
 
 from __future__ import annotations
 
-__all__ = ["BaseChatModelConfig", "ChatModelConfig"]
+__all__ = ["ChatModelConfig"]
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from zenpyre.utils.config import BaseConfig, ExtraFieldsConfig
+from zenpyre.utils.config import ExtraFieldsConfig
 
 if TYPE_CHECKING:
     from typing import Self
 
 
-class BaseChatModelConfig(BaseConfig):
-    """Define the interface for chat model configurations.
-
-    Concrete subclasses only need to implement :meth:`to_kwargs`;
-    :meth:`cache_key` is derived from it automatically.
-
-    Example:
-        ```pycon
-        >>> from zenpyre.chat_models import ChatModelConfig
-        >>> cfg = ChatModelConfig(model="gpt-4", extra={"temperature": 0.2})
-        >>> isinstance(cfg, BaseChatModelConfig)
-        True
-
-        ```
-    """
-
-    model: str
-
-
 @dataclass(frozen=True)
-class ChatModelConfig(BaseChatModelConfig, ExtraFieldsConfig):
+class ChatModelConfig(ExtraFieldsConfig):
     """A generic chat model configuration.
 
     ``to_kwargs()``, the ``extra``/field-name collision check, and
@@ -106,9 +87,12 @@ class ChatModelConfig(BaseChatModelConfig, ExtraFieldsConfig):
         return cls(model=model, extra=kwargs)
 
     def __hash__(self) -> int:
-        # The auto-generated dataclass __hash__ would hash `extra`
-        # (and any nested BaseConfig field, unless it's independently
-        # hashable) directly, which fails for an unhashable
-        # dict/MappingProxyType. Hashing the (string) cache key
-        # sidesteps that while keeping equal configs hash-equal.
-        return hash(self.cache_key())
+        # @dataclass(frozen=True) auto-generates a fresh __hash__ for
+        # every dataclass-decorated class unless __hash__ is already
+        # present in that class's own body — merely inheriting one
+        # does not suppress the override, and the auto-generated
+        # version would try to hash the unhashable `extra`
+        # dict/MappingProxyType. Delegating here (rather than
+        # repeating its logic) keeps ExtraFieldsConfig.__hash__ the
+        # single authoritative implementation.
+        return ExtraFieldsConfig.__hash__(self)
