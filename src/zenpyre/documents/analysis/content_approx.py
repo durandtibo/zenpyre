@@ -2,7 +2,7 @@ r"""Content approximate document statistics."""
 
 from __future__ import annotations
 
-__all__ = ["ApproxDocContentStats", "compute_doc_content_stats_approx"]
+__all__ = ["ApproxContentStats", "compute_content_stats_approx"]
 
 import hashlib
 import random
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class ApproxDocContentStats:
+class ApproxContentStats:
     """Streaming document health/analysis with APPROXIMATE duplicate
     detection and APPROXIMATE percentiles.
 
@@ -280,7 +280,7 @@ class ApproxDocContentStats:
         }
 
 
-def compute_doc_content_stats_approx(
+def compute_content_stats_approx(
     documents: Iterable[Document],
     *,
     expected_doc_count: int = 1_000_000,
@@ -334,12 +334,12 @@ def compute_doc_content_stats_approx(
     Example:
         ```pycon
         >>> from langchain_core.documents import Document
-        >>> from zenpyre.documents.analysis import compute_doc_content_stats_approx
+        >>> from zenpyre.documents.analysis import compute_content_stats_approx
         >>> docs = [
         ...     Document(id="a", page_content="hello"),
         ...     Document(id="b", page_content="hello world"),
         ... ]
-        >>> analysis = compute_doc_content_stats_approx(docs, expected_doc_count=1000)
+        >>> analysis = compute_content_stats_approx(docs, expected_doc_count=1000)
         >>> analysis["count"]
         2
 
@@ -351,7 +351,7 @@ def compute_doc_content_stats_approx(
         lengths for percentiles, with memory usage that grows with
         corpus size but produces exact (non-approximate) results.
     """
-    stats = ApproxDocContentStats(
+    stats = ApproxContentStats(
         expected_doc_count=expected_doc_count,
         fp_rate=fp_rate,
         reservoir_size=reservoir_size,

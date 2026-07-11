@@ -4,8 +4,8 @@ import pytest
 from langchain_core.documents import Document
 
 from zenpyre.documents.analysis import (
-    ExactDocContentStats,
-    compute_doc_content_stats_exact,
+    ExactContentStats,
+    compute_content_stats_exact,
 )
 
 
@@ -38,29 +38,29 @@ def messy_docs() -> list[Document]:
     ]
 
 
-#####################################################
-#     Tests for compute_doc_content_stats_exact     #
-#####################################################
+#################################################
+#     Tests for compute_content_stats_exact     #
+#################################################
 
 
 # --- Return type and non-mutation ---
 
 
-def test_compute_doc_content_stats_exact_returns_dict(docs: list[Document]) -> None:
-    assert isinstance(compute_doc_content_stats_exact(docs), dict)
+def test_compute_content_stats_exact_returns_dict(docs: list[Document]) -> None:
+    assert isinstance(compute_content_stats_exact(docs), dict)
 
 
-def test_compute_doc_content_stats_exact_does_not_mutate_input(docs: list[Document]) -> None:
+def test_compute_content_stats_exact_does_not_mutate_input(docs: list[Document]) -> None:
     original_len = len(docs)
-    compute_doc_content_stats_exact(docs)
+    compute_content_stats_exact(docs)
     assert len(docs) == original_len
 
 
 # --- Empty input ---
 
 
-def test_compute_doc_content_stats_exact_empty_list() -> None:
-    assert compute_doc_content_stats_exact([]) == {
+def test_compute_content_stats_exact_empty_list() -> None:
+    assert compute_content_stats_exact([]) == {
         "count": 0,
         "total_chars": 0,
         "avg_chars": 0,
@@ -83,12 +83,12 @@ def test_compute_doc_content_stats_exact_empty_list() -> None:
     }
 
 
-def test_compute_doc_content_stats_exact_empty_generator() -> None:
+def test_compute_content_stats_exact_empty_generator() -> None:
     def gen() -> object:
         return
         yield  # pragma: no cover
 
-    assert compute_doc_content_stats_exact(gen()) == {
+    assert compute_content_stats_exact(gen()) == {
         "count": 0,
         "total_chars": 0,
         "avg_chars": 0,
@@ -114,8 +114,8 @@ def test_compute_doc_content_stats_exact_empty_generator() -> None:
 # --- Core analysis ---
 
 
-def test_compute_doc_content_stats_exact_core_stats(docs: list[Document]) -> None:
-    assert compute_doc_content_stats_exact(docs) == {
+def test_compute_content_stats_exact_core_stats(docs: list[Document]) -> None:
+    assert compute_content_stats_exact(docs) == {
         "count": 3,
         "total_chars": 60,
         "avg_chars": 20,
@@ -138,9 +138,9 @@ def test_compute_doc_content_stats_exact_core_stats(docs: list[Document]) -> Non
     }
 
 
-def test_compute_doc_content_stats_exact_single_doc() -> None:
+def test_compute_content_stats_exact_single_doc() -> None:
     docs = [Document(id="1", page_content="hello", metadata={"source": "x"})]
-    assert compute_doc_content_stats_exact(docs) == {
+    assert compute_content_stats_exact(docs) == {
         "count": 1,
         "total_chars": 5,
         "avg_chars": 5,
@@ -163,13 +163,13 @@ def test_compute_doc_content_stats_exact_single_doc() -> None:
     }
 
 
-def test_compute_doc_content_stats_exact_std_dev_known_value() -> None:
+def test_compute_content_stats_exact_std_dev_known_value() -> None:
     lengths = [2, 4, 4, 4, 5, 5, 7, 9]
     docs = [
         Document(id=str(i), page_content="x" * length, metadata={"source": "x"})
         for i, length in enumerate(lengths)
     ]
-    assert compute_doc_content_stats_exact(docs) == {
+    assert compute_content_stats_exact(docs) == {
         "count": 8,
         "total_chars": 40,
         "avg_chars": 5,
@@ -192,11 +192,11 @@ def test_compute_doc_content_stats_exact_std_dev_known_value() -> None:
     }
 
 
-def test_compute_doc_content_stats_exact_percentiles_one_to_ten() -> None:
+def test_compute_content_stats_exact_percentiles_one_to_ten() -> None:
     docs = [
         Document(id=str(n), page_content="x" * n, metadata={"source": "x"}) for n in range(1, 11)
     ]
-    assert compute_doc_content_stats_exact(docs) == {
+    assert compute_content_stats_exact(docs) == {
         "count": 10,
         "total_chars": 55,
         "avg_chars": 5.5,
@@ -222,14 +222,14 @@ def test_compute_doc_content_stats_exact_percentiles_one_to_ten() -> None:
 # --- Tie-breaking ---
 
 
-def test_compute_doc_content_stats_exact_min_max_id_first_on_tie() -> None:
+def test_compute_content_stats_exact_min_max_doc_id_first_on_tie() -> None:
     docs = [
         Document(id="first_min", page_content="aa", metadata={"source": "x"}),
         Document(id="second_min", page_content="aa", metadata={"source": "x"}),
         Document(id="first_max", page_content="zz", metadata={"source": "x"}),
         Document(id="second_max", page_content="zz", metadata={"source": "x"}),
     ]
-    assert compute_doc_content_stats_exact(docs) == {
+    assert compute_content_stats_exact(docs) == {
         "count": 4,
         "total_chars": 8,
         "avg_chars": 2,
@@ -255,8 +255,8 @@ def test_compute_doc_content_stats_exact_min_max_id_first_on_tie() -> None:
 # --- Data quality flags ---
 
 
-def test_compute_doc_content_stats_exact_messy_docs(messy_docs: list[Document]) -> None:
-    assert compute_doc_content_stats_exact(messy_docs) == {
+def test_compute_content_stats_exact_messy_docs(messy_docs: list[Document]) -> None:
+    assert compute_content_stats_exact(messy_docs) == {
         "count": 5,
         "total_chars": 29,
         "avg_chars": 5.8,
@@ -279,10 +279,10 @@ def test_compute_doc_content_stats_exact_messy_docs(messy_docs: list[Document]) 
     }
 
 
-def test_compute_doc_content_stats_exact_none_content_treated_as_empty() -> None:
+def test_compute_content_stats_exact_none_content_treated_as_empty() -> None:
     doc = Document(id="1", page_content="placeholder", metadata={"source": "x"})
     doc.page_content = None
-    assert compute_doc_content_stats_exact([doc]) == {
+    assert compute_content_stats_exact([doc]) == {
         "count": 1,
         "total_chars": 0,
         "avg_chars": 0,
@@ -305,10 +305,10 @@ def test_compute_doc_content_stats_exact_none_content_treated_as_empty() -> None
     }
 
 
-def test_compute_doc_content_stats_exact_non_string_content() -> None:
+def test_compute_content_stats_exact_non_string_content() -> None:
     doc = Document(id="1", page_content="placeholder", metadata={"source": "x"})
     doc.page_content = 12345
-    assert compute_doc_content_stats_exact([doc]) == {
+    assert compute_content_stats_exact([doc]) == {
         "count": 1,
         "total_chars": 0,
         "avg_chars": 0,
@@ -334,8 +334,8 @@ def test_compute_doc_content_stats_exact_non_string_content() -> None:
 # --- Duplicate detection ---
 
 
-def test_compute_doc_content_stats_exact_duplicates(duplicate_docs: list[Document]) -> None:
-    assert compute_doc_content_stats_exact(duplicate_docs) == {
+def test_compute_content_stats_exact_duplicates(duplicate_docs: list[Document]) -> None:
+    assert compute_content_stats_exact(duplicate_docs) == {
         "count": 3,
         "total_chars": 33,
         "avg_chars": 11,
@@ -358,9 +358,9 @@ def test_compute_doc_content_stats_exact_duplicates(duplicate_docs: list[Documen
     }
 
 
-def test_compute_doc_content_stats_exact_empty_strings_are_duplicates_of_each_other() -> None:
+def test_compute_content_stats_exact_empty_strings_are_duplicates_of_each_other() -> None:
     docs = [Document(id=str(i), page_content="", metadata={"source": "x"}) for i in range(3)]
-    assert compute_doc_content_stats_exact(docs) == {
+    assert compute_content_stats_exact(docs) == {
         "count": 3,
         "total_chars": 0,
         "avg_chars": 0,
@@ -383,9 +383,9 @@ def test_compute_doc_content_stats_exact_empty_strings_are_duplicates_of_each_ot
     }
 
 
-def test_compute_doc_content_stats_exact_many_duplicates_same_content() -> None:
+def test_compute_content_stats_exact_many_duplicates_same_content() -> None:
     docs = [Document(id=str(i), page_content="repeat", metadata={"source": "x"}) for i in range(5)]
-    assert compute_doc_content_stats_exact(docs) == {
+    assert compute_content_stats_exact(docs) == {
         "count": 5,
         "total_chars": 30,
         "avg_chars": 6,
@@ -411,12 +411,12 @@ def test_compute_doc_content_stats_exact_many_duplicates_same_content() -> None:
 # --- Iterator / generator support ---
 
 
-def test_compute_doc_content_stats_exact_generator_input() -> None:
+def test_compute_content_stats_exact_generator_input() -> None:
     def gen() -> object:
         yield Document(id="1", page_content="aaaa", metadata={"source": "x"})
         yield Document(id="2", page_content="bb", metadata={"source": "x"})
 
-    assert compute_doc_content_stats_exact(gen()) == {
+    assert compute_content_stats_exact(gen()) == {
         "count": 2,
         "total_chars": 6,
         "avg_chars": 3,
@@ -439,19 +439,19 @@ def test_compute_doc_content_stats_exact_generator_input() -> None:
     }
 
 
-def test_compute_doc_content_stats_exact_generator_consumed_only_once() -> None:
+def test_compute_content_stats_exact_generator_consumed_only_once() -> None:
     def gen() -> object:
         yield Document(id="1", page_content="x", metadata={"source": "x"})
 
     g = gen()
-    compute_doc_content_stats_exact(g)
+    compute_content_stats_exact(g)
     assert list(g) == []
 
 
-def test_compute_doc_content_stats_exact_map_iterator() -> None:
+def test_compute_content_stats_exact_map_iterator() -> None:
     raw_texts = ["one", "two", "three"]
     docs_iter = (Document(id=t, page_content=t, metadata={"source": "x"}) for t in raw_texts)
-    assert compute_doc_content_stats_exact(docs_iter) == {
+    assert compute_content_stats_exact(docs_iter) == {
         "count": 3,
         "total_chars": 11,
         "avg_chars": pytest.approx(3.6666666666666665),
@@ -477,29 +477,29 @@ def test_compute_doc_content_stats_exact_map_iterator() -> None:
 # --- Larger scale sanity check ---
 
 
-def test_compute_doc_content_stats_exact_thousand_docs() -> None:
+def test_compute_content_stats_exact_thousand_docs() -> None:
     docs = [
         Document(id=str(i), page_content="x" * (i % 50 + 1), metadata={"source": "x"})
         for i in range(1000)
     ]
-    result = compute_doc_content_stats_exact(docs)
+    result = compute_content_stats_exact(docs)
     assert result["count"] == 1000
     assert result["min_chars"] == 1
     assert result["max_chars"] == 50
     assert result["total_chars"] == sum((i % 50 + 1) for i in range(1000))
 
 
-##########################################
-#     Tests for ExactDocContentStats     #
-##########################################
+#######################################
+#     Tests for ExactContentStats     #
+#######################################
 
 
-def test_exact_doc_content_stats_starts_at_zero() -> None:
-    assert ExactDocContentStats().to_dict() == compute_doc_content_stats_exact([])
+def test_exact_content_stats_starts_at_zero() -> None:
+    assert ExactContentStats().to_dict() == compute_content_stats_exact([])
 
 
-def test_exact_doc_content_stats_manual_update_calls() -> None:
-    stats = ExactDocContentStats()
+def test_exact_content_stats_manual_update_calls() -> None:
+    stats = ExactContentStats()
     stats.update(Document(id="1", page_content="aa", metadata={"source": "x"}))
     stats.update(Document(id="2", page_content="bbbb", metadata={"source": "x"}))
     assert stats.to_dict() == {
@@ -525,7 +525,7 @@ def test_exact_doc_content_stats_manual_update_calls() -> None:
     }
 
 
-def test_exact_doc_content_stats_to_dict_is_idempotent() -> None:
-    stats = ExactDocContentStats()
+def test_exact_content_stats_to_dict_is_idempotent() -> None:
+    stats = ExactContentStats()
     stats.update(Document(id="1", page_content="abc", metadata={"source": "x"}))
     assert stats.to_dict() == stats.to_dict()

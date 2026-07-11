@@ -3,25 +3,25 @@ r"""Contain utilities to compute document statistics."""
 from __future__ import annotations
 
 __all__ = [
-    "ApproxDocContentStats",
-    "DocMetadataStats",
-    "ExactDocContentStats",
-    "compute_doc_content_stats_approx",
-    "compute_doc_content_stats_exact",
-    "compute_doc_metadata_stats",
-    "print_doc_content_stats",
+    "ApproxContentStats",
+    "ExactContentStats",
+    "MetadataStats",
+    "compute_content_stats_approx",
+    "compute_content_stats_exact",
+    "compute_metadata_stats",
+    "print_content_stats_report",
 ]
 
 from zenpyre.documents.analysis.content_approx import (
-    ApproxDocContentStats,
-    compute_doc_content_stats_approx,
+    ApproxContentStats,
+    compute_content_stats_approx,
 )
 from zenpyre.documents.analysis.content_exact import (
-    ExactDocContentStats,
-    compute_doc_content_stats_exact,
+    ExactContentStats,
+    compute_content_stats_exact,
 )
-from zenpyre.documents.analysis.content_print import print_doc_content_stats
-from zenpyre.documents.analysis.metadata import (
-    DocMetadataStats,
-    compute_doc_metadata_stats,
+from zenpyre.documents.analysis.content_print import print_content_stats_report
+from zenpyre.documents.analysis.metadata_stats import (
+    MetadataStats,
+    compute_metadata_stats,
 )

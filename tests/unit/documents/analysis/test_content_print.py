@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from zenpyre.documents.analysis import print_doc_content_stats
+from zenpyre.documents.analysis import print_content_stats_report
 from zenpyre.documents.analysis.content_print import (
     _build_approx_footnote_items,
     _build_bar_chart_items,
@@ -412,41 +412,41 @@ def test_build_approx_footnote_items_missing_keys_does_not_raise() -> None:
     assert len(items) == 1
 
 
-#############################################
-#     Tests for print_doc_content_stats     #
-#############################################
+################################################
+#     Tests for print_content_stats_report     #
+################################################
 
 
-def test_print_doc_content_stats_exact_runs_without_error(
+def test_print_content_stats_report_exact_runs_without_error(
     exact_stats: dict, console: Console
 ) -> None:
-    print_doc_content_stats(exact_stats, console=console)
+    print_content_stats_report(exact_stats, console=console)
 
 
-def test_print_doc_content_stats_approx_runs_without_error(
+def test_print_content_stats_report_approx_runs_without_error(
     approx_stats: dict, console: Console
 ) -> None:
-    print_doc_content_stats(approx_stats, console=console)
+    print_content_stats_report(approx_stats, console=console)
 
 
-def test_print_doc_content_stats_empty_runs_without_error(
+def test_print_content_stats_report_empty_runs_without_error(
     empty_stats: dict, console: Console
 ) -> None:
-    print_doc_content_stats(empty_stats, console=console)
+    print_content_stats_report(empty_stats, console=console)
 
 
-def test_print_doc_content_stats_creates_own_console_if_none_given(
+def test_print_content_stats_report_creates_own_console_if_none_given(
     exact_stats: dict,
 ) -> None:
     # no console passed -> should fall back to a real Console() internally
-    print_doc_content_stats(exact_stats)
+    print_content_stats_report(exact_stats)
 
 
-def test_print_doc_content_stats_custom_title(exact_stats: dict, console: Console) -> None:
-    print_doc_content_stats(exact_stats, title="Custom Title", console=console)
+def test_print_content_stats_report_custom_title(exact_stats: dict, console: Console) -> None:
+    print_content_stats_report(exact_stats, title="Custom Title", console=console)
 
 
-def test_print_doc_content_stats_no_issues(exact_stats: dict, console: Console) -> None:
+def test_print_content_stats_report_no_issues(exact_stats: dict, console: Console) -> None:
     healthy_stats = {
         **exact_stats,
         "empty_count": 0,
@@ -456,10 +456,10 @@ def test_print_doc_content_stats_no_issues(exact_stats: dict, console: Console) 
         "missing_metadata_count": 0,
         "duplicate_count": 0,
     }
-    print_doc_content_stats(healthy_stats, console=console)
+    print_content_stats_report(healthy_stats, console=console)
 
 
-def test_print_doc_content_stats_missing_optional_keys(console: Console) -> None:
+def test_print_content_stats_report_missing_optional_keys(console: Console) -> None:
     # a minimal dict missing several optional keys should not raise,
     # since the function uses .get(...) with defaults throughout
     minimal_stats = {
@@ -472,17 +472,21 @@ def test_print_doc_content_stats_missing_optional_keys(console: Console) -> None
         "duplicate_count_exact": True,
         "percentiles_exact": True,
     }
-    print_doc_content_stats(minimal_stats, console=console)
+    print_content_stats_report(minimal_stats, console=console)
 
 
-def test_print_doc_content_stats_single_point_no_chart(exact_stats: dict, console: Console) -> None:
+def test_print_content_stats_report_single_point_no_chart(
+    exact_stats: dict, console: Console
+) -> None:
     # min == max means only one distinct point -> chart section should
     # be skipped gracefully rather than erroring
     single_point_stats = {**exact_stats, "min_chars": 100, "max_chars": 100}
-    print_doc_content_stats(single_point_stats, console=console)
+    print_content_stats_report(single_point_stats, console=console)
 
 
-def test_print_doc_content_stats_does_not_mutate_input(exact_stats: dict, console: Console) -> None:
+def test_print_content_stats_report_does_not_mutate_input(
+    exact_stats: dict, console: Console
+) -> None:
     original = dict(exact_stats)
-    print_doc_content_stats(exact_stats, console=console)
+    print_content_stats_report(exact_stats, console=console)
     assert exact_stats == original

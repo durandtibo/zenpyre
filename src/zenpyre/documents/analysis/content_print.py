@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["print_doc_content_stats"]
+__all__ = ["print_content_stats_report"]
 
 from typing import Any
 
@@ -436,7 +436,7 @@ def _build_approx_footnote_items(
     ]
 
 
-def print_doc_content_stats(
+def print_content_stats_report(
     stats: dict[str, Any],
     *,
     title: str = "Document Content Stats",
@@ -488,7 +488,7 @@ def print_doc_content_stats(
         ...     "missing_metadata_count": 0, "duplicate_count": 0,
         ...     "duplicate_count_exact": True, "percentiles_exact": True,
         ... }
-        >>> print_doc_content_stats(analysis)  # doctest: +SKIP
+        >>> print_content_stats_report(analysis)  # doctest: +SKIP
     """
     console = console or get_console()
 
