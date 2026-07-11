@@ -154,9 +154,9 @@ class MetadataStats:
             - ``per_key``: A dict mapping each metadata key to a dict
               with:
 
-              - ``present_in_docs``: Number of records containing
+              - ``present_in_records``: Number of records containing
                 the key.
-              - ``missing_in_docs``: Number of records not
+              - ``missing_in_records``: Number of records not
                 containing the key.
               - ``value_types``: Sorted list of ``type(value).__name__``
                 seen for the key.
@@ -175,7 +175,7 @@ class MetadataStats:
                 unhashable value was seen.
 
             Percentages are intentionally omitted - compute them later
-            from the raw counts (e.g. ``present_in_docs / count``)
+            from the raw counts (e.g. ``present_in_records / count``)
             since they are trivially derived from this report.
         """
         n = self.count
@@ -185,8 +185,8 @@ class MetadataStats:
         for key in sorted(self._key_counts):
             present = self._key_counts[key]
             per_key[key] = {
-                "present_in_docs": present,
-                "missing_in_docs": n - present,
+                "present_in_records": present,
+                "missing_in_records": n - present,
                 "value_types": sorted(self._key_types.get(key, set())),
                 "none_or_empty_count": self._key_none_counts.get(key, 0),
                 "unique_values_sample": sorted(self._key_values.get(key, set()), key=str),
