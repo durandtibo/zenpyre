@@ -2,7 +2,7 @@ r"""Record metadata statistics."""
 
 from __future__ import annotations
 
-__all__ = ["RecordMetadataStats", "compute_record_metadata_stats"]
+__all__ = ["MetadataStats", "compute_metadata_stats"]
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class RecordMetadataStats:
+class MetadataStats:
     """Streaming record metadata health/stats.
 
     Accumulates statistics one record at a time via ``update``, so it
@@ -204,7 +204,7 @@ class RecordMetadataStats:
         }
 
 
-def compute_record_metadata_stats(
+def compute_metadata_stats(
     records: Iterable[Record], n_sample_values: int | None = 3
 ) -> dict[str, Any]:
     """Compute metadata health/statistics over a stream of records.
@@ -236,18 +236,18 @@ def compute_record_metadata_stats(
     Example:
         ```pycon
         >>> from zenpyre.records import Record
-        >>> from zenpyre.records.analysis import compute_record_metadata_stats
+        >>> from zenpyre.records.analysis import compute_metadata_stats
         >>> records = [
         ...     Record(id="a", metadata={"source": "a.pdf"}),
         ...     Record(id="b", metadata={"source": "b.pdf", "page": 1}),
         ... ]
-        >>> stats = compute_record_metadata_stats(records)
+        >>> stats = compute_metadata_stats(records)
         >>> stats["count"]
         2
 
         ```
     """
-    stats = RecordMetadataStats(n_sample_values=n_sample_values)
+    stats = MetadataStats(n_sample_values=n_sample_values)
     for record in records:
         stats.update(record)
     return stats.to_dict()
