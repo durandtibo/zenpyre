@@ -20,7 +20,8 @@ class DummyConfig(ExtraFieldsConfig):
 
     name: str = "dummy"
 
-    __hash__ = ExtraFieldsConfig.__hash__
+    def __hash__(self) -> int:
+        return ExtraFieldsConfig.__hash__(self)
 
 
 @dataclass(frozen=True)
@@ -31,7 +32,8 @@ class OtherFieldConfig(ExtraFieldsConfig):
 
     max_tokens: int | None = None
 
-    __hash__ = ExtraFieldsConfig.__hash__
+    def __hash__(self) -> int:
+        return ExtraFieldsConfig.__hash__(self)
 
 
 @pytest.fixture
@@ -137,6 +139,33 @@ def test_collision_guard_does_not_flag_extra_itself() -> None:
     DummyConfig(name="a", extra={"extra": "should not collide"})  # should not raise
 
 
+# --- _get_reserved_fields ---
+
+
+def test_get_reserved_fields_callable_on_instance(config: DummyConfig) -> None:
+    """_get_reserved_fields must remain callable via an instance (as
+    used internally by __post_init__), not just via the class."""
+    assert config._get_reserved_fields() == {"name"}
+
+
+def test_get_reserved_fields_callable_on_class() -> None:
+    """_get_reserved_fields must be a classmethod so it can also be.
+
+    called directly on the class (as used internally by from_kwargs),
+    without needing to construct an instance first - this is the exact
+    bug from_kwargs hit when this was a plain instance method.
+    """
+    assert DummyConfig._get_reserved_fields() == {"name"}
+
+
+def test_get_reserved_fields_excludes_extra() -> None:
+    assert "extra" not in DummyConfig._get_reserved_fields()
+
+
+def test_get_reserved_fields_reflects_subclass_fields() -> None:
+    assert OtherFieldConfig._get_reserved_fields() == {"max_tokens"}
+
+
 # --- to_kwargs ---
 
 
@@ -179,6 +208,66 @@ def test_to_kwargs_subclass_field_alongside_extra() -> None:
     kwargs = config.to_kwargs()
     assert kwargs["max_tokens"] == 1024
     assert kwargs["max_retries"] == 3
+
+
+# --- from_kwargs ---
+
+
+def test_from_kwargs_routes_field_name_to_real_field() -> None:
+    config = DummyConfig.from_kwargs(name="custom")
+    assert config.name == "custom"
+    assert dict(config.extra) == {}
+
+
+def test_from_kwargs_routes_unrecognized_key_to_extra() -> None:
+    config = DummyConfig.from_kwargs(name="a", temperature=0.2)
+    assert config.name == "a"
+    assert dict(config.extra) == {"temperature": 0.2}
+
+
+def test_from_kwargs_no_field_kwargs_still_works() -> None:
+    """Every field on DummyConfig has a default, so from_kwargs with no
+    field-matching kwargs at all must fall back to defaults rather than
+    raising."""
+    config = DummyConfig.from_kwargs(max_retries=3)
+    assert config.name == "dummy"
+    assert dict(config.extra) == {"max_retries": 3}
+
+
+def test_from_kwargs_returns_instance_of_the_calling_subclass() -> None:
+    """from_kwargs is a classmethod inherited from ExtraFieldsConfig; it
+    must construct an instance of the subclass it was called on, not of
+    ExtraFieldsConfig itself."""
+    config = OtherFieldConfig.from_kwargs(max_tokens=1024, max_retries=3)
+    assert isinstance(config, OtherFieldConfig)
+    assert config.max_tokens == 1024
+    assert dict(config.extra) == {"max_retries": 3}
+
+
+def test_from_kwargs_equivalent_to_direct_construction() -> None:
+    cfg1 = DummyConfig.from_kwargs(name="a", max_retries=3)
+    cfg2 = DummyConfig(name="a", extra={"max_retries": 3})
+    assert cfg1 == cfg2
+    assert cfg1.cache_key() == cfg2.cache_key()
+
+
+def test_from_kwargs_result_is_frozen() -> None:
+    config = DummyConfig.from_kwargs(name="a")
+    with pytest.raises(FrozenInstanceError):
+        config.name = "other"
+
+
+def test_from_kwargs_extra_is_mapping_proxy() -> None:
+    config = DummyConfig.from_kwargs(name="a", max_retries=3)
+    assert isinstance(config.extra, MappingProxyType)
+
+
+def test_from_kwargs_on_base_class_routes_everything_to_extra() -> None:
+    """ExtraFieldsConfig itself has no fields besides `extra`, so every
+    kwarg passed to from_kwargs on the base class directly must land in
+    extra."""
+    config = ExtraFieldsConfig.from_kwargs(x=1, y=2)
+    assert dict(config.extra) == {"x": 1, "y": 2}
 
 
 # --- cache_key ---

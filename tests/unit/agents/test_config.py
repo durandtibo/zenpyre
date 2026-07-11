@@ -389,23 +389,6 @@ def test_from_kwargs_duplicate_system_prompt_id_key_raises_type_error(
         AgentConfig.from_kwargs(chat_model, "p", system_prompt_id="a", **extra)
 
 
-def test_from_kwargs_on_subclass_rejects_subclass_specific_field(
-    chat_model: ChatModelConfig,
-) -> None:
-    """from_kwargs's signature only names chat_model/system_prompt/
-    system_prompt_id, so it has no way to route max_tokens to the real
-    field; it can only go through **kwargs -> extra, which the collision
-    guard correctly rejects (accepting it would let extra's max_tokens
-    silently override to_kwargs()'s output while cfg.max_tokens itself
-    stayed at its default).
-
-    Subclass-specific fields must be set via the regular constructor
-    instead.
-    """
-    with pytest.raises(ValueError, match=r"max_tokens"):
-        MyAgentConfig.from_kwargs(chat_model, "p", max_tokens=1024)
-
-
 def test_from_kwargs_on_subclass_works_for_extra_only(chat_model: ChatModelConfig) -> None:
     """from_kwargs still works on a subclass as long as the kwargs are
     genuine extra data, not a subclass field name."""

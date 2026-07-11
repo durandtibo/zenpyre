@@ -84,7 +84,7 @@ class ChatModelConfig(ExtraFieldsConfig):
 
             ```
         """
-        return cls(model=model, extra=kwargs)
+        return super().from_kwargs(model=model, **kwargs)
 
     def __hash__(self) -> int:
         # @dataclass(frozen=True) auto-generates a fresh __hash__ for
