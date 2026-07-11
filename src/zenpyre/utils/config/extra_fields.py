@@ -7,9 +7,12 @@ __all__ = ["ExtraFieldsConfig"]
 import dataclasses
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from zenpyre.utils.config.base import BaseConfig
+
+if TYPE_CHECKING:
+    from typing import Self
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -19,10 +22,10 @@ class ExtraFieldsConfig(BaseConfig):
     declares.
 
     Subclasses just need to be frozen dataclasses with their own typed
-    fields; :meth:`to_kwargs`, the extra/field-name collision check, and
-    ``__hash__`` are all inherited from here and work automatically via
-    introspection (:func:`dataclasses.fields`) — no per-subclass
-    overriding required.
+    fields; :meth:`to_kwargs`, :meth:`from_kwargs`, the extra/field-name
+    collision check, and ``__hash__`` are all inherited from here and
+    work automatically via introspection (:func:`dataclasses.fields`) —
+    no per-subclass overriding required.
 
     ``extra`` is declared keyword-only (``kw_only=True`` on this class)
     specifically so that subclasses are free to add non-defaulted,
@@ -41,7 +44,7 @@ class ExtraFieldsConfig(BaseConfig):
     extra: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        reserved = {f.name for f in dataclasses.fields(self) if f.name != "extra"}
+        reserved = self._get_reserved_fields()
         collisions = reserved & self.extra.keys()
         if collisions:
             msg = (
@@ -74,6 +77,55 @@ class ExtraFieldsConfig(BaseConfig):
         }
         kwargs.update(self.extra)
         return kwargs
+
+    @classmethod
+    def from_kwargs(cls, **kwargs: Any) -> Self:
+        """Construct a config from arbitrary keyword arguments, routing
+        each one to a real field if it matches one, or to ``extra``
+        otherwise.
+
+        A convenience alternative to the regular constructor's
+        ``extra={...}`` dict, letting callers pass extra fields
+        directly as keyword arguments instead of building the dict
+        themselves. Which keys count as "real fields" is determined by
+        introspection (:func:`dataclasses.fields`) on ``cls``, so this
+        works automatically for any subclass without needing its own
+        override — including subclasses that add their own typed
+        fields.
+
+        Args:
+            **kwargs: Keyword arguments to route: keys matching one of
+                this class's own dataclass field names (other than
+                ``extra``) are passed through as that field's value;
+                any remaining keys are collected into ``extra``.
+
+        Returns:
+            A new instance of ``cls``.
+
+        Raises:
+            ValueError: If, after routing, a key intended for ``extra``
+                collides with one of this config's own field names —
+                this can't actually happen through normal use of this
+                method (a key either matches a field name and is routed
+                there, or it doesn't and goes to ``extra``, so a
+                collision would require the field-name set to change
+                between routing and construction). Documented for
+                completeness rather than as a realistic failure mode.
+        """
+        reserved = cls._get_reserved_fields()
+        no_extra = {key: value for key, value in kwargs.items() if key in reserved}
+        extra = {key: value for key, value in kwargs.items() if key not in reserved}
+        return cls(**no_extra, extra=extra)
+
+    @classmethod
+    def _get_reserved_fields(cls) -> set[str]:
+        # dataclasses.fields() accepts either a dataclass instance or a
+        # dataclass type, so this works called either via an instance
+        # (self._get_reserved_fields(), as in __post_init__) or via the
+        # class itself (cls._get_reserved_fields(), as in from_kwargs).
+        # It must be a classmethod (not a plain instance method) for
+        # the latter call site to work at all.
+        return {f.name for f in dataclasses.fields(cls) if f.name != "extra"}
 
     def __hash__(self) -> int:
         # The auto-generated dataclass __hash__ would hash `extra`

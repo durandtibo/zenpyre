@@ -147,11 +147,11 @@ class AgentConfig(ExtraFieldsConfig, MultilineDisplayMixin):
         """
         if system_prompt_id is None:
             system_prompt_id = hash_string(system_prompt, length=64)
-        return cls(
+        return super().from_kwargs(
             chat_model=chat_model,
             system_prompt=system_prompt,
             system_prompt_id=system_prompt_id,
-            extra=kwargs,
+            **kwargs,
         )
 
     def _get_repr_kwargs(self) -> dict[str, Any]:
