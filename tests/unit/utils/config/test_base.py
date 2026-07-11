@@ -55,9 +55,9 @@ def config() -> SimpleConfig:
     return SimpleConfig(model="gpt-4")
 
 
-##################################
+#################################
 #     Tests for BaseConfig      #
-##################################
+#################################
 
 
 def test_base_config_is_abstract() -> None:

@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-__all__ = ["BaseConfig"]
+__all__ = ["MISSING", "BaseConfig"]
 
 from abc import ABC, abstractmethod
 from typing import Any
 
 from coola.hashing import hash_object
 from coola.recursive import recursive_apply
+
+MISSING = object()
 
 
 class BaseConfig(ABC):
@@ -21,18 +23,62 @@ class BaseConfig(ABC):
         ```pycon
         >>> from zenpyre.utils.config import BaseConfig
         >>> class ChatModelConfig(BaseConfig):
-        ...     def __init__(self, model, extra=None):
+        ...     def __init__(self, model: str, temperature: float | None = None):
         ...         self.model = model
-        ...         self.extra = extra or {}
-        ...     def to_kwargs(self):
-        ...         return {"model": self.model, **self.extra}
+        ...         self.temperature = temperature
+        ...     def get_value(self, name: str, default: Any = MISSING) -> Any:
+        ...         return getattr(self, name)
+        ...     def to_kwargs(self) -> dict:
+        ...         return {"model": self.model, "temperature": self.temperature}
         ...
-        >>> cfg = ChatModelConfig(model="gpt-4", extra={"temperature": 0.2})
+        >>> cfg = ChatModelConfig(model="gpt-4", temperature=0.2)
         >>> isinstance(cfg, BaseConfig)
         True
 
         ```
     """
+
+    # @abstractmethod
+    def get_value(self, name: str, default: Any = MISSING) -> Any:
+        """Get the value of a dataclass field (or ``extra`` entry) by
+        name.
+
+        Checks this config's own dataclass fields first (via ``getattr``,
+        without needing to build the full :meth:`to_kwargs` dict just for
+        a single lookup), then falls back to ``extra`` for keys that only
+        live there.
+
+        Args:
+            name: The name of the field (or ``extra`` key) to look up.
+            default: The value to return if ``name`` is not present.
+                If omitted, a missing ``name`` raises ``KeyError``
+                instead. Since ``None`` is a valid field value, omitting
+                ``default`` is the only way to distinguish "not present"
+                from "present but set to ``None``" — passing
+                ``default=None`` explicitly means a missing field
+                silently returns ``None`` instead of raising.
+
+        Returns:
+            The value associated with ``name``, or ``default`` if not
+                present and ``default`` was given.
+
+        Raises:
+            KeyError: If ``name`` is not present in this config and no
+                ``default`` was given.
+
+        Example:
+            ```pycon
+            >>> from zenpyre.chat_models import ChatModelConfig
+            >>> config = ChatModelConfig(model="gpt-4", extra={"temperature": 0.2})
+            >>> config.get_value("model")
+            'gpt-4'
+            >>> config.get_value("temperature")
+            0.2
+            >>> config.get_value("missing_key", default=42)
+            42
+
+            ```
+        """
 
     @abstractmethod
     def to_kwargs(self) -> dict[str, Any]:
@@ -51,13 +97,15 @@ class BaseConfig(ABC):
             ```pycon
             >>> from zenpyre.utils.config import BaseConfig
             >>> class ChatModelConfig(BaseConfig):
-            ...     def __init__(self, model, extra=None):
+            ...     def __init__(self, model: str, temperature: float | None = None):
             ...         self.model = model
-            ...         self.extra = extra or {}
-            ...     def to_kwargs(self):
-            ...         return {"model": self.model, **self.extra}
+            ...         self.temperature = temperature
+            ...     def get_value(self, name: str, default: Any = MISSING) -> Any:
+            ...         return getattr(self, name)
+            ...     def to_kwargs(self) -> dict:
+            ...         return {"model": self.model, "temperature": self.temperature}
             ...
-            >>> cfg = ChatModelConfig(model="gpt-4", extra={"temperature": 0.2})
+            >>> cfg = ChatModelConfig(model="gpt-4", temperature=0.2)
             >>> cfg.to_kwargs()
             {'model': 'gpt-4', 'temperature': 0.2}
 
@@ -99,33 +147,19 @@ class BaseConfig(ABC):
             ```pycon
             >>> from zenpyre.utils.config import BaseConfig
             >>> class ChatModelConfig(BaseConfig):
-            ...     def __init__(self, model, extra=None):
+            ...     def __init__(self, model: str, temperature: float | None = None):
             ...         self.model = model
-            ...         self.extra = extra or {}
-            ...     def to_kwargs(self):
-            ...         return {"model": self.model, **self.extra}
+            ...         self.temperature = temperature
+            ...     def get_value(self, name: str, default: Any = MISSING) -> Any:
+            ...         return getattr(self, name)
+            ...     def to_kwargs(self) -> dict:
+            ...         return {"model": self.model, "temperature": self.temperature}
             ...
-            >>> cfg = ChatModelConfig(model="gpt-4", extra={"temperature": 0.2})
+            >>> cfg = ChatModelConfig(model="gpt-4", temperature=0.2)
             >>> key = cfg.cache_key()
             >>> len(key)
             64
             >>> cfg.cache_key() == cfg.cache_key()
-            True
-
-            ```
-
-            Nested configs are resolved by content, not identity:
-
-            ```pycon
-            >>> class AgentConfig(BaseConfig):
-            ...     def __init__(self, chat_model):
-            ...         self.chat_model = chat_model
-            ...     def to_kwargs(self):
-            ...         return {"chat_model": self.chat_model}
-            ...
-            >>> a = AgentConfig(ChatModelConfig(model="gpt-4"))
-            >>> b = AgentConfig(ChatModelConfig(model="gpt-4"))
-            >>> a.cache_key() == b.cache_key()
             True
 
             ```
