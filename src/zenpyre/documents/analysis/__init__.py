@@ -10,6 +10,7 @@ __all__ = [
     "compute_content_stats_exact",
     "compute_metadata_stats",
     "print_content_stats_report",
+    "print_metadata_stats_report",
 ]
 
 from zenpyre.documents.analysis.content_approx import (
@@ -21,6 +22,7 @@ from zenpyre.documents.analysis.content_exact import (
     compute_content_stats_exact,
 )
 from zenpyre.documents.analysis.content_print import print_content_stats_report
+from zenpyre.documents.analysis.metadata_print import print_metadata_stats_report
 from zenpyre.documents.analysis.metadata_stats import (
     MetadataStats,
     compute_metadata_stats,
