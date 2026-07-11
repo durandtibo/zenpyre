@@ -83,83 +83,6 @@ def _format_percentage_of_total(count: int, total: int) -> str:
     return f" [dim]({count / total:.1%})[/dim]"
 
 
-# Sub-row resolution for one character cell, empty to full (8 levels).
-_EIGHTHS = " ▁▂▃▄▅▆▇█"
-
-
-def _render_bar_chart_rows(points: list[float], width: int = 40, height: int = 5) -> list[str]:
-    """Render a multi-row block-character bar chart from a handful of
-    known points (e.g. min, p50, p90, p99, max), linearly interpolated
-    across ``width`` columns and ``height`` rows tall.
-
-    This is a schematic shape, not a true histogram — the report only
-    has a few quantile markers to work with, not the full distribution
-    of lengths, so bar heights are interpolated between those markers
-    rather than reflecting actual bucket counts. Vertical resolution is
-    ``height * 8`` levels (8 sub-row levels per character row, via
-    Unicode eighth-block characters), so bars can have a fractional
-    top row rather than only whole-row steps.
-
-    Args:
-        points: A list of at least two numeric values, in any order,
-            representing known markers along the distribution (e.g.
-            ``[min, p50, p90, p99, max]``). Values are linearly
-            interpolated between consecutive entries as columns
-            advance from left to right.
-        width: Number of character columns in the rendered chart.
-        height: Number of character rows in the rendered chart.
-
-    Returns:
-        A list of exactly ``height`` strings, each exactly ``width``
-        characters wide, ordered top row first (tallest bars) down to
-        the bottom/baseline row. Returns an empty list if ``points``
-        has fewer than two values (a shape cannot be interpolated from
-        a single point).
-
-    Examples:
-        >>> rows = _render_bar_chart_rows([1, 5, 10], width=10, height=3)
-        >>> len(rows), len(rows[0])
-        (3, 10)
-        >>> _render_bar_chart_rows([42])
-        []
-        >>> _render_bar_chart_rows([])
-        []
-    """
-    if not points or len(points) < 2:
-        return []
-
-    lo, hi = min(points), max(points)
-    n = len(points)
-
-    # level[i] in [0, height * 8]: total eighths of vertical fill for column i
-    levels = []
-    for i in range(width):
-        pos = i / (width - 1) * (n - 1)
-        idx = int(pos)
-        frac = pos - idx
-        left = points[idx]
-        right = points[min(idx + 1, n - 1)]
-        value = left + (right - left) * frac
-        ratio = 0.0 if hi == lo else (value - lo) / (hi - lo)
-        levels.append(round(ratio * height * 8))
-
-    rows = []
-    for row_idx in range(height):
-        threshold_full = (height - row_idx) * 8  # eighths needed for a fully-filled cell here
-        threshold_empty = (height - row_idx - 1) * 8  # eighths needed for any fill here
-        line_chars = []
-        for level in levels:
-            if level >= threshold_full:
-                line_chars.append(_EIGHTHS[-1])
-            elif level <= threshold_empty:
-                line_chars.append(" ")
-            else:
-                sub = level - threshold_empty
-                line_chars.append(_EIGHTHS[sub])
-        rows.append("".join(line_chars))
-    return rows
-
-
 def _build_stats_table(
     stats: dict[str, Any],
     *,
@@ -331,66 +254,6 @@ def _build_status_line(any_issues: bool) -> Text:
     return Text("✓ no issues detected", style="bold green")
 
 
-def _build_bar_chart_items(stats: dict[str, Any], p_suffix: str) -> list[Text]:
-    """Build the "length shape" schematic bar chart section.
-
-    Collects the available quantile markers (min, p50, p90, p99, max)
-    from ``analysis``, and if at least two *distinct* values are present,
-    renders a 5-row block-character bar chart via
-    ``_render_bar_chart_rows`` plus a min/max axis label line beneath
-    it. Values that are missing (``None``) are excluded from the point
-    set rather than causing an error. If all available markers are
-    equal (e.g. every document has the same length), there is no shape
-    to draw, so the chart is skipped entirely.
-
-    Args:
-        stats: The full analysis report dict.
-        p_suffix: Either ``""`` or ``"_approx"``, used to look up the
-            correct percentile keys (mirrors the parameter of the same
-            name in ``_build_stats_table``).
-
-    Returns:
-        A list of ``rich.text.Text`` renderables: a dim section label,
-        followed by one ``Text`` per chart row, followed by a min/max
-        axis-label line. Returns an empty list if fewer than two
-        *distinct* quantile points are available (e.g. all documents
-        have exactly the same length, too few markers are present, or
-        the report is otherwise too sparse to draw a meaningful shape
-        from).
-
-    Examples:
-        >>> analysis = {"min_chars": 1, "max_chars": 10, "p50_chars": 5}
-        >>> items = _build_bar_chart_items(analysis, p_suffix="")
-        >>> len(items) > 0
-        True
-        >>> _build_bar_chart_items({"min_chars": 5, "max_chars": 5}, p_suffix="")
-        []
-        >>> analysis = {"min_chars": 5, "max_chars": 5, "p50_chars": 5, "p90_chars": 5, "p99_chars": 5}
-        >>> _build_bar_chart_items(analysis, p_suffix="")
-        []
-    """
-    min_chars = stats.get("min_chars")
-    max_chars = stats.get("max_chars")
-    p50 = stats.get(f"p50_chars{p_suffix}")
-    p90 = stats.get(f"p90_chars{p_suffix}")
-    p99 = stats.get(f"p99_chars{p_suffix}")
-
-    points = [v for v in (min_chars, p50, p90, p99, max_chars) if v is not None]
-    if len(set(points)) < 2:
-        return []
-
-    bar_rows = _render_bar_chart_rows(points, width=40, height=5)
-    chart_lines = [Text(line, style="cyan") for line in bar_rows]
-
-    min_label, max_label = _format_value(min_chars), _format_value(max_chars)
-    labels_line = Text()
-    labels_line.append(min_label, style="dim")
-    labels_line.append(" " * max(1, 34 - len(min_label) - len(max_label)))
-    labels_line.append(max_label, style="dim")
-
-    return [Text("length shape", style="dim"), *chart_lines, labels_line]
-
-
 def _build_approx_footnote_items(
     stats: dict[str, Any], *, is_exact: bool, count: int
 ) -> list[Text]:
@@ -519,7 +382,6 @@ def print_content_stats_report(
     overview = _build_overview_line(stats, count)
     doc_ids = _build_doc_ids_grid(stats)
     status_line = _build_status_line(any_issues)
-    bar_chart_items = _build_bar_chart_items(stats, p_suffix)
     footnote_items = _build_approx_footnote_items(stats, is_exact=is_exact, count=count)
 
     body = Group(
@@ -530,7 +392,6 @@ def print_content_stats_report(
         doc_ids,
         Text(),
         status_line,
-        *([Text(), *bar_chart_items] if bar_chart_items else []),
         *([Text(), *footnote_items] if footnote_items else []),
     )
 
