@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
-from coola.hashing import hash_object
+from zenpyre.utils.config import BaseConfig
 
 if TYPE_CHECKING:
     from typing import Self
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class AgentConfig:
+class AgentConfig(BaseConfig):
     r"""A generic LLM agent configuration.
 
     Subclass this to add provider- or agent-specific parameters as
@@ -117,50 +117,6 @@ class AgentConfig:
         }
         kwargs.update(self.extra)
         return kwargs
-
-    def cache_key(self, length: int = 64) -> str:
-        """Return a stable hash string derived from the current
-        configuration.
-
-        Serializes :meth:`to_kwargs`'s output to a canonical form with
-        sorted keys before hashing, so two configs with identical
-        content always produce the same hash regardless of field
-        ordering. The nested ``chat_model`` field is replaced by its
-        own :meth:`~zenpyre.chat_models.BaseChatModelConfig.cache_key`
-        string before hashing, since the config object itself isn't
-        guaranteed to be hashable or serializable on its own. Note
-        that this only covers whatever :meth:`to_kwargs` returns; see
-        that method's docstring for what's included.
-
-        Useful for cache keys, output filenames, or detecting
-        configuration changes between runs without comparing each
-        field manually.
-
-        Args:
-            length: The desired length of the returned hash string.
-
-        Returns:
-            A stable hash string, ``length`` characters long.
-
-        Example:
-            ```pycon
-            >>> from zenpyre.agents import AgentConfig
-            >>> from zenpyre.chat_models import ChatModelConfig
-            >>> cfg = AgentConfig(
-            ...     chat_model=ChatModelConfig(model="gpt-4"),
-            ...     system_prompt="You are helpful.",
-            ... )
-            >>> key = cfg.cache_key()
-            >>> len(key)
-            64
-            >>> cfg.cache_key() == cfg.cache_key()
-            True
-
-            ```
-        """
-        kwargs = self.to_kwargs()
-        kwargs["chat_model"] = self.chat_model.cache_key()
-        return hash_object(kwargs, length=length)
 
     @classmethod
     def from_kwargs(
