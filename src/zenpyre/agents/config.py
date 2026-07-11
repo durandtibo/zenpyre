@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any
 from zenpyre.utils.config import ExtraFieldsConfig
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from typing import Self
 
     from zenpyre.chat_models import BaseChatModelConfig
@@ -76,7 +77,7 @@ class AgentConfig(ExtraFieldsConfig):
     # inheriting one from ExtraFieldsConfig does not stop the override.
     # Restating it here (rather than repeating its logic) keeps the
     # single implementation in ExtraFieldsConfig authoritative.
-    __hash__ = ExtraFieldsConfig.__hash__
+    __hash__: Callable[[object], int] = ExtraFieldsConfig.__hash__
 
     @classmethod
     def from_kwargs(
