@@ -6,7 +6,10 @@ __all__ = ["BloomFilter"]
 
 import hashlib
 import math
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 
 class BloomFilter:
@@ -36,9 +39,9 @@ class BloomFilter:
                 approximately ``expected_items`` unique items have been
                 added, expressed as a value in ``(0, 1)``.
         """
-        self.size = self._optimal_size(expected_items, fp_rate)
-        self.hash_count = self._optimal_hash_count(self.size, expected_items)
-        self.bits = bytearray(self.size // 8 + 1)
+        self.size: int = self._optimal_size(expected_items, fp_rate)
+        self.hash_count: int = self._optimal_hash_count(self.size, expected_items)
+        self.bits: bytearray = bytearray(self.size // 8 + 1)
 
     @staticmethod
     def _optimal_size(n: int, p: float) -> int:
@@ -54,12 +57,15 @@ class BloomFilter:
         count ``n``."""
         return max(1, int((m / max(n, 1)) * math.log(2)))
 
-    def _hashes(self, item: bytes) -> Any:
+    def _hashes(self, item: bytes) -> Generator[int, None, None]:
         """Yield ``self.hash_count`` bit indices for ``item``.
 
-        Uses double hashing (two independent hash functions combined
+        Uses double hashing (two independent hash values combined
         linearly) to cheaply derive many hash functions from two, per
-        the standard Kirsch-Mitzenmacher technique.
+        the standard Kirsch-Mitzenmacher technique. Both values are
+        derived from a single SHA-512 digest, split into two halves,
+        which avoids a second hash computation while keeping the two
+        values statistically independent.
 
         Args:
             item: The raw bytes to hash.
@@ -67,8 +73,12 @@ class BloomFilter:
         Yields:
             Bit-array indices, in ``range(self.size)``.
         """
-        h1 = int(hashlib.sha256(item).hexdigest(), 16)
-        h2 = int(hashlib.md5(item).hexdigest(), 16)  # noqa: S324
+        digest = hashlib.sha512(item).digest()
+        h1 = int.from_bytes(digest[:32], "big")
+        h2 = int.from_bytes(digest[32:], "big")
+        # Ensure h2 is never 0, or every index collapses to h1 for that item.
+        h2 |= 1
+
         for i in range(self.hash_count):
             yield (h1 + i * h2) % self.size
 
