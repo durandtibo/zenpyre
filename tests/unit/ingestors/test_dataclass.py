@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 
 from zenpyre.ingestors import DataclassIngestor
-from zenpyre.utils.dataclass_io import save_dataclasses
+from zenpyre.utils.dataclass.io import save_dataclasses
 
 if TYPE_CHECKING:
     from pathlib import Path

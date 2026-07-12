@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 from coola.display import InlineDisplayMixin
 
 from zenpyre.ingestors.base import BaseIngestor
-from zenpyre.utils.dataclass_io import load_dataclasses
+from zenpyre.utils.dataclass.io import load_dataclasses
 
 if TYPE_CHECKING:
     from pathlib import Path

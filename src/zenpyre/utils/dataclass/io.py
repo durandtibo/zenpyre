@@ -44,7 +44,7 @@ def load_dataclasses(path: Path | str, cls: type[T]) -> list[T]:
     Example:
         ```pycon
         >>> from dataclasses import dataclass
-        >>> from zenpyre.utils.dataclass_io import load_dataclasses
+        >>> from zenpyre.utils.dataclass import load_dataclasses
         >>> @dataclass(frozen=True)
         ... class Point:
         ...     x: int
@@ -101,6 +101,19 @@ def save_dataclasses(items: list[Any], path: Path | str, *, exist_ok: bool = Fal
             ``exist_ok=False``.
         OSError: If ``path`` cannot be written to, or if ``path``
             exists as a directory (regardless of ``exist_ok``).
+
+    Example:
+        ```pycon
+        >>> from dataclasses import dataclass
+        >>> from zenpyre.utils.dataclass import save_dataclasses
+        >>> @dataclass(frozen=True)
+        ... class Point:
+        ...     x: int
+        ...     y: int
+        ...
+        >>> points = save_dataclasses([Point(1, 2), Point(3, 4)])  # doctest: +SKIP
+
+        ```
     """
     for item in items:
         if not is_dataclass(item):
