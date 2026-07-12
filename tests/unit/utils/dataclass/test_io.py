@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from zenpyre.utils.dataclass_io import load_dataclasses, save_dataclasses
+from zenpyre.utils.dataclass import load_dataclasses, save_dataclasses
 
 
 @dataclass(frozen=True)

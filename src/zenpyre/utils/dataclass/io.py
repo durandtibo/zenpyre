@@ -44,7 +44,7 @@ def load_dataclasses(path: Path | str, cls: type[T]) -> list[T]:
     Example:
         ```pycon
         >>> from dataclasses import dataclass
-        >>> from zenpyre.utils.dataclass_io import load_dataclasses
+        >>> from zenpyre.utils.dataclass import load_dataclasses
         >>> @dataclass(frozen=True)
         ... class Point:
         ...     x: int
@@ -105,7 +105,7 @@ def save_dataclasses(items: list[Any], path: Path | str, *, exist_ok: bool = Fal
     Example:
         ```pycon
         >>> from dataclasses import dataclass
-        >>> from zenpyre.utils.dataclass_io import save_dataclasses
+        >>> from zenpyre.utils.dataclass import save_dataclasses
         >>> @dataclass(frozen=True)
         ... class Point:
         ...     x: int
