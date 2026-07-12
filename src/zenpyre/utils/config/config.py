@@ -6,7 +6,7 @@ __all__ = ["Config"]
 
 from dataclasses import dataclass
 
-from zenpyre.utils.config import ExtraFieldsConfig
+from zenpyre.utils.config.extra_fields import ExtraFieldsConfig
 
 
 @dataclass(frozen=True)
