@@ -26,10 +26,12 @@ jobs:
           'anthropic',
           'chroma',
           'duckdb',
+          'faker',
           'google-genai',
           'huggingface',
           'ollama',
           'openai',
+          'polars',
           'sentence-transformers',
           'text-splitters',
         ]
