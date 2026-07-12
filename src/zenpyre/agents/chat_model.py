@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Iterator
 
 
-class AgentChatModel(Runnable[LanguageModelInput, dict]):
+class AgentChatModel(Runnable[LanguageModelInput, dict[str, Any]]):
     r"""Wrap a ``BaseChatModel`` so it exposes the same input/output
     shape as an agent (e.g. ``AgentRunnable`` / ``create_agent``),
     without any tool-calling loop.
@@ -122,7 +122,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
         input: LanguageModelInput,  # noqa: A002
         config: RunnableConfig | None = None,
         **kwargs: Any,
-    ) -> dict:
+    ) -> dict[str, Any]:
         r"""Invoke the wrapped chat model once and return an agent-shaped
         result.
 
@@ -166,7 +166,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
         input: LanguageModelInput,  # noqa: A002
         config: RunnableConfig | None = None,
         **kwargs: Any,
-    ) -> dict:
+    ) -> dict[str, Any]:
         r"""Asynchronously invoke the wrapped chat model once and return
         an agent-shaped result.
 
@@ -212,7 +212,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
         inputs: list[LanguageModelInput],
         config: RunnableConfig | list[RunnableConfig] | None = None,
         **kwargs: Any,
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         r"""Invoke the wrapped chat model on a batch of inputs.
 
         Unlike the default ``Runnable.batch`` (which fans out ``N``
@@ -262,7 +262,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
         inputs: list[LanguageModelInput],
         config: RunnableConfig | list[RunnableConfig] | None = None,
         **kwargs: Any,
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         r"""Asynchronously invoke the wrapped chat model on a batch of
         inputs.
 
