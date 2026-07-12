@@ -234,6 +234,20 @@ def test_invoke_with_structured_output_does_not_call_plain_model() -> None:
     structured.invoke.assert_called_once()
 
 
+@pytest.mark.parametrize(
+    "data",
+    [
+        "hi",
+        [HumanMessage(content="hi")],
+        {"messages": [HumanMessage(content="hi")]},
+    ],
+)
+def test_invoke_inputs(data: Any) -> None:
+    agent = AgentChatModel(model=_mock_model())
+    output = agent.invoke(data)
+    assert output == {"messages": [HumanMessage(content="hi"), AIMessage(content="hello")]}
+
+
 # --- ainvoke ---
 
 
@@ -312,6 +326,20 @@ def test_ainvoke_and_invoke_agree() -> None:
     ainvoke_result = asyncio.run(agent.ainvoke("hi"))
 
     assert invoke_result == ainvoke_result
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        "hi",
+        [HumanMessage(content="hi")],
+        {"messages": [HumanMessage(content="hi")]},
+    ],
+)
+def test_ainvoke_inputs(data: Any) -> None:
+    agent = AgentChatModel(model=_mock_model())
+    output = asyncio.run(agent.ainvoke(data))
+    assert output == {"messages": [HumanMessage(content="hi"), AIMessage(content="hello")]}
 
 
 # --- batch ---
@@ -394,6 +422,25 @@ def test_invoke_and_batch_agree() -> None:
     assert [invoke_result] == batch_result
 
 
+@pytest.mark.parametrize(
+    "data",
+    [
+        ["hi", "HI"],
+        [[HumanMessage(content="hi")], [HumanMessage(content="HI")]],
+        [{"messages": [HumanMessage(content="hi")]}, {"messages": [HumanMessage(content="HI")]}],
+    ],
+)
+def test_batch_inputs(data: Any) -> None:
+    model = _mock_model()
+    model.batch.return_value = [AIMessage(content="hello"), AIMessage(content="HELLO")]
+    agent = AgentChatModel(model=model)
+    output = agent.batch(data)
+    assert output == [
+        {"messages": [HumanMessage(content="hi"), AIMessage(content="hello")]},
+        {"messages": [HumanMessage(content="HI"), AIMessage(content="HELLO")]},
+    ]
+
+
 # --- abatch ---
 
 
@@ -468,6 +515,25 @@ def test_batch_and_abatch_agree() -> None:
     abatch_result = asyncio.run(agent.abatch(["hi"]))
 
     assert batch_result == abatch_result
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        ["hi", "HI"],
+        [[HumanMessage(content="hi")], [HumanMessage(content="HI")]],
+        [{"messages": [HumanMessage(content="hi")]}, {"messages": [HumanMessage(content="HI")]}],
+    ],
+)
+def test_abatch_inputs(data: Any) -> None:
+    model = _mock_model()
+    model.abatch = AsyncMock(return_value=[AIMessage(content="hello"), AIMessage(content="HELLO")])
+    agent = AgentChatModel(model=model)
+    output = asyncio.run(agent.abatch(data))
+    assert output == [
+        {"messages": [HumanMessage(content="hi"), AIMessage(content="hello")]},
+        {"messages": [HumanMessage(content="HI"), AIMessage(content="HELLO")]},
+    ]
 
 
 # --- stream ---
