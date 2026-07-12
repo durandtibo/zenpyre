@@ -4,7 +4,7 @@ from __future__ import annotations
 
 __all__ = ["format_documents", "format_documents_as_markdown", "format_documents_as_xml"]
 
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -51,7 +51,7 @@ def _build_blocks(
 def format_documents(
     documents: list[Document],
     include_metadata: bool = False,
-    output_format: Literal["xml", "markdown"] = "xml",
+    output_format: str = "xml",
 ) -> str:
     """Concatenate a list of LangChain documents into a single LLM-
     friendly string, in either XML or Markdown format.
