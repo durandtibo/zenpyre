@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Iterator
 
 
-class AgentChatModel(Runnable[LanguageModelInput, dict[str, Any]]):
+class AgentChatModel(Runnable[LanguageModelInput | dict[str, Any], dict[str, Any]]):
     r"""Wrap a ``BaseChatModel`` so it exposes the same input/output
     shape as an agent (e.g. ``AgentRunnable`` / ``create_agent``),
     without any tool-calling loop.
@@ -119,7 +119,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict[str, Any]]):
 
     def invoke(
         self,
-        input: LanguageModelInput,  # noqa: A002
+        input: LanguageModelInput | dict[str, Any],  # noqa: A002
         config: RunnableConfig | None = None,
         **kwargs: Any,
     ) -> dict[str, Any]:
@@ -163,7 +163,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict[str, Any]]):
 
     async def ainvoke(
         self,
-        input: LanguageModelInput,  # noqa: A002
+        input: LanguageModelInput | dict[str, Any],  # noqa: A002
         config: RunnableConfig | None = None,
         **kwargs: Any,
     ) -> dict[str, Any]:
@@ -209,7 +209,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict[str, Any]]):
 
     def batch(
         self,
-        inputs: list[LanguageModelInput],
+        inputs: list[LanguageModelInput | dict[str, Any]],
         config: RunnableConfig | list[RunnableConfig] | None = None,
         **kwargs: Any,
     ) -> list[dict[str, Any]]:
@@ -259,7 +259,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict[str, Any]]):
 
     async def abatch(
         self,
-        inputs: list[LanguageModelInput],
+        inputs: list[LanguageModelInput | dict[str, Any]],
         config: RunnableConfig | list[RunnableConfig] | None = None,
         **kwargs: Any,
     ) -> list[dict[str, Any]]:
@@ -310,7 +310,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict[str, Any]]):
 
     def stream(
         self,
-        input: LanguageModelInput,  # noqa: A002
+        input: LanguageModelInput | dict[str, Any],  # noqa: A002
         config: RunnableConfig | None = None,
         **kwargs: Any,
     ) -> Iterator[BaseMessage]:
@@ -349,7 +349,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict[str, Any]]):
 
     async def astream(
         self,
-        input: LanguageModelInput,  # noqa: A002
+        input: LanguageModelInput | dict[str, Any],  # noqa: A002
         config: RunnableConfig | None = None,
         **kwargs: Any,
     ) -> AsyncIterator[BaseMessage]:
