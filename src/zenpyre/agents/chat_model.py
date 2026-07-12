@@ -22,8 +22,9 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
     This is useful for dropping a plain chat model into a workflow that's
     built to work with agents: callers can treat this object as if it were
     an agent (accepting the same flexible input shapes and returning the
-    same ``{"messages": ..., "output": ...}`` dict), while under the hood
-    it's just a single call to the wrapped chat model.
+    same ``{"messages": ...}`` dict shape, with an optional
+    ``"structured_response"`` key), while under the hood it's just a
+    single call to the wrapped chat model.
 
     For ``invoke``/``ainvoke``, the input is coerced to a list of
     ``BaseMessage`` objects (optionally prefixed with a system prompt),
@@ -34,13 +35,12 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
 
     Note:
         ``stream``/``astream`` do **not** follow the same
-        ``{"messages": ..., "output": ...}`` shape as ``invoke``/
-        ``ainvoke``. They instead yield the raw ``BaseMessage`` chunks
-        produced by the wrapped model's own streaming interface, do not
-        accumulate a running message history, and ignore
-        ``response_format`` entirely (structured output is not
-        supported in streaming mode). See the docstrings of those
-        methods for details.
+        ``{"messages": ...}`` shape as ``invoke``/``ainvoke``. They
+        instead yield the raw ``BaseMessage`` chunks produced by the
+        wrapped model's own streaming interface, do not accumulate a
+        running message history, and ignore ``response_format``
+        entirely (structured output is not supported in streaming
+        mode). See the docstrings of those methods for details.
 
     Accepted input shapes (for all four methods):
         - ``str``: treated as a single human message.
@@ -69,7 +69,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
         >>> from zenpyre.agents import AgentChatModel
         >>> agent = AgentChatModel(model=my_chat_model)  # doctest: +SKIP
         >>> result = agent.invoke("What is the capital of France?")  # doctest: +SKIP
-        >>> result["output"]  # doctest: +SKIP
+        >>> result["messages"][-1].content  # doctest: +SKIP
         'The capital of France is Paris.'
 
         ```
@@ -141,8 +141,6 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
             - ``"messages"``: the full list of ``BaseMessage`` objects
               used for the call (including any prepended system prompt),
               with the model's response message appended at the end.
-            - ``"output"``: the ``content`` of the model's response
-              message, for convenient direct access.
             - ``"structured_response"``: present only if
               ``response_format`` was set at construction time. The
               parsed structured output, as an instance of
@@ -156,13 +154,12 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
             messages.append(ai_message)
             return {
                 "messages": messages,
-                "output": ai_message.content,
                 "structured_response": result["parsed"],
             }
 
         ai_message = self.model.invoke(messages, config=config, **kwargs)
         messages.append(ai_message)
-        return {"messages": messages, "output": ai_message.content}
+        return {"messages": messages}
 
     async def ainvoke(
         self,
@@ -188,7 +185,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
                 wrapped model's ``ainvoke`` call.
 
         Returns:
-            A dict with ``"messages"``, ``"output"``, and (if
+            A dict with ``"messages"``, and (if
             ``response_format`` is set) ``"structured_response"``.
         """
         messages = self._coerce_input(input)
@@ -199,13 +196,12 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
             messages.append(ai_message)
             return {
                 "messages": messages,
-                "output": ai_message.content,
                 "structured_response": result["parsed"],
             }
 
         ai_message = await self.model.ainvoke(messages, config=config, **kwargs)
         messages.append(ai_message)
-        return {"messages": messages, "output": ai_message.content}
+        return {"messages": messages}
 
     # ------------------------------------------------------------------
     # Batch interface
@@ -250,7 +246,6 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
                 output.append(
                     {
                         "messages": messages,
-                        "output": ai_message.content,
                         "structured_response": result["parsed"],
                     },
                 )
@@ -258,7 +253,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
 
         ai_messages = self.model.batch(all_messages, config=config, **kwargs)
         return [
-            {"messages": [*messages, ai_message], "output": ai_message.content}
+            {"messages": [*messages, ai_message]}
             for messages, ai_message in zip(all_messages, ai_messages, strict=True)
         ]
 
@@ -298,7 +293,6 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
                 output.append(
                     {
                         "messages": messages,
-                        "output": ai_message.content,
                         "structured_response": result["parsed"],
                     },
                 )
@@ -306,7 +300,7 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
 
         ai_messages = await self.model.abatch(all_messages, config=config, **kwargs)
         return [
-            {"messages": [*messages, ai_message], "output": ai_message.content}
+            {"messages": [*messages, ai_message]}
             for messages, ai_message in zip(all_messages, ai_messages, strict=True)
         ]
 
@@ -323,12 +317,12 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
         r"""Stream the wrapped chat model's response chunk by chunk.
 
         Unlike :meth:`invoke`, this does **not** return the
-        ``{"messages": ..., "output": ...}`` agent shape. It is a thin
-        pass-through to the wrapped model's own ``stream`` method: the
-        input is coerced to a message list (with the system prompt
-        prepended if applicable) and each ``BaseMessage`` chunk produced
-        by the model is yielded as-is. The running message history is
-        not accumulated or returned.
+        ``{"messages": ...}`` agent shape. It is a thin pass-through to
+        the wrapped model's own ``stream`` method: the input is coerced
+        to a message list (with the system prompt prepended if
+        applicable) and each ``BaseMessage`` chunk produced by the model
+        is yielded as-is. The running message history is not
+        accumulated or returned.
 
         Note:
             Structured output (``response_format``) is not supported in
@@ -363,9 +357,9 @@ class AgentChatModel(Runnable[LanguageModelInput, dict]):
         by chunk.
 
         As with :meth:`stream`, this does not return the
-        ``{"messages": ..., "output": ...}`` agent shape, does not
-        accumulate message history, and ignores ``response_format``
-        (structured output is not supported in streaming mode).
+        ``{"messages": ...}`` agent shape, does not accumulate message
+        history, and ignores ``response_format`` (structured output is
+        not supported in streaming mode).
 
         Args:
             input: The input to the model. See the class docstring for

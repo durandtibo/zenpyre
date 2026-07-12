@@ -1,5 +1,3 @@
-r"""Contain unit tests for ``AgentChatModel``."""
-
 from __future__ import annotations
 
 import asyncio
@@ -9,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
-from zenpyre.agents.chat_model import AgentChatModel
+from zenpyre.agents import AgentChatModel
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
@@ -155,7 +153,7 @@ def test_coerce_input_returns_new_list_each_call() -> None:
 # --- invoke ---
 
 
-def test_invoke_returns_messages_and_output() -> None:
+def test_invoke_returns_messages() -> None:
     model = _mock_model(response=AIMessage(content="hello there"))
     agent = AgentChatModel(model=model)
 
@@ -163,7 +161,6 @@ def test_invoke_returns_messages_and_output() -> None:
 
     assert result == {
         "messages": [HumanMessage(content="hi"), AIMessage(content="hello there")],
-        "output": "hello there",
     }
 
 
@@ -220,7 +217,6 @@ def test_invoke_with_structured_output_includes_structured_response() -> None:
 
     assert result == {
         "messages": [HumanMessage(content="what is the answer?"), ai_message],
-        "output": "42",
         "structured_response": {"answer": 42},
     }
 
@@ -241,7 +237,7 @@ def test_invoke_with_structured_output_does_not_call_plain_model() -> None:
 # --- ainvoke ---
 
 
-def test_ainvoke_returns_messages_and_output() -> None:
+def test_ainvoke_returns_messages() -> None:
     model = _mock_model(response=AIMessage(content="hello there"))
     agent = AgentChatModel(model=model)
 
@@ -249,7 +245,6 @@ def test_ainvoke_returns_messages_and_output() -> None:
 
     assert result == {
         "messages": [HumanMessage(content="hi"), AIMessage(content="hello there")],
-        "output": "hello there",
     }
 
 
@@ -305,7 +300,6 @@ def test_ainvoke_with_structured_output_includes_structured_response() -> None:
 
     assert result == {
         "messages": [HumanMessage(content="what is the answer?"), ai_message],
-        "output": "42",
         "structured_response": {"answer": 42},
     }
 
@@ -331,8 +325,8 @@ def test_batch_returns_one_result_per_input() -> None:
     result = agent.batch(["hi", "there"])
 
     assert result == [
-        {"messages": [HumanMessage(content="hi"), AIMessage(content="a")], "output": "a"},
-        {"messages": [HumanMessage(content="there"), AIMessage(content="b")], "output": "b"},
+        {"messages": [HumanMessage(content="hi"), AIMessage(content="a")]},
+        {"messages": [HumanMessage(content="there"), AIMessage(content="b")]},
     ]
 
 
@@ -380,12 +374,10 @@ def test_batch_with_structured_output_includes_structured_response() -> None:
     assert result == [
         {
             "messages": [HumanMessage(content="hi"), AIMessage(content="a")],
-            "output": "a",
             "structured_response": {"v": 1},
         },
         {
             "messages": [HumanMessage(content="there"), AIMessage(content="b")],
-            "output": "b",
             "structured_response": {"v": 2},
         },
     ]
@@ -413,8 +405,8 @@ def test_abatch_returns_one_result_per_input() -> None:
     result = asyncio.run(agent.abatch(["hi", "there"]))
 
     assert result == [
-        {"messages": [HumanMessage(content="hi"), AIMessage(content="a")], "output": "a"},
-        {"messages": [HumanMessage(content="there"), AIMessage(content="b")], "output": "b"},
+        {"messages": [HumanMessage(content="hi"), AIMessage(content="a")]},
+        {"messages": [HumanMessage(content="there"), AIMessage(content="b")]},
     ]
 
 
@@ -451,7 +443,6 @@ def test_abatch_with_structured_output_includes_structured_response() -> None:
     assert result == [
         {
             "messages": [HumanMessage(content="hi"), AIMessage(content="a")],
-            "output": "a",
             "structured_response": {"v": 1},
         }
     ]
