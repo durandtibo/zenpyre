@@ -1,0 +1,3280 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://durandtibo.github.io/zenpyre/main/refs/runnables/">
+      
+      
+        <link rel="prev" href="../records/">
+      
+      
+        <link rel="next" href="../testing/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Runnables - zenpyre</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#zenpyre.runnables" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="zenpyre" class="md-header__button md-logo" aria-label="zenpyre" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            zenpyre
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Runnables
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/durandtibo/zenpyre" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    durandtibo/zenpyre
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../get_started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Get Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../agents/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://github.com/durandtibo/zenpyre" class="md-tabs__link">
+        
+  
+  
+    
+  
+  GitHub
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="zenpyre" class="md-nav__button md-logo" aria-label="zenpyre" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    zenpyre
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/durandtibo/zenpyre" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    durandtibo/zenpyre
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../get_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../chat_models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chat models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data_processors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data processors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../document_loaders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document loaders
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../document_stores/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document stores
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../documents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../embeddings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Embeddings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ingestors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../record_stores/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record stores
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../records/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Records
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runnables
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runnables
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#zenpyre.runnables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        runnables
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="runnables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.CachingRunnable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CachingRunnable
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.InputOutputPair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InputOutputPair
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.InputOutputRunnable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InputOutputRunnable
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RecordingRunnable
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RecordingRunnable">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.reserved_metadata_keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        reserved_metadata_keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.abatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        abatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.ainvoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ainvoke
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.astream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        astream
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.batch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        batch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.invoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        invoke
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.stream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stream
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.structured_output_runnable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        structured_output_runnable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../text_splitters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Text splitters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utils
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vectorstores/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vectorstores
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/durandtibo/zenpyre" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#zenpyre.runnables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        runnables
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="runnables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.CachingRunnable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CachingRunnable
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.InputOutputPair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InputOutputPair
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.InputOutputRunnable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InputOutputRunnable
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RecordingRunnable
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RecordingRunnable">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.reserved_metadata_keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        reserved_metadata_keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.abatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        abatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.ainvoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ainvoke
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.astream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        astream
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.batch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        batch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.invoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        invoke
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.RecordingRunnable.stream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stream
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zenpyre.runnables.structured_output_runnable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        structured_output_runnable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Runnables</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="zenpyre.runnables" class="doc doc-heading">
+            <span class="doc doc-object-name doc-module-name">zenpyre.runnables</span>
+
+
+<a href="#zenpyre.runnables" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Contain runnables.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="zenpyre.runnables.CachingRunnable" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">zenpyre.runnables.CachingRunnable</span>
+
+
+<a href="#zenpyre.runnables.CachingRunnable" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="langchain_core.runnables.Runnable">Runnable</span>[<span title="langchain_core.runnables.utils.Input">Input</span>, <span title="langchain_core.runnables.utils.Output">Output</span>]</code>, <code><span title="coola.display.MultilineDisplayMixin">MultilineDisplayMixin</span></code></p>
+
+
+
+        <p>Wrap a <code>Runnable</code> to cache its output to disk, keyed by a hash
+of the input.</p>
+<p>On each call, <code>key_fn(input)</code> is used to look up a previously
+pickled result under <code>cache_dir</code>. On a cache hit, the pickled
+result is returned without calling the wrapped runnable. On a cache
+miss, the wrapped runnable is invoked and its result is pickled to
+disk before being returned. If <code>cache_dir</code> is <code>None</code>, caching is
+disabled entirely and every call goes straight to the wrapped
+runnable.</p>
+<p><code>batch</code>/<code>abatch</code> look up each input's cache entry individually,
+then call the wrapped runnable's own <code>batch</code>/<code>abatch</code> for only
+the inputs that missed -- so a partially-cached batch still benefits
+from the wrapped runnable's batching, rather than falling back to
+one call per miss.</p>
+<p>A failure to read or write a cache file (corrupt pickle, permission
+error, disk full, etc.) is logged as a warning and treated as a
+cache miss; it never raises and never prevents the wrapped runnable
+from producing a result.</p>
+<p>Unlike subclassing a caching base class, this wrapper works with any
+<code>Runnable</code> — including third-party ones you don't control — since
+caching is composed around the runnable rather than baked into its
+class hierarchy.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>runnable</code>
+            </td>
+            <td>
+                  <code><span title="langchain_core.runnables.Runnable">Runnable</span>[<span title="langchain_core.runnables.utils.Input">Input</span>, <span title="langchain_core.runnables.utils.Output">Output</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The runnable whose output should be cached.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cache_dir</code>
+            </td>
+            <td>
+                  <code><span title="pathlib.Path">Path</span> | <span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The directory used to store cached results. If
+<code>None</code>, caching is disabled.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>key_fn</code>
+            </td>
+            <td>
+                  <code><span title="collections.abc.Callable">Callable</span>[[<span title="langchain_core.runnables.utils.Input">Input</span>], <span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A function that derives a cache key from an input. The
+returned string is used as a filename (with a <code>.pkl</code>
+extension appended) under <code>cache_dir</code>, so it must be
+filesystem-safe -- in particular, it must not contain path
+separators. Defaults to <code>hash_object</code>, which dispatches
+through <code>coola</code>'s hasher registry (e.g. using
+<code>DocumentHasher</code> for <code>Document</code> inputs). Override this
+if you need input-specific hashing behavior that differs
+from the registered default.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ignore_none</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>False</code> (the default), <code>None</code> is treated as
+an ordinary cacheable value: a cached <code>None</code> counts as a
+cache hit, and a wrapped-runnable result of <code>None</code> is
+written to disk like any other result. If <code>True</code>, <code>None</code>
+is treated as if there were no cache entry at all: a cached
+<code>None</code> is treated as a cache miss (the wrapped runnable is
+called instead of returning <code>None</code>), and a wrapped-runnable
+result of <code>None</code> is never written to disk. This is useful
+when the wrapped runnable can return <code>None</code> to mean
+"no result yet" or "failed silently," and you don't want
+that non-result to be cached as if it were a real answer.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_core.runnables</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunnableLambda</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">zenpyre.runnables</span><span class="w"> </span><span class="kn">import</span> <span class="n">CachingRunnable</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">runnable</span> <span class="o">=</span> <span class="n">RunnableLambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">cached</span> <span class="o">=</span> <span class="n">CachingRunnable</span><span class="p">(</span><span class="n">runnable</span><span class="o">=</span><span class="n">runnable</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="n">cached</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">&#39;HELLO&#39;</span>
+</code></pre></div>
+</details>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="zenpyre.runnables.InputOutputPair" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">zenpyre.runnables.InputOutputPair</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#zenpyre.runnables.InputOutputPair" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="typing.Generic">Generic</span>[<span title="zenpyre.runnables.utils.Input">Input</span>, <span title="zenpyre.runnables.utils.Output">Output</span>]</code></p>
+
+
+
+        <p>A frozen pair holding a runnable's input alongside the output it
+produced.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>input</code>
+            </td>
+            <td>
+                  <code><span title="zenpyre.runnables.utils.Input">Input</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The input value passed to the wrapped runnable.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>output</code>
+            </td>
+            <td>
+                  <code><span title="zenpyre.runnables.utils.Output">Output</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The output value produced by the wrapped runnable for
+<code>input</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="zenpyre.runnables.InputOutputRunnable" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">zenpyre.runnables.InputOutputRunnable</span>
+
+
+<a href="#zenpyre.runnables.InputOutputRunnable" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="langchain_core.runnables.Runnable">Runnable</span>[<span title="zenpyre.runnables.utils.Input">Input</span>, <a class="autorefs autorefs-internal" title="zenpyre.runnables.InputOutputPair
+
+
+  
+      dataclass
+   (zenpyre.runnables.utils.InputOutputPair)" href="#zenpyre.runnables.InputOutputPair">InputOutputPair</a>[<span title="zenpyre.runnables.utils.Input">Input</span>, <span title="zenpyre.runnables.utils.Output">Output</span>]]</code>, <code><span title="typing.Generic">Generic</span>[<span title="zenpyre.runnables.utils.Input">Input</span>, <span title="zenpyre.runnables.utils.Output">Output</span>]</code></p>
+
+
+
+        <p>Wrap a runnable so invoking it returns an
+:class:<code>InputOutputPair</code> of its input and output, instead of just
+the output.</p>
+<p>This is useful whenever downstream code needs to know which input
+produced a given output -- e.g. logging, evaluation harnesses, or
+building a dataset of (input, output) examples -- without having to
+thread the input through the wrapped runnable itself or zip inputs
+and outputs back together by hand afterwards.</p>
+<p><code>.batch()</code>/<code>.abatch()</code> delegate to the wrapped runnable's own
+batch/abatch implementation (rather than falling back to the
+default per-item <code>invoke</code> loop that :class:<code>Runnable</code> provides),
+so any batching optimizations the inner runnable implements (e.g.
+batched LLM calls) are preserved. When <code>return_exceptions=True</code>
+and a given input's call fails, the corresponding entry in the
+returned list is the raw exception, not an :class:<code>InputOutputPair</code>
+-- exactly as :meth:<code>Runnable.batch</code> behaves for the wrapped
+runnable itself.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>runnable</code>
+            </td>
+            <td>
+                  <code><span title="langchain_core.runnables.Runnable">Runnable</span>[<span title="zenpyre.runnables.utils.Input">Input</span>, <span title="zenpyre.runnables.utils.Output">Output</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The runnable to wrap.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_core.runnables</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunnableLambda</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">zenpyre.runnables</span><span class="w"> </span><span class="kn">import</span> <span class="n">InputOutputRunnable</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inner</span> <span class="o">=</span> <span class="n">RunnableLambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wrapped</span> <span class="o">=</span> <span class="n">InputOutputRunnable</span><span class="p">(</span><span class="n">inner</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">wrapped</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">input</span>
+<span class="go">&#39;hello&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">output</span>
+<span class="go">&#39;HELLO&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">pair</span><span class="o">.</span><span class="n">output</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">wrapped</span><span class="o">.</span><span class="n">batch</span><span class="p">([</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">])]</span>
+<span class="go">[&#39;A&#39;, &#39;B&#39;]</span>
+</code></pre></div>
+</details>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="zenpyre.runnables.RecordingRunnable" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">zenpyre.runnables.RecordingRunnable</span>
+
+
+<a href="#zenpyre.runnables.RecordingRunnable" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="langchain_core.runnables.Runnable">Runnable</span>[<span title="zenpyre.runnables.recording.Input">Input</span>, <span title="zenpyre.runnables.recording.Output">Output</span>]</code>, <code><span title="coola.display.MultilineDisplayMixin">MultilineDisplayMixin</span></code>, <code><span title="typing.Generic">Generic</span>[<span title="zenpyre.runnables.recording.Input">Input</span>, <span title="zenpyre.runnables.recording.Output">Output</span>]</code></p>
+
+
+
+        <p>Wrap a Runnable to record the input and output of each invocation
+to a record store.</p>
+<p>This is a transparent passthrough wrapper: calling <code>invoke</code>,
+<code>ainvoke</code>, <code>batch</code>, or <code>abatch</code> behaves exactly like calling
+the wrapped <code>runnable</code> directly (same return value, same
+exceptions), with the side effect of writing one
+:class:<code>~zenpyre.records.Record</code> per invocation to <code>record_store</code>
+via :meth:<code>~zenpyre.record_stores.base.BaseRecordStore.add_records</code>.
+Each record gets a fresh, randomly generated ID (not derived from
+its content), so that two calls with identical input/output/extra
+are still both recorded rather than one silently overwriting the
+other via the store's upsert semantics.</p>
+
+
+<details class="note" open>
+  <summary>Note</summary>
+  <p>If the wrapped <code>runnable</code> raises during <code>invoke</code>/
+<code>ainvoke</code>, the exception propagates immediately and <em>no</em>
+record is written for that call -- unlike <code>batch</code>/<code>abatch</code>
+with <code>return_exceptions=True</code>, which does record failed
+items (see <code>"error"</code> below). If you want failed single calls
+recorded too for a fully consistent audit trail, wrap the
+<code>self._runnable.invoke(...)</code>/<code>ainvoke(...)</code> calls in
+<code>invoke</code>/<code>ainvoke</code> in a try/except that builds an
+error record before re-raising, mirroring
+:meth:<code>_record_batch</code>'s handling.</p>
+</details>        <p>Each record's metadata is assembled as a plain dict with the
+following keys, then passed through <code>serializer</code> (see below) as
+a whole before being stored:</p>
+<ul>
+<li><code>"input"</code> / <code>"output"</code>: the invocation's raw input and
+  output.</li>
+<li><code>"timestamp"</code>: an ISO 8601 UTC timestamp of when the call
+  completed.</li>
+<li><code>"run_id"</code>: the <code>run_id</code> from the call's <code>RunnableConfig</code>,
+  if the caller supplied one explicitly; otherwise <code>None</code>. This
+  is <em>not</em> LangChain's internally auto-generated run ID (that
+  isn't accessible from a plain wrapper like this one), only one
+  explicitly passed in by the caller.</li>
+<li><code>"error"</code>: <code>None</code> on success. On a batch item that failed
+  with <code>return_exceptions=True</code>, this holds <code>str(exception)</code>
+  and <code>"output"</code> is <code>None</code>.</li>
+<li>Any additional keys from <code>extra</code> (fixed for this wrapper's
+  lifetime, e.g. an experiment ID) and/or from the call's
+  <code>config["metadata"]</code> (varies per invocation, e.g. a session or
+  user ID). If the same key appears in both, the per-call
+  <code>config["metadata"]</code> value wins. Neither may use one of the
+  reserved keys above; doing so raises :exc:<code>ValueError</code>.</li>
+</ul>
+<p><code>stream</code>/<code>astream</code> are supported on a best-effort basis: each
+chunk is yielded to the caller immediately (true streaming isn't
+delayed), while chunks are accumulated internally (via <code>+</code>, as
+LangChain message chunks support) to reconstruct a final output
+for recording once the stream is exhausted. If chunks don't
+support <code>+</code>, or the stream raises before completing, no record
+is written for that call (a warning is logged) rather than raising
+an error into the caller's stream.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>runnable</code>
+            </td>
+            <td>
+                  <code><span title="langchain_core.runnables.Runnable">Runnable</span>[<span title="zenpyre.runnables.recording.Input">Input</span>, <span title="zenpyre.runnables.recording.Output">Output</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The inner Runnable to wrap.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>record_store</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="zenpyre.record_stores.BaseRecordStore" href="../record_stores/#zenpyre.record_stores.BaseRecordStore">BaseRecordStore</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The store to write input/output records to.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>extra</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional metadata merged into every record written by
+this wrapper, fixed for its lifetime (e.g. an experiment
+ID). For metadata that varies per call, pass it via
+<code>config={"metadata": {...}}</code> on the individual
+<code>invoke</code>/<code>batch</code>/... call instead; it takes precedence
+over <code>extra</code> on key collision. Must not use a reserved
+key (see above).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>serializer</code>
+            </td>
+            <td>
+                  <code><span title="collections.abc.Callable">Callable</span>[[<span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]], <span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A function applied to the whole assembled metadata
+dict before it's stored, to make it JSON-friendly (or to
+apply any other custom transform). Defaults to
+:func:<code>default_serialize</code>, applied to the whole dict (so
+it naturally recurses into <code>"input"</code>, <code>"output"</code>, and
+any <code>extra</code>/<code>config["metadata"]</code> values in one pass).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">zenpyre.record_stores</span><span class="w"> </span><span class="kn">import</span> <span class="n">DuckDBRecordStore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">zenpyre.runnables</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordingRunnable</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span> <span class="o">=</span> <span class="n">DuckDBRecordStore</span><span class="p">(</span><span class="s2">&quot;:memory:&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">recorded</span> <span class="o">=</span> <span class="n">RecordingRunnable</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">chat_model</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;experiment_id&quot;</span><span class="p">:</span> <span class="s2">&quot;exp-42&quot;</span><span class="p">}</span>
+<span class="gp">... </span><span class="p">)</span>  <span class="c1"># doctest: +SKIP</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">recorded</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="s2">&quot;Hello!&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;session_id&quot;</span><span class="p">:</span> <span class="s2">&quot;s-1&quot;</span><span class="p">}})</span>  <span class="c1"># doctest: +SKIP</span>
+<span class="go">AIMessage(content=&#39;Hi there!&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="o">.</span><span class="n">all</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;experiment_id&quot;</span><span class="p">],</span> <span class="n">store</span><span class="o">.</span><span class="n">all</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span>
+<span class="gp">... </span>    <span class="s2">&quot;session_id&quot;</span>
+<span class="gp">... </span><span class="p">]</span>  <span class="c1"># doctest: +SKIP</span>
+<span class="go">(&#39;exp-42&#39;, &#39;s-1&#39;)</span>
+</code></pre></div>
+</details>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="zenpyre.runnables.RecordingRunnable.reserved_metadata_keys" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">zenpyre.runnables.RecordingRunnable.reserved_metadata_keys</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#zenpyre.runnables.RecordingRunnable.reserved_metadata_keys" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">reserved_metadata_keys</span><span class="p">:</span> <span class="n"><span title="frozenset">frozenset</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>The metadata keys reserved for this class's own use.</p>
+<p>Neither <code>extra</code> nor a call's <code>config["metadata"]</code> may use
+one of these; doing so raises :exc:<code>ValueError</code>. A subclass
+may override this property to change the reserved set.</p>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="zenpyre.runnables.RecordingRunnable.__init__" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">zenpyre.runnables.RecordingRunnable.__init__</span>
+
+
+<a href="#zenpyre.runnables.RecordingRunnable.__init__" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__init__</span><span class="p">(</span>
+    <span class="n">runnable</span><span class="p">:</span> <span class="n"><span title="langchain_core.runnables.Runnable">Runnable</span></span><span class="p">[</span><span class="n"><span title="zenpyre.runnables.recording.Input">Input</span></span><span class="p">,</span> <span class="n"><span title="zenpyre.runnables.recording.Output">Output</span></span><span class="p">],</span>
+    <span class="n">record_store</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="zenpyre.record_stores.BaseRecordStore" href="../record_stores/#zenpyre.record_stores.BaseRecordStore">BaseRecordStore</a></span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">extra</span><span class="p">:</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">serializer</span><span class="p">:</span> <span class="p">(</span>
+        <span class="n"><span title="collections.abc.Callable">Callable</span></span><span class="p">[[</span><span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">]],</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Initialize the wrapper.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>runnable</code>
+            </td>
+            <td>
+                  <code><span title="langchain_core.runnables.Runnable">Runnable</span>[<span title="zenpyre.runnables.recording.Input">Input</span>, <span title="zenpyre.runnables.recording.Output">Output</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The inner Runnable to wrap and record calls of.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>record_store</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="zenpyre.record_stores.BaseRecordStore" href="../record_stores/#zenpyre.record_stores.BaseRecordStore">BaseRecordStore</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The store to write input/output records to.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>extra</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional metadata merged into every record
+written by this wrapper, fixed for its lifetime (e.g.
+an experiment ID). Must not contain a key from
+:attr:<code>reserved_metadata_keys</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>serializer</code>
+            </td>
+            <td>
+                  <code><span title="collections.abc.Callable">Callable</span>[[<span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]], <span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A function applied to the whole assembled
+metadata dict before it's stored. Defaults to
+:func:<code>default_serialize</code> when <code>None</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>extra</code> contains a key from
+:attr:<code>reserved_metadata_keys</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="zenpyre.runnables.RecordingRunnable.abatch" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">zenpyre.runnables.RecordingRunnable.abatch</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-async"><code>async</code></small>
+  </span>
+
+<a href="#zenpyre.runnables.RecordingRunnable.abatch" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">abatch</span><span class="p">(</span>
+    <span class="n">inputs</span><span class="p">:</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="zenpyre.runnables.recording.Input">Input</span></span><span class="p">],</span>
+    <span class="n">config</span><span class="p">:</span> <span class="p">(</span>
+        <span class="n"><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span></span> <span class="o">|</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span></span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">return_exceptions</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="zenpyre.runnables.recording.Output">Output</span></span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Asynchronously invoke the wrapped runnable on a list of
+inputs and record each call.</p>
+<p>The async counterpart of :meth:<code>batch</code>: calls
+<code>self.runnable.abatch(inputs, config, return_exceptions,
+**kwargs)</code>, then writes one :class:<code>~zenpyre.records.Record</code>
+per <code>(input, result)</code> pair to the record store in a single
+:meth:<code>~zenpyre.record_stores.base.BaseRecordStore.add_records</code>
+call, before returning the results unchanged. Unlike
+:meth:<code>ainvoke</code>, a failed item (when <code>return_exceptions=True</code>)
+is still recorded, with <code>"error"</code> set to <code>str(exception)</code>
+and <code>"output"</code> set to <code>None</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>inputs</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span>[<span title="zenpyre.runnables.recording.Input">Input</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The list of inputs to pass to the wrapped
+runnable.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>config</code>
+            </td>
+            <td>
+                  <code><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span> | <span title="list">list</span>[<span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional run configuration, either a single config
+shared by every item or a list with one config per
+item (matching <code>inputs</code> in length and order). If a
+config has a <code>"metadata"</code> key, those entries are
+merged into that item's stored record.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>return_exceptions</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>True</code>, exceptions raised by
+individual items are returned in <code>results</code> instead
+of propagating, and are still recorded (see above). If
+<code>False</code>, an exception from any item propagates
+immediately from <code>self.runnable.abatch</code> itself, and
+no records are written for this call at all.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional keyword arguments forwarded to the
+wrapped runnable's <code>abatch</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="zenpyre.runnables.recording.Output">Output</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One result per input, in the same order as <code>inputs</code>,
+unchanged from what the wrapped runnable returned
+(which may include exception instances when
+<code>return_exceptions=True</code>).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="zenpyre.runnables.RecordingRunnable.ainvoke" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">zenpyre.runnables.RecordingRunnable.ainvoke</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-async"><code>async</code></small>
+  </span>
+
+<a href="#zenpyre.runnables.RecordingRunnable.ainvoke" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">ainvoke</span><span class="p">(</span>
+    <span class="nb">input</span><span class="p">:</span> <span class="n"><span title="zenpyre.runnables.recording.Input">Input</span></span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n"><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="zenpyre.runnables.recording.Output">Output</span></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Asynchronously invoke the wrapped runnable and record the
+call.</p>
+<p>The async counterpart of :meth:<code>invoke</code>: calls
+<code>self.runnable.ainvoke(input, config, **kwargs)</code>, writes one
+:class:<code>~zenpyre.records.Record</code> to the record store capturing
+<code>input</code>, the returned output, a timestamp, and any
+<code>run_id</code>/<code>extra</code> metadata, then returns that output
+unchanged.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>input</code>
+            </td>
+            <td>
+                  <code><span title="zenpyre.runnables.recording.Input">Input</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The input to pass to the wrapped runnable.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>config</code>
+            </td>
+            <td>
+                  <code><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional run configuration. If it has a
+<code>"metadata"</code> key, those entries are merged into the
+stored record (see the class docstring).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional keyword arguments forwarded to the
+wrapped runnable's <code>ainvoke</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="zenpyre.runnables.recording.Output">Output</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The wrapped runnable's output, unchanged.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="Exception">Exception</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whatever the wrapped runnable itself raises. In
+that case, this method does not catch it, so no record
+is written for the failed call (see the class
+docstring's Note).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="zenpyre.runnables.RecordingRunnable.astream" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">zenpyre.runnables.RecordingRunnable.astream</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-async"><code>async</code></small>
+  </span>
+
+<a href="#zenpyre.runnables.RecordingRunnable.astream" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">astream</span><span class="p">(</span>
+    <span class="nb">input</span><span class="p">:</span> <span class="n"><span title="zenpyre.runnables.recording.Input">Input</span></span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n"><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="collections.abc.AsyncIterator">AsyncIterator</span></span><span class="p">[</span><span class="n"><span title="zenpyre.runnables.recording.Output">Output</span></span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Asynchronously stream the wrapped runnable's output chunks,
+recording an accumulated final result once the stream completes.</p>
+<p>The async counterpart of :meth:<code>stream</code>: each chunk from
+<code>self.runnable.astream(input, config, **kwargs)</code> is yielded
+to the caller immediately, with no added latency. In parallel,
+chunks are accumulated via <code>+</code> (see :func:<code>_try_add</code>) to
+reconstruct a final output. Once the stream is exhausted (in a
+<code>finally</code> block, so this also runs if the caller stops
+iterating early or the stream raises), one
+:class:<code>~zenpyre.records.Record</code> is written for the
+accumulated result, unless no chunk could be accumulated at
+all (in which case a warning is logged and nothing is
+recorded for this call).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>input</code>
+            </td>
+            <td>
+                  <code><span title="zenpyre.runnables.recording.Input">Input</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The input to pass to the wrapped runnable.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>config</code>
+            </td>
+            <td>
+                  <code><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional run configuration. If it has a
+<code>"metadata"</code> key, those entries are merged into the
+stored record (see the class docstring).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional keyword arguments forwarded to the
+wrapped runnable's <code>astream</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Yields:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="collections.abc.AsyncIterator">AsyncIterator</span>[<span title="zenpyre.runnables.recording.Output">Output</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Each output chunk from the wrapped runnable, unchanged and
+in the same order, as soon as it's produced.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="zenpyre.runnables.RecordingRunnable.batch" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">zenpyre.runnables.RecordingRunnable.batch</span>
+
+
+<a href="#zenpyre.runnables.RecordingRunnable.batch" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">batch</span><span class="p">(</span>
+    <span class="n">inputs</span><span class="p">:</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="zenpyre.runnables.recording.Input">Input</span></span><span class="p">],</span>
+    <span class="n">config</span><span class="p">:</span> <span class="p">(</span>
+        <span class="n"><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span></span> <span class="o">|</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span></span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">return_exceptions</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="zenpyre.runnables.recording.Output">Output</span></span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Invoke the wrapped runnable on a list of inputs and record
+each call.</p>
+<p>Calls <code>self.runnable.batch(inputs, config, return_exceptions,
+**kwargs)</code>, then writes one :class:<code>~zenpyre.records.Record</code>
+per <code>(input, result)</code> pair to the record store in a single
+:meth:<code>~zenpyre.record_stores.base.BaseRecordStore.add_records</code>
+call, before returning the results unchanged. Unlike
+:meth:<code>invoke</code>, a failed item (when <code>return_exceptions=True</code>)
+is still recorded, with <code>"error"</code> set to <code>str(exception)</code>
+and <code>"output"</code> set to <code>None</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>inputs</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span>[<span title="zenpyre.runnables.recording.Input">Input</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The list of inputs to pass to the wrapped
+runnable.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>config</code>
+            </td>
+            <td>
+                  <code><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span> | <span title="list">list</span>[<span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional run configuration, either a single config
+shared by every item or a list with one config per
+item (matching <code>inputs</code> in length and order). If a
+config has a <code>"metadata"</code> key, those entries are
+merged into that item's stored record.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>return_exceptions</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>True</code>, exceptions raised by
+individual items are returned in <code>results</code> instead
+of propagating, and are still recorded (see above). If
+<code>False</code>, an exception from any item propagates
+immediately from <code>self.runnable.batch</code> itself, and no
+records are written for this call at all.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional keyword arguments forwarded to the
+wrapped runnable's <code>batch</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="zenpyre.runnables.recording.Output">Output</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One result per input, in the same order as <code>inputs</code>,
+unchanged from what the wrapped runnable returned
+(which may include exception instances when
+<code>return_exceptions=True</code>).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="zenpyre.runnables.RecordingRunnable.invoke" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">zenpyre.runnables.RecordingRunnable.invoke</span>
+
+
+<a href="#zenpyre.runnables.RecordingRunnable.invoke" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">invoke</span><span class="p">(</span>
+    <span class="nb">input</span><span class="p">:</span> <span class="n"><span title="zenpyre.runnables.recording.Input">Input</span></span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n"><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="zenpyre.runnables.recording.Output">Output</span></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Invoke the wrapped runnable and record the call.</p>
+<p>Calls <code>self.runnable.invoke(input, config, **kwargs)</code>,
+writes one :class:<code>~zenpyre.records.Record</code> to the record
+store capturing <code>input</code>, the returned output, a timestamp,
+and any <code>run_id</code>/<code>extra</code> metadata, then returns that
+output unchanged.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>input</code>
+            </td>
+            <td>
+                  <code><span title="zenpyre.runnables.recording.Input">Input</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The input to pass to the wrapped runnable.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>config</code>
+            </td>
+            <td>
+                  <code><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional run configuration. If it has a
+<code>"metadata"</code> key, those entries are merged into the
+stored record (see the class docstring).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional keyword arguments forwarded to the
+wrapped runnable's <code>invoke</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="zenpyre.runnables.recording.Output">Output</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The wrapped runnable's output, unchanged.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="Exception">Exception</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whatever the wrapped runnable itself raises. In
+that case, this method does not catch it, so no record
+is written for the failed call (see the class
+docstring's Note).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="zenpyre.runnables.RecordingRunnable.stream" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">zenpyre.runnables.RecordingRunnable.stream</span>
+
+
+<a href="#zenpyre.runnables.RecordingRunnable.stream" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">stream</span><span class="p">(</span>
+    <span class="nb">input</span><span class="p">:</span> <span class="n"><span title="zenpyre.runnables.recording.Input">Input</span></span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n"><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="collections.abc.Iterator">Iterator</span></span><span class="p">[</span><span class="n"><span title="zenpyre.runnables.recording.Output">Output</span></span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Stream the wrapped runnable's output chunks, recording an
+accumulated final result once the stream completes.</p>
+<p>Each chunk from <code>self.runnable.stream(input, config,
+**kwargs)</code> is yielded to the caller immediately, with no
+added latency. In parallel, chunks are accumulated via <code>+</code>
+(see :func:<code>_try_add</code>) to reconstruct a final output. Once the
+stream is exhausted (in a <code>finally</code> block, so this also runs
+if the caller stops iterating early or the stream raises), one
+:class:<code>~zenpyre.records.Record</code> is written for the
+accumulated result, unless no chunk could be accumulated at
+all (in which case a warning is logged and nothing is
+recorded for this call).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>input</code>
+            </td>
+            <td>
+                  <code><span title="zenpyre.runnables.recording.Input">Input</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The input to pass to the wrapped runnable.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>config</code>
+            </td>
+            <td>
+                  <code><span title="langchain_core.runnables.RunnableConfig">RunnableConfig</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional run configuration. If it has a
+<code>"metadata"</code> key, those entries are merged into the
+stored record (see the class docstring).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional keyword arguments forwarded to the
+wrapped runnable's <code>stream</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Yields:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="zenpyre.runnables.recording.Output">Output</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Each output chunk from the wrapped runnable, unchanged and
+in the same order, as soon as it's produced.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="zenpyre.runnables.structured_output_runnable" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">zenpyre.runnables.structured_output_runnable</span>
+
+
+<a href="#zenpyre.runnables.structured_output_runnable" class="headerlink" title="Permanent link">&para;</a></h3>
+          <div class="doc-overloads">
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">structured_output_runnable</span><span class="p">(</span>
+    <span class="n">chat_model</span><span class="p">:</span> <span class="n"><span title="langchain_core.language_models.BaseChatModel">BaseChatModel</span></span><span class="p">,</span>
+    <span class="n">output_type</span><span class="p">:</span> <span class="n"><span title="type">type</span></span><span class="p">[</span><span class="n"><span title="zenpyre.runnables.structured.T">T</span></span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">include_raw</span><span class="p">:</span> <span class="n"><span title="typing.Literal">Literal</span></span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="langchain_core.runnables.Runnable">Runnable</span></span><span class="p">[</span><span class="n"><span title="langchain_core.language_models.LanguageModelInput">LanguageModelInput</span></span><span class="p">,</span> <span class="n"><span title="zenpyre.runnables.structured.T">T</span></span><span class="p">]</span>
+</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">structured_output_runnable</span><span class="p">(</span>
+    <span class="n">chat_model</span><span class="p">:</span> <span class="n"><span title="langchain_core.language_models.BaseChatModel">BaseChatModel</span></span><span class="p">,</span>
+    <span class="n">output_type</span><span class="p">:</span> <span class="n"><span title="type">type</span></span><span class="p">[</span><span class="n"><span title="zenpyre.runnables.structured.T">T</span></span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">include_raw</span><span class="p">:</span> <span class="n"><span title="typing.Literal">Literal</span></span><span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="langchain_core.runnables.Runnable">Runnable</span></span><span class="p">[</span><span class="n"><span title="langchain_core.language_models.LanguageModelInput">LanguageModelInput</span></span><span class="p">,</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">]]</span>
+</code></pre></div>          </div>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">structured_output_runnable</span><span class="p">(</span>
+    <span class="n">chat_model</span><span class="p">:</span> <span class="n"><span title="langchain_core.language_models.BaseChatModel">BaseChatModel</span></span><span class="p">,</span>
+    <span class="n">output_type</span><span class="p">:</span> <span class="n"><span title="type">type</span></span><span class="p">[</span><span class="n"><span title="zenpyre.runnables.structured.T">T</span></span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">include_raw</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span>
+    <span class="n"><span title="langchain_core.runnables.Runnable">Runnable</span></span><span class="p">[</span><span class="n"><span title="langchain_core.language_models.LanguageModelInput">LanguageModelInput</span></span><span class="p">,</span> <span class="n"><span title="zenpyre.runnables.structured.T">T</span></span><span class="p">]</span>
+    <span class="o">|</span> <span class="n"><span title="langchain_core.runnables.Runnable">Runnable</span></span><span class="p">[</span><span class="n"><span title="langchain_core.language_models.LanguageModelInput">LanguageModelInput</span></span><span class="p">,</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">]]</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Build a Runnable that returns validated, structured output, with
+a JSON-parsing fallback.</p>
+<p>This composes <code>chat_model.with_structured_output(output_type,
+include_raw=True)</code> -- itself a
+:class:<code>~langchain_core.runnables.Runnable</code> returning
+<code>{"raw": AIMessage, "parsed": T | None, "parsing_error":
+Exception | None}</code> -- with a small unwrapping step piped after it
+via <code>|</code>.</p>
+<p>If the chat model's native structured-output parsing fails (e.g.
+the model didn't emit a proper tool call, which is common with
+small or local models), the unwrap step falls back to manually
+parsing the raw message content as JSON, without making a second
+LLM call.</p>
+<p><code>include_raw</code> controls both the output shape <em>and</em> the failure
+behavior, mirroring <code>with_structured_output</code>'s own contract:</p>
+<ul>
+<li><code>include_raw=False</code> (default): invoking returns <code>T</code>
+  directly. If both native parsing and the JSON fallback fail,
+  this raises :class:<code>StructuredOutputError</code>.</li>
+<li><code>include_raw=True</code>: invoking returns a dict with the same
+  <code>"raw"</code>/<code>"parsed"</code>/<code>"parsing_error"</code> keys as
+  <code>with_structured_output(..., include_raw=True)</code>, plus a
+  <code>"used_fallback": bool</code> key. This mode never raises on parse
+  failure, matching the underlying method's own fail-open
+  contract: <code>"parsed"</code> is populated whenever native parsing <em>or</em>
+  the JSON fallback succeeds, and <code>"parsing_error"</code> is only set
+  if both fail.</li>
+</ul>
+<p>Because the result is a plain <code>|</code>-composed
+:class:<code>~langchain_core.runnables.RunnableSequence</code>, it already
+implements <code>invoke</code>, <code>ainvoke</code>, <code>batch</code>, <code>abatch</code>,
+<code>stream</code>, <code>astream</code>, and config propagation -- nothing here
+reimplements the <code>Runnable</code> interface. <code>batch</code>/<code>abatch</code> in
+particular delegate to each step's own batch implementation (so
+the chat model's native batching is preserved), and correctly
+skip re-processing items that already failed when
+<code>return_exceptions=True</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>chat_model</code>
+            </td>
+            <td>
+                  <code><span title="langchain_core.language_models.BaseChatModel">BaseChatModel</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The chat model to wrap.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>output_type</code>
+            </td>
+            <td>
+                  <code><span title="type">type</span>[<span title="zenpyre.runnables.structured.T">T</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The type (e.g. a Pydantic model) that the LLM
+output should be parsed into.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>include_raw</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>False</code> (default), invoking returns
+<code>output_type</code> directly and raises
+:class:<code>StructuredOutputError</code> on total parse failure. If
+<code>True</code>, invoking returns a
+<code>{"raw", "parsed", "parsing_error", "used_fallback"}</code>
+dict and never raises on parse failure.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="langchain_core.runnables.Runnable">Runnable</span>[<span title="langchain_core.language_models.LanguageModelInput">LanguageModelInput</span>, <span title="zenpyre.runnables.structured.T">T</span>] | <span title="langchain_core.runnables.Runnable">Runnable</span>[<span title="langchain_core.language_models.LanguageModelInput">LanguageModelInput</span>, <span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A <code>Runnable[LanguageModelInput, T]</code> if <code>include_raw=False</code>,</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="langchain_core.runnables.Runnable">Runnable</span>[<span title="langchain_core.language_models.LanguageModelInput">LanguageModelInput</span>, <span title="zenpyre.runnables.structured.T">T</span>] | <span title="langchain_core.runnables.Runnable">Runnable</span>[<span title="langchain_core.language_models.LanguageModelInput">LanguageModelInput</span>, <span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>or a <code>Runnable[LanguageModelInput, dict[str, Any]]</code> if</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="langchain_core.runnables.Runnable">Runnable</span>[<span title="langchain_core.language_models.LanguageModelInput">LanguageModelInput</span>, <span title="zenpyre.runnables.structured.T">T</span>] | <span title="langchain_core.runnables.Runnable">Runnable</span>[<span title="langchain_core.language_models.LanguageModelInput">LanguageModelInput</span>, <span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>include_raw=True</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">Answer</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">value</span><span class="p">:</span> <span class="nb">int</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chain</span> <span class="o">=</span> <span class="n">structured_output_runnable</span><span class="p">(</span><span class="n">chat_model</span><span class="p">,</span> <span class="n">Answer</span><span class="p">)</span>  <span class="c1"># doctest: +SKIP</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chain</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="s2">&quot;What is 2+2?&quot;</span><span class="p">)</span>  <span class="c1"># doctest: +SKIP</span>
+<span class="go">Answer(value=4)</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 - present Thibaut Durand
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.expand", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"method": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
