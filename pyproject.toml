@@ -70,8 +70,6 @@ polars = ["polars>=1.0,<2.0"]
 sentence-transformers = [ "sentence-transformers >=5.0,<6.0" ]
 text-splitters = [ "langchain-text-splitters >=1.0,<2.0" ]
 
-
-
 [dependency-groups]
 dev = [
     "black>=26.5.1",
