@@ -2,8 +2,14 @@
 
 from __future__ import annotations
 
-__all__ = ["format_documents", "format_documents_as_markdown", "format_documents_as_xml"]
+__all__ = [
+    "format_documents",
+    "format_documents_as_json",
+    "format_documents_as_markdown",
+    "format_documents_as_xml",
+]
 
+import json
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -98,8 +104,72 @@ def format_documents(
         return format_documents_as_xml(documents, include_metadata=include_metadata)
     if output_format == "markdown":
         return format_documents_as_markdown(documents, include_metadata=include_metadata)
+    if output_format == "json":
+        return format_documents_as_json(documents, include_metadata=include_metadata)
     msg = f"Unknown format: {output_format}"
     raise ValueError(msg)
+
+
+def format_documents_as_json(documents: list[Document], include_metadata: bool = False) -> str:
+    """Concatenate a list of LangChain documents into a single LLM-
+    friendly JSON string.
+
+        Each document is rendered as an object with an ``id`` field and a
+        ``content`` field. When ``include_metadata`` is ``True``, a
+        ``metadata`` field (a JSON object, keys sorted alphabetically) is
+        also included.
+
+    Args:
+            documents: The documents to concatenate.
+            include_metadata: If ``True``, include each document's metadata
+                as a nested object. Defaults to ``False``.
+
+    Returns:
+            A JSON array (as a string) with one object per document, in the
+            same order as ``documents``. Returns ``"[]"`` if ``documents`` is
+            empty.
+
+    Example:
+    ```pycon
+    >>> from langchain_core.documents import Document
+    >>> from zenpyre.documents import format_documents_as_json
+    >>> docs = [
+    ...     Document(
+    ...         page_content="The cat sat on the mat.",
+    ...         metadata={"source": "story.txt", "author": "Alice"},
+    ...     ),
+    ... ]
+    >>> print(format_documents_as_json(docs))
+    [
+      {
+        "id": 1,
+        "content": "The cat sat on the mat."
+      }
+    ]
+    >>> print(format_documents_as_json(docs, include_metadata=True))
+    [
+      {
+        "id": 1,
+        "metadata": {
+          "author": "Alice",
+          "source": "story.txt"
+        },
+        "content": "The cat sat on the mat."
+      }
+    ]
+    >>> format_documents_as_json([])
+    '[]'
+
+    ```
+    """
+    entries = []
+    for i, doc in enumerate(documents, start=1):
+        entry: dict[str, Any] = {"id": i}
+        if include_metadata and doc.metadata:
+            entry["metadata"] = dict(sorted(doc.metadata.items()))
+        entry["content"] = doc.page_content
+        entries.append(entry)
+    return json.dumps(entries, indent=2)
 
 
 def format_documents_as_markdown(documents: list[Document], include_metadata: bool = False) -> str:

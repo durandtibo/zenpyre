@@ -10,6 +10,7 @@ __all__ = [
     "filter_by_metadata_range",
     "filter_by_metadata_values",
     "format_documents",
+    "format_documents_as_json",
     "format_documents_as_markdown",
     "format_documents_as_xml",
     "hash_document",
@@ -20,6 +21,7 @@ __all__ = [
 
 from zenpyre.documents.concatenation import (
     format_documents,
+    format_documents_as_json,
     format_documents_as_markdown,
     format_documents_as_xml,
 )
