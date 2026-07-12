@@ -142,3 +142,10 @@ jobs:
     with:
       package-name: langchain-text-splitters
       package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-text-splitters']) }}
+
+  polars:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: polars
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).polars) }}
