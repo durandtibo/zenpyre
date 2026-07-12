@@ -6,17 +6,20 @@ from __future__ import annotations
 __all__ = ["resolve_runnable"]
 
 import logging
-from typing import Any
+from typing import Any, TypeVar
 
 from langchain_core.runnables import Runnable
 from objectory import factory
 
 logger: logging.Logger = logging.getLogger(__name__)
 
+Input = TypeVar("Input")
+Output = TypeVar("Output")
+
 
 def resolve_runnable(
-    runnable: Runnable[Any, Any] | dict[str, Any],
-) -> Runnable[Any, Any]:
+    runnable: Runnable[Input, Output] | dict[str, Any],
+) -> Runnable[Input, Output]:
     """Resolve a LangChain :class:`~langchain_core.runnables.Runnable`
     instance from an existing object or a configuration dictionary.
 
@@ -47,7 +50,7 @@ def resolve_runnable(
         >>> from langchain_core.runnables import Runnable
         >>> from zenpyre.runnables import resolve_runnable
         >>> class MyRunnable(Runnable):
-        ...     def invoke(self, input, config=None):
+        ...     def invoke(self, input: Any, config: Any = None, **kwargs: Any) -> Any:
         ...         return input
         ...
         >>> # From an existing instance:
