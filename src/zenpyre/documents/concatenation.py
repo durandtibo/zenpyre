@@ -2,12 +2,104 @@
 
 from __future__ import annotations
 
-__all__ = ["format_documents_as_markdown", "format_documents_as_xml"]
+__all__ = ["format_documents", "format_documents_as_markdown", "format_documents_as_xml"]
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from langchain_core.documents import Document
+
+
+def _build_blocks(
+    documents: list[Document],
+    include_metadata: bool,
+    header_fn: Callable[[int, str], str],
+    metadata_line_fn: Callable[[Any, Any], str],
+) -> str:
+    """Build the shared per-document block structure used by both the
+    Markdown and XML formatters.
+
+    Args:
+        documents: The documents to concatenate.
+        include_metadata: If ``True``, include each document's metadata
+            above its content.
+        header_fn: A callable ``(index, body) -> str`` that wraps a
+            document's body in the format-specific header/delimiter.
+        metadata_line_fn: A callable ``(key, value) -> str`` that renders
+            a single metadata entry in the format-specific style.
+
+    Returns:
+        A single string with one block per document, in the same order as
+        ``documents``. Returns an empty string if ``documents`` is empty.
+    """
+    blocks = []
+    for i, doc in enumerate(documents, start=1):
+        parts = []
+        if include_metadata and doc.metadata:
+            metadata_lines = "\n".join(
+                metadata_line_fn(key, doc.metadata[key]) for key in sorted(doc.metadata)
+            )
+            parts.append(metadata_lines)
+        parts.append(doc.page_content)
+        body = "\n\n".join(parts)
+        blocks.append(header_fn(i, body))
+    return "\n\n".join(blocks)
+
+
+def format_documents(
+    documents: list[Document],
+    include_metadata: bool = False,
+    output_format: Literal["xml", "markdown"] = "xml",
+) -> str:
+    """Concatenate a list of LangChain documents into a single LLM-
+    friendly string, in either XML or Markdown format.
+
+    This is a convenience dispatcher over :func:`format_documents_as_xml`
+    and :func:`format_documents_as_markdown`. See those functions for
+    details on how each format renders documents and metadata.
+
+    Args:
+        documents: The documents to concatenate.
+        include_metadata: If ``True``, include each document's metadata
+            above its content, sorted alphabetically by key. Defaults to
+            ``False``.
+        output_format: Either ``"xml"`` or ``"markdown"``. Defaults to
+            ``"xml"``.
+
+    Returns:
+        A single string with one document block per document, in the same
+        order as ``documents``. Returns an empty string if ``documents``
+        is empty.
+
+    Raises:
+        ValueError: If ``output_format`` is not ``"xml"`` or ``"markdown"``.
+
+    Example:
+        ```pycon
+        >>> from langchain_core.documents import Document
+        >>> from zenpyre.documents import format_documents
+        >>> docs = [
+        ...     Document(page_content="The cat sat on the mat."),
+        ... ]
+        >>> print(format_documents(docs, output_format="xml"))
+        <document id="1">
+        The cat sat on the mat.
+        </document>
+        >>> print(format_documents(docs, output_format="markdown"))
+        ## Document 1
+        <BLANKLINE>
+        The cat sat on the mat.
+
+        ```
+    """
+    if output_format == "xml":
+        return format_documents_as_xml(documents, include_metadata=include_metadata)
+    if output_format == "markdown":
+        return format_documents_as_markdown(documents, include_metadata=include_metadata)
+    msg = f"Unknown format: {output_format}"
+    raise ValueError(msg)
 
 
 def format_documents_as_markdown(documents: list[Document], include_metadata: bool = False) -> str:
@@ -66,21 +158,17 @@ def format_documents_as_markdown(documents: list[Document], include_metadata: bo
         - source: story.txt
         <BLANKLINE>
         The dog chased the ball.
+        >>> format_documents_as_markdown([])
+        ''
 
         ```
     """
-    blocks = []
-    for i, doc in enumerate(documents, start=1):
-        parts = []
-        if include_metadata and doc.metadata:
-            metadata_lines = "\n".join(
-                f"- {key}: {doc.metadata[key]}" for key in sorted(doc.metadata)
-            )
-            parts.append(metadata_lines)
-        parts.append(doc.page_content)
-        body = "\n\n".join(parts)
-        blocks.append(f"## Document {i}\n\n{body}")
-    return "\n\n".join(blocks)
+    return _build_blocks(
+        documents,
+        include_metadata,
+        header_fn=lambda i, body: f"## Document {i}\n\n{body}",
+        metadata_line_fn=lambda key, value: f"- {key}: {value}",
+    )
 
 
 def format_documents_as_xml(documents: list[Document], include_metadata: bool = False) -> str:
@@ -139,18 +227,14 @@ def format_documents_as_xml(documents: list[Document], include_metadata: bool = 
         <BLANKLINE>
         The dog chased the ball.
         </document>
+        >>> format_documents_as_xml([])
+        ''
 
         ```
     """
-    blocks = []
-    for i, doc in enumerate(documents, start=1):
-        parts = []
-        if include_metadata and doc.metadata:
-            metadata_lines = "\n".join(
-                f"{key}: {doc.metadata[key]}" for key in sorted(doc.metadata)
-            )
-            parts.append(metadata_lines)
-        parts.append(doc.page_content)
-        body = "\n\n".join(parts)
-        blocks.append(f'<document id="{i}">\n{body}\n</document>')
-    return "\n\n".join(blocks)
+    return _build_blocks(
+        documents,
+        include_metadata,
+        header_fn=lambda i, body: f'<document id="{i}">\n{body}\n</document>',
+        metadata_line_fn=lambda key, value: f"{key}: {value}",
+    )

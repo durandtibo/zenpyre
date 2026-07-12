@@ -1,8 +1,70 @@
 from __future__ import annotations
 
+import pytest
 from langchain_core.documents import Document
 
-from zenpyre.documents import format_documents_as_markdown, format_documents_as_xml
+from zenpyre.documents import (
+    format_documents,
+    format_documents_as_markdown,
+    format_documents_as_xml,
+)
+
+######################################
+#     Tests for format_documents     #
+######################################
+
+
+def test_format_documents_default_is_xml() -> None:
+    documents = [Document(page_content="The cat sat on the mat.")]
+    assert format_documents(documents) == format_documents_as_xml(documents)
+
+
+def test_format_documents_output_format_xml() -> None:
+    documents = [Document(page_content="The cat sat on the mat.")]
+    assert format_documents(documents, output_format="xml") == format_documents_as_xml(documents)
+
+
+def test_format_documents_output_format_markdown() -> None:
+    documents = [Document(page_content="The cat sat on the mat.")]
+    assert format_documents(documents, output_format="markdown") == format_documents_as_markdown(
+        documents
+    )
+
+
+def test_format_documents_output_format_markdown_with_metadata() -> None:
+    documents = [
+        Document(
+            page_content="The cat sat on the mat.",
+            metadata={"source": "story.txt", "author": "Alice"},
+        ),
+    ]
+    assert format_documents(
+        documents, include_metadata=True, output_format="markdown"
+    ) == format_documents_as_markdown(documents, include_metadata=True)
+
+
+def test_format_documents_output_format_xml_with_metadata() -> None:
+    documents = [
+        Document(
+            page_content="The cat sat on the mat.",
+            metadata={"source": "story.txt", "author": "Alice"},
+        ),
+    ]
+    assert format_documents(
+        documents, include_metadata=True, output_format="xml"
+    ) == format_documents_as_xml(documents, include_metadata=True)
+
+
+def test_format_documents_empty() -> None:
+    assert format_documents([]) == ""
+    assert format_documents([], output_format="markdown") == ""
+
+
+def test_format_documents_invalid_output_format_raises() -> None:
+    documents = [Document(page_content="The cat sat on the mat.")]
+    with pytest.raises(ValueError, match="Unknown format: bogus"):
+        format_documents(documents, output_format="bogus")
+
 
 ######################################################
 #     Tests for format_documents_as_markdown         #
