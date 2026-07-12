@@ -13,6 +13,7 @@ __all__ = [
     "ProcessorIngestor",
     "ShuffleIngestor",
     "TextIngestor",
+    "resolve_ingestor",
 ]
 
 from zenpyre.ingestors.base import BaseIngestor
@@ -23,5 +24,6 @@ from zenpyre.ingestors.last_n import LastNIngestor
 from zenpyre.ingestors.mapping import MappingIngestor
 from zenpyre.ingestors.pickle import PickleIngestor
 from zenpyre.ingestors.processor import ProcessorIngestor
+from zenpyre.ingestors.resolve import resolve_ingestor
 from zenpyre.ingestors.shuffle import ShuffleIngestor
 from zenpyre.ingestors.text import TextIngestor
