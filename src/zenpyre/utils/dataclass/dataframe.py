@@ -7,11 +7,11 @@ __all__ = ["dataclasses_to_dataframe"]
 
 import logging
 from dataclasses import asdict, is_dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from coola.utils.imports import is_polars_available
 
-if is_polars_available():
+if TYPE_CHECKING or is_polars_available():
     import polars as pl
 else:  # pragma: no cover
     from coola.utils.fallback.polars import polars as pl
