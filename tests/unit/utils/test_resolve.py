@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
+from zenpyre.utils.config import MISSING, BaseConfig
 from zenpyre.utils.resolve import resolve_object
 
 
@@ -11,6 +14,27 @@ class Animal:
 
 class Dog(Animal):
     """Concrete subclass for testing."""
+
+    def __init__(self, name: str = "Rex") -> None:
+        self.name = name
+
+
+class DogConfig(BaseConfig):
+    """A BaseConfig that resolves to a Dog for testing."""
+
+    def __init__(self, name: str = "Rex") -> None:
+        self.name = name
+
+    def get_value(self, name: str, default: Any = MISSING) -> Any:
+        kwargs = self.to_kwargs()
+        if name in kwargs:
+            return kwargs[name]
+        if default is not MISSING:
+            return default
+        raise KeyError(name)
+
+    def to_kwargs(self) -> dict[str, Any]:
+        return {"_target_": "tests.unit.utils.test_resolve.Dog", "name": self.name}
 
 
 ####################################
@@ -58,6 +82,29 @@ def test_resolve_object_from_dict_returns_instance() -> None:
 def test_resolve_object_from_dict_no_cls_still_resolves() -> None:
     result = resolve_object({"_target_": "tests.unit.utils.test_resolve.Dog"})
     assert isinstance(result, Dog)
+
+
+# --- From BaseConfig ---
+
+
+def test_resolve_object_from_base_config_returns_instance() -> None:
+    result = resolve_object(DogConfig(), cls=Dog)
+    assert isinstance(result, Dog)
+
+
+def test_resolve_object_from_base_config_no_cls_still_resolves() -> None:
+    result = resolve_object(DogConfig())
+    assert isinstance(result, Dog)
+
+
+def test_resolve_object_from_base_config_uses_config_fields() -> None:
+    result = resolve_object(DogConfig(name="Fido"), cls=Dog)
+    assert result.name == "Fido"
+
+
+def test_resolve_object_from_base_config_wrong_cls_raises_type_error() -> None:
+    with pytest.raises(TypeError, match=r"Received object is not a str instance"):
+        resolve_object(DogConfig(), cls=str)
 
 
 # --- Invalid input ---
