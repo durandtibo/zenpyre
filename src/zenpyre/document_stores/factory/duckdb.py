@@ -8,10 +8,10 @@ __all__ = ["DuckDBDocumentStoreFactory"]
 from typing import TYPE_CHECKING, Any
 
 from coola.display import MultilineDisplayMixin
-from coola.utils.path import sanitize_path
 
 from zenpyre.document_stores import DuckDBDocumentStore
 from zenpyre.document_stores.factory.base import BaseDocumentStoreFactory
+from zenpyre.utils.duckdb import prepare_duckdb_path
 from zenpyre.utils.imports import check_duckdb
 
 if TYPE_CHECKING:
@@ -48,7 +48,7 @@ class DuckDBDocumentStoreFactory(BaseDocumentStoreFactory, MultilineDisplayMixin
 
     def __init__(self, path: Path | str, **kwargs: Any) -> None:
         check_duckdb()
-        self._path = sanitize_path(path)
+        self._path = prepare_duckdb_path(path)
         self._kwargs = kwargs
 
     def make_document_store(self) -> BaseDocumentStore:
