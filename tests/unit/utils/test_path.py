@@ -48,6 +48,19 @@ def test_find_root_package_parent_from_top_level_package_file(tmp_path: Path) ->
     assert find_root_package_parent(module) == tmp_path
 
 
+def test_find_root_package_parent_stops_at_filesystem_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Simulate every directory (including the real filesystem root) containing
+    # an __init__.py, forcing the walk to continue all the way up until
+    # parent == current at the filesystem root.
+    monkeypatch.setattr(Path, "is_file", lambda self: True)  # noqa: ARG005
+
+    result = find_root_package_parent(tmp_path)
+
+    assert result == result.parent
+
+
 # --- Non-package input ---
 
 
