@@ -13,6 +13,9 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
+MODULE = "zenpyre.utils.git"
+
+
 def _init_repo(path: Path) -> None:
     """Initialize a git repository with a single commit at ``path``."""
     subprocess.run(["git", "init"], cwd=path, check=True, capture_output=True)
@@ -75,7 +78,7 @@ def test_get_current_commit_hash_empty_repo_returns_none(tmp_path: Path) -> None
 
 
 def test_get_current_commit_hash_missing_git_executable_returns_none(tmp_path: Path) -> None:
-    with patch("zenpyre.utils.git.subprocess.check_output", side_effect=FileNotFoundError):
+    with patch(f"{MODULE}.subprocess.check_output", side_effect=FileNotFoundError):
         assert get_current_commit_hash(cwd=tmp_path) is None
 
 
@@ -88,7 +91,7 @@ def test_get_current_commit_hash_os_error_returns_none(tmp_path: Path) -> None:
 
 
 def test_get_current_commit_hash_uses_current_process_cwd_by_default() -> None:
-    with patch("zenpyre.utils.git.subprocess.check_output") as mock_check_output:
+    with patch(f"{MODULE}.subprocess.check_output") as mock_check_output:
         mock_check_output.return_value = "abc1234\n"
         get_current_commit_hash()
         assert mock_check_output.call_args.kwargs["cwd"] is None
