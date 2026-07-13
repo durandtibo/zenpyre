@@ -10,12 +10,14 @@ from typing import Any, TypeVar
 
 from objectory import factory
 
+from zenpyre.utils.config import BaseConfig
+
 logger: logging.Logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
 
-def resolve_object(obj: T | dict[str, Any], cls: type[T] = object) -> T:
+def resolve_object(obj: T | dict[str, Any] | BaseConfig, cls: type[T] = object) -> T:
     """Resolve an instance of ``cls`` from an existing object or a
     configuration dictionary.
 
@@ -53,12 +55,26 @@ def resolve_object(obj: T | dict[str, Any], cls: type[T] = object) -> T:
         ...     {"_target_": "zenpyre.ingestors.InMemoryIngestor", "data": [1, 2, 3]},
         ...     cls=BaseIngestor,
         ... )
+        >>> # From a BaseConfig, whose to_kwargs() includes a "_target_" key:
+        >>> from zenpyre.utils.config import MISSING, BaseConfig
+        >>> class IngestorConfig(BaseConfig):
+        ...     def __init__(self, data: list[int]):
+        ...         self.data = data
+        ...     def get_value(self, name, default=MISSING):
+        ...         return self.to_kwargs()[name]
+        ...     def to_kwargs(self):
+        ...         return {"_target_": "zenpyre.ingestors.InMemoryIngestor", "data": self.data}
+        ...
+        >>> ingestor = resolve_object(IngestorConfig(data=[1, 2, 3]), cls=BaseIngestor)
 
         ```
     """
     if isinstance(obj, dict):
         logger.info("Initializing a %s instance from its configuration...", cls.__qualname__)
         obj = factory(**obj)
+    elif isinstance(obj, BaseConfig):
+        logger.info("Initializing a %s instance from its configuration...", cls.__qualname__)
+        obj = factory(**obj.to_kwargs())
     if not isinstance(obj, cls):
         msg = f"Received object is not a {cls.__name__} instance (received: {type(obj)})"
         raise TypeError(msg)
