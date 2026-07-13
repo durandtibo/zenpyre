@@ -6,7 +6,7 @@ from __future__ import annotations
 __all__ = ["resolve_data_processor"]
 
 import logging
-from typing import Any
+from typing import Any, TypeVar
 
 from objectory import factory
 
@@ -15,9 +15,13 @@ from zenpyre.data_processors.base import BaseProcessor
 logger: logging.Logger = logging.getLogger(__name__)
 
 
+T = TypeVar("T")
+U = TypeVar("U")
+
+
 def resolve_data_processor(
-    processor: BaseProcessor | dict[str, Any],
-) -> BaseProcessor:
+    processor: BaseProcessor[U, T] | dict[str, Any],
+) -> BaseProcessor[U, T]:
     """Resolve a :class:`~zenpyre.data_processors.base.BaseProcessor`
     instance from an existing object or a configuration dictionary.
 
