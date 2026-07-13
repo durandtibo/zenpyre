@@ -8,10 +8,12 @@ __all__ = [
     "BaseAgentFactory",
     "CachingAgentFactory",
     "ConfigurableAgentFactory",
+    "CreateAgentFactory",
 ]
 
 from zenpyre.agents.factory.base import BaseAgentFactory
 from zenpyre.agents.factory.cache import CachingAgentFactory
 from zenpyre.agents.factory.chat_model import AgentChatModelFactory
 from zenpyre.agents.factory.configurable import ConfigurableAgentFactory
+from zenpyre.agents.factory.create_agent import CreateAgentFactory
 from zenpyre.agents.factory.vanilla import AgentFactory
