@@ -7,6 +7,7 @@ from zenpyre.testing.fixtures import (
     langchain_text_splitters_not_available,
 )
 from zenpyre.text_splitters import resolve_text_splitter
+from zenpyre.utils.config import Config
 from zenpyre.utils.imports import is_langchain_text_splitters_available
 
 if is_langchain_text_splitters_available():
@@ -56,6 +57,23 @@ def test_resolve_text_splitter_without_langchain_text_splitters() -> None:
         match=r"The target object does not exist: langchain_text_splitters.CharacterTextSplitter",
     ):
         resolve_text_splitter({"_target_": CHARACTER_TEXT_SPLITTER_TARGET})
+
+
+# --- From BaseConfig ---
+
+
+@langchain_text_splitters_available
+def test_resolve_text_splitter_from_base_config_returns_text_splitter() -> None:
+    config = Config.from_kwargs(_target_=CHARACTER_TEXT_SPLITTER_TARGET)
+    result = resolve_text_splitter(config)
+    assert isinstance(result, TextSplitter)
+
+
+@langchain_text_splitters_available
+def test_resolve_text_splitter_from_base_config_returns_correct_type() -> None:
+    config = Config.from_kwargs(_target_=CHARACTER_TEXT_SPLITTER_TARGET)
+    result = resolve_text_splitter(config)
+    assert isinstance(result, CharacterTextSplitter)
 
 
 # --- Invalid input ---

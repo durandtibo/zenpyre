@@ -6,6 +6,7 @@ import pytest
 from langchain_core.runnables import Runnable, RunnableConfig
 
 from zenpyre.runnables import resolve_runnable
+from zenpyre.utils.config import Config
 
 MINIMAL_RUNNABLE_TARGET = "tests.unit.runnables.test_resolve.MinimalRunnable"
 
@@ -49,6 +50,21 @@ def test_resolve_runnable_from_dict_returns_runnable() -> None:
 
 def test_resolve_runnable_from_dict_returns_correct_type() -> None:
     result = resolve_runnable({"_target_": MINIMAL_RUNNABLE_TARGET})
+    assert isinstance(result, MinimalRunnable)
+
+
+# --- From BaseConfig ---
+
+
+def test_resolve_runnable_from_base_config_returns_runnable() -> None:
+    config = Config.from_kwargs(_target_=MINIMAL_RUNNABLE_TARGET)
+    result = resolve_runnable(config)
+    assert isinstance(result, Runnable)
+
+
+def test_resolve_runnable_from_base_config_returns_correct_type() -> None:
+    config = Config.from_kwargs(_target_=MINIMAL_RUNNABLE_TARGET)
+    result = resolve_runnable(config)
     assert isinstance(result, MinimalRunnable)
 
 

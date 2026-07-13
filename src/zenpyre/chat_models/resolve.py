@@ -5,34 +5,40 @@ from __future__ import annotations
 
 __all__ = ["resolve_chat_model"]
 
-import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from langchain_core.language_models import BaseChatModel
-from objectory import factory
 
-logger: logging.Logger = logging.getLogger(__name__)
+from zenpyre.utils.resolve import resolve_object
+
+if TYPE_CHECKING:
+    from zenpyre.utils.config import BaseConfig
 
 
 def resolve_chat_model(
-    chat_model: BaseChatModel | dict[str, Any],
+    chat_model: BaseChatModel | dict[str, Any] | BaseConfig,
 ) -> BaseChatModel:
     """Resolve a LangChain
     :class:`~langchain_core.language_models.BaseChatModel` instance from
-    an existing object or a configuration dictionary.
+    an existing object, a configuration dictionary, or a
+    :class:`~zenpyre.utils.config.BaseConfig`.
 
     If ``chat_model`` is already a
     :class:`~langchain_core.language_models.BaseChatModel` instance
-    it is returned as-is.  If it is a :class:`dict`, it is treated as
-    an ``objectory`` factory configuration and instantiated via
-    :func:`objectory.factory`.
+    it is returned as-is.  If it is a :class:`dict` or a
+    :class:`~zenpyre.utils.config.BaseConfig`, it is treated as an
+    ``objectory`` factory configuration and instantiated via
+    :func:`objectory.factory`. See
+    :func:`~zenpyre.utils.resolve.resolve_object` for details.
 
     Args:
         chat_model: Either a fully configured
             :class:`~langchain_core.language_models.BaseChatModel`
-            instance, or a :class:`dict` containing an ``objectory``
+            instance, a :class:`dict` containing an ``objectory``
             factory specification (must include a ``"_target_"`` key
-            pointing to the fully-qualified class name).
+            pointing to the fully-qualified class name), or a
+            :class:`~zenpyre.utils.config.BaseConfig` whose
+            ``to_kwargs()`` includes a ``"_target_"`` key.
 
     Returns:
         A configured
@@ -60,10 +66,4 @@ def resolve_chat_model(
 
         ```
     """
-    if isinstance(chat_model, dict):
-        logger.info("Initializing a BaseChatModel instance from its configuration...")
-        chat_model = factory(**chat_model)
-    if not isinstance(chat_model, BaseChatModel):
-        msg = f"Received object is not a BaseChatModel instance (received: {type(chat_model)})"
-        raise TypeError(msg)
-    return chat_model
+    return resolve_object(chat_model, cls=BaseChatModel)

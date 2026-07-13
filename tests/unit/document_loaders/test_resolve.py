@@ -6,6 +6,7 @@ import pytest
 from langchain_core.document_loaders import BaseLoader
 
 from zenpyre.document_loaders import resolve_document_loader
+from zenpyre.utils.config import Config
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -50,6 +51,21 @@ def test_resolve_document_loader_from_dict_returns_base_loader() -> None:
 
 def test_resolve_document_loader_from_dict_returns_correct_type() -> None:
     result = resolve_document_loader({"_target_": MINIMAL_LOADER_TARGET})
+    assert isinstance(result, MinimalLoader)
+
+
+# --- From BaseConfig ---
+
+
+def test_resolve_document_loader_from_base_config_returns_base_loader() -> None:
+    config = Config.from_kwargs(_target_=MINIMAL_LOADER_TARGET)
+    result = resolve_document_loader(config)
+    assert isinstance(result, BaseLoader)
+
+
+def test_resolve_document_loader_from_base_config_returns_correct_type() -> None:
+    config = Config.from_kwargs(_target_=MINIMAL_LOADER_TARGET)
+    result = resolve_document_loader(config)
     assert isinstance(result, MinimalLoader)
 
 

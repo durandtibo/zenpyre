@@ -5,36 +5,42 @@ from __future__ import annotations
 
 __all__ = ["resolve_runnable"]
 
-import logging
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from langchain_core.runnables import Runnable
-from objectory import factory
 
-logger: logging.Logger = logging.getLogger(__name__)
+from zenpyre.utils.resolve import resolve_object
+
+if TYPE_CHECKING:
+    from zenpyre.utils.config import BaseConfig
 
 Input = TypeVar("Input")
 Output = TypeVar("Output")
 
 
 def resolve_runnable(
-    runnable: Runnable[Input, Output] | dict[str, Any],
+    runnable: Runnable[Input, Output] | dict[str, Any] | BaseConfig,
 ) -> Runnable[Input, Output]:
     """Resolve a LangChain :class:`~langchain_core.runnables.Runnable`
-    instance from an existing object or a configuration dictionary.
+    instance from an existing object, a configuration dictionary, or a
+    :class:`~zenpyre.utils.config.BaseConfig`.
 
     If ``runnable`` is already a
     :class:`~langchain_core.runnables.Runnable` instance it is
-    returned as-is.  If it is a :class:`dict`, it is treated as an
+    returned as-is.  If it is a :class:`dict` or a
+    :class:`~zenpyre.utils.config.BaseConfig`, it is treated as an
     ``objectory`` factory configuration and instantiated via
-    :func:`objectory.factory`.
+    :func:`objectory.factory`. See
+    :func:`~zenpyre.utils.resolve.resolve_object` for details.
 
     Args:
         runnable: Either a fully configured
             :class:`~langchain_core.runnables.Runnable`
-            instance, or a :class:`dict` containing an ``objectory``
+            instance, a :class:`dict` containing an ``objectory``
             factory specification (must include a ``"_target_"`` key
-            pointing to the fully-qualified class name).
+            pointing to the fully-qualified class name), or a
+            :class:`~zenpyre.utils.config.BaseConfig` whose
+            ``to_kwargs()`` includes a ``"_target_"`` key.
 
     Returns:
         A configured :class:`~langchain_core.runnables.Runnable`
@@ -62,10 +68,4 @@ def resolve_runnable(
 
         ```
     """
-    if isinstance(runnable, dict):
-        logger.info("Initializing a Runnable instance from its configuration...")
-        runnable = factory(**runnable)
-    if not isinstance(runnable, Runnable):
-        msg = f"Received object is not a Runnable instance (received: {type(runnable)})"
-        raise TypeError(msg)
-    return runnable
+    return resolve_object(runnable, cls=Runnable)

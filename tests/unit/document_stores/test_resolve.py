@@ -7,6 +7,7 @@ from zenpyre.document_stores import (
     InMemoryDocumentStore,
     resolve_document_store,
 )
+from zenpyre.utils.config import Config
 
 IN_MEMORY_DOCUMENT_STORE_TARGET = "zenpyre.document_stores.InMemoryDocumentStore"
 
@@ -43,6 +44,21 @@ def test_resolve_document_store_from_dict_returns_base_document_store() -> None:
 
 def test_resolve_document_store_from_dict_returns_correct_type() -> None:
     result = resolve_document_store({"_target_": IN_MEMORY_DOCUMENT_STORE_TARGET})
+    assert isinstance(result, InMemoryDocumentStore)
+
+
+# --- From BaseConfig ---
+
+
+def test_resolve_document_store_from_base_config_returns_base_document_store() -> None:
+    config = Config.from_kwargs(_target_=IN_MEMORY_DOCUMENT_STORE_TARGET)
+    result = resolve_document_store(config)
+    assert isinstance(result, BaseDocumentStore)
+
+
+def test_resolve_document_store_from_base_config_returns_correct_type() -> None:
+    config = Config.from_kwargs(_target_=IN_MEMORY_DOCUMENT_STORE_TARGET)
+    result = resolve_document_store(config)
     assert isinstance(result, InMemoryDocumentStore)
 
 

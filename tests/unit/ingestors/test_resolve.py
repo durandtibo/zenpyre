@@ -6,6 +6,7 @@ import pytest
 
 from zenpyre.ingestors import resolve_ingestor
 from zenpyre.ingestors.base import BaseIngestor
+from zenpyre.utils.config import Config
 
 MINIMAL_INGESTOR_TARGET = "tests.unit.ingestors.test_resolve.MinimalIngestor"
 
@@ -44,6 +45,21 @@ def test_resolve_ingestor_from_dict_returns_base_ingestor() -> None:
 
 def test_resolve_ingestor_from_dict_returns_correct_type() -> None:
     result = resolve_ingestor({"_target_": MINIMAL_INGESTOR_TARGET})
+    assert isinstance(result, MinimalIngestor)
+
+
+# --- From BaseConfig ---
+
+
+def test_resolve_ingestor_from_base_config_returns_base_ingestor() -> None:
+    config = Config.from_kwargs(_target_=MINIMAL_INGESTOR_TARGET)
+    result = resolve_ingestor(config)
+    assert isinstance(result, BaseIngestor)
+
+
+def test_resolve_ingestor_from_base_config_returns_correct_type() -> None:
+    config = Config.from_kwargs(_target_=MINIMAL_INGESTOR_TARGET)
+    result = resolve_ingestor(config)
     assert isinstance(result, MinimalIngestor)
 
 

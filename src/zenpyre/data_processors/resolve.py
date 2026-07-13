@@ -5,14 +5,13 @@ from __future__ import annotations
 
 __all__ = ["resolve_data_processor"]
 
-import logging
-from typing import Any, TypeVar
-
-from objectory import factory
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from zenpyre.data_processors.base import BaseProcessor
+from zenpyre.utils.resolve import resolve_object
 
-logger: logging.Logger = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from zenpyre.utils.config import BaseConfig
 
 
 T = TypeVar("T")
@@ -20,23 +19,28 @@ U = TypeVar("U")
 
 
 def resolve_data_processor(
-    processor: BaseProcessor[U, T] | dict[str, Any],
+    processor: BaseProcessor[U, T] | dict[str, Any] | BaseConfig,
 ) -> BaseProcessor[U, T]:
     """Resolve a :class:`~zenpyre.data_processors.base.BaseProcessor`
-    instance from an existing object or a configuration dictionary.
+    instance from an existing object, a configuration dictionary, or a
+    :class:`~zenpyre.utils.config.BaseConfig`.
 
     If ``processor`` is already a
     :class:`~zenpyre.data_processors.base.BaseProcessor` instance
-    it is returned as-is.  If it is a :class:`dict`, it is treated as
-    an ``objectory`` factory configuration and instantiated via
-    :func:`objectory.factory`.
+    it is returned as-is.  If it is a :class:`dict` or a
+    :class:`~zenpyre.utils.config.BaseConfig`, it is treated as an
+    ``objectory`` factory configuration and instantiated via
+    :func:`objectory.factory`. See
+    :func:`~zenpyre.utils.resolve.resolve_object` for details.
 
     Args:
         processor: Either a fully configured
             :class:`~zenpyre.data_processors.base.BaseProcessor`
-            instance, or a :class:`dict` containing an ``objectory``
+            instance, a :class:`dict` containing an ``objectory``
             factory specification (must include a ``"_target_"`` key
-            pointing to the fully-qualified class name).
+            pointing to the fully-qualified class name), or a
+            :class:`~zenpyre.utils.config.BaseConfig` whose
+            ``to_kwargs()`` includes a ``"_target_"`` key.
 
     Returns:
         A configured
@@ -60,10 +64,4 @@ def resolve_data_processor(
 
         ```
     """
-    if isinstance(processor, dict):
-        logger.info("Initializing a BaseProcessor instance from its configuration...")
-        processor = factory(**processor)
-    if not isinstance(processor, BaseProcessor):
-        msg = f"Received object is not a BaseProcessor instance (received: {type(processor)})"
-        raise TypeError(msg)
-    return processor
+    return resolve_object(processor, cls=BaseProcessor)

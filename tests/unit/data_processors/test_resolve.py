@@ -7,6 +7,7 @@ from zenpyre.data_processors import (
     FirstNProcessor,
     resolve_data_processor,
 )
+from zenpyre.utils.config import Config
 
 FIRST_N_PROCESSOR_TARGET = "zenpyre.data_processors.FirstNProcessor"
 
@@ -43,6 +44,21 @@ def test_resolve_data_processor_from_dict_returns_base_processor() -> None:
 
 def test_resolve_data_processor_from_dict_returns_correct_type() -> None:
     result = resolve_data_processor({"_target_": FIRST_N_PROCESSOR_TARGET, "n": 5})
+    assert isinstance(result, FirstNProcessor)
+
+
+# --- From BaseConfig ---
+
+
+def test_resolve_data_processor_from_base_config_returns_base_processor() -> None:
+    config = Config.from_kwargs(_target_=FIRST_N_PROCESSOR_TARGET, n=5)
+    result = resolve_data_processor(config)
+    assert isinstance(result, BaseProcessor)
+
+
+def test_resolve_data_processor_from_base_config_returns_correct_type() -> None:
+    config = Config.from_kwargs(_target_=FIRST_N_PROCESSOR_TARGET, n=5)
+    result = resolve_data_processor(config)
     assert isinstance(result, FirstNProcessor)
 
 

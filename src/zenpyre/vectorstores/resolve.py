@@ -5,32 +5,38 @@ from __future__ import annotations
 
 __all__ = ["resolve_vector_store"]
 
-import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from langchain_core.vectorstores import VectorStore
-from objectory import factory
 
-logger: logging.Logger = logging.getLogger(__name__)
+from zenpyre.utils.resolve import resolve_object
+
+if TYPE_CHECKING:
+    from zenpyre.utils.config import BaseConfig
 
 
-def resolve_vector_store(vector_store: VectorStore | dict[str, Any]) -> VectorStore:
+def resolve_vector_store(vector_store: VectorStore | dict[str, Any] | BaseConfig) -> VectorStore:
     """Resolve a LangChain
     :class:`~langchain_core.vectorstores.VectorStore` instance from an
-    existing object or a configuration dictionary.
+    existing object, a configuration dictionary, or a
+    :class:`~zenpyre.utils.config.BaseConfig`.
 
     If ``vector_store`` is already a
     :class:`~langchain_core.vectorstores.VectorStore` instance it is
-    returned as-is.  If it is a :class:`dict`, it is treated as an
+    returned as-is.  If it is a :class:`dict` or a
+    :class:`~zenpyre.utils.config.BaseConfig`, it is treated as an
     ``objectory`` factory configuration and instantiated via
-    :func:`objectory.factory`.
+    :func:`objectory.factory`. See
+    :func:`~zenpyre.utils.resolve.resolve_object` for details.
 
     Args:
         vector_store: Either a fully configured
             :class:`~langchain_core.vectorstores.VectorStore` instance,
-            or a :class:`dict` containing an ``objectory`` factory
+            a :class:`dict` containing an ``objectory`` factory
             specification (must include a ``"_target_"`` key pointing to
-            the fully-qualified class name).
+            the fully-qualified class name), or a
+            :class:`~zenpyre.utils.config.BaseConfig` whose
+            ``to_kwargs()`` includes a ``"_target_"`` key.
 
     Returns:
         A configured :class:`~langchain_core.vectorstores.VectorStore`
@@ -57,10 +63,4 @@ def resolve_vector_store(vector_store: VectorStore | dict[str, Any]) -> VectorSt
 
         ```
     """
-    if isinstance(vector_store, dict):
-        logger.info("Initializing a VectorStore instance from its configuration...")
-        vector_store = factory(**vector_store)
-    if not isinstance(vector_store, VectorStore):
-        msg = f"Received object is not a VectorStore instance (received: {type(vector_store)})"
-        raise TypeError(msg)
-    return vector_store
+    return resolve_object(vector_store, cls=VectorStore)
