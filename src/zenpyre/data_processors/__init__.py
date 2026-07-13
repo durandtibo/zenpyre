@@ -16,6 +16,7 @@ __all__ = [
     "SortByKeyProcessor",
     "SortDocumentsByMetadataProcessor",
     "SortRecordsByMetadataProcessor",
+    "resolve_data_processor",
 ]
 
 from zenpyre.data_processors.base import BaseProcessor
@@ -29,6 +30,7 @@ from zenpyre.data_processors.filter_documents_values import (
 from zenpyre.data_processors.first_n import FirstNProcessor
 from zenpyre.data_processors.lambdaa import LambdaProcessor
 from zenpyre.data_processors.last_n import LastNProcessor
+from zenpyre.data_processors.resolve import resolve_data_processor
 from zenpyre.data_processors.sequence import SequenceProcessor
 from zenpyre.data_processors.sequential import SequentialProcessor
 from zenpyre.data_processors.shuffle import ShuffleProcessor
