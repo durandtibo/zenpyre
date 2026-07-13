@@ -43,22 +43,22 @@ def _mock_model(response: AIMessage | None = None) -> MagicMock:
 def test_agent_chat_model_stores_model() -> None:
     model = _mock_model()
     agent = AgentChatModel(model=model)
-    assert agent.model is model
+    assert agent._model is model
 
 
 def test_agent_chat_model_default_system_prompt() -> None:
     agent = AgentChatModel(model=_mock_model())
-    assert agent.system_prompt is None
+    assert agent._system_prompt is None
 
 
 def test_agent_chat_model_stores_system_prompt() -> None:
     agent = AgentChatModel(model=_mock_model(), system_prompt="You are helpful.")
-    assert agent.system_prompt == "You are helpful."
+    assert agent._system_prompt == "You are helpful."
 
 
 def test_agent_chat_model_default_response_format() -> None:
     agent = AgentChatModel(model=_mock_model())
-    assert agent.response_format is None
+    assert agent._response_format is None
 
 
 def test_agent_chat_model_default_structured_model_is_none() -> None:
