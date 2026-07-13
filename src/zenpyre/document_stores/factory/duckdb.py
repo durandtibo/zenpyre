@@ -12,6 +12,7 @@ from coola.utils.path import sanitize_path
 
 from zenpyre.document_stores import DuckDBDocumentStore
 from zenpyre.document_stores.factory.base import BaseDocumentStoreFactory
+from zenpyre.utils.imports import check_duckdb
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -46,6 +47,7 @@ class DuckDBDocumentStoreFactory(BaseDocumentStoreFactory, MultilineDisplayMixin
     """
 
     def __init__(self, path: Path | str, **kwargs: Any) -> None:
+        check_duckdb()
         self._path = sanitize_path(path)
         self._kwargs = kwargs
 
