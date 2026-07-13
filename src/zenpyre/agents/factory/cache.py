@@ -11,12 +11,15 @@ from coola.display import MultilineDisplayMixin
 
 from zenpyre.agents.factory.base import BaseAgentFactory
 from zenpyre.runnables import CachingRunnable
+from zenpyre.utils.resolve import resolve_object
 
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
 
     from langchain_core.runnables import Runnable
+
+    from zenpyre.utils.config import BaseConfig
 
 
 class CachingAgentFactory(BaseAgentFactory, MultilineDisplayMixin):
@@ -63,12 +66,12 @@ class CachingAgentFactory(BaseAgentFactory, MultilineDisplayMixin):
 
     def __init__(
         self,
-        agent_factory: BaseAgentFactory,
+        agent_factory: BaseAgentFactory | dict[str, Any] | BaseConfig,
         cache_dir: Path | str | None = None,
         key_fn: Callable[[dict[str, Any]], str] | None = None,
         ignore_none: bool = False,
     ) -> None:
-        self._agent_factory = agent_factory
+        self._agent_factory = resolve_object(agent_factory, cls=BaseAgentFactory)
         self._cache_dir = cache_dir
         self._key_fn = key_fn
         self._ignore_none = ignore_none

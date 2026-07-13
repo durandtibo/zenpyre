@@ -3,20 +3,36 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, patch
 
+import pytest
 from coola.equality import objects_are_equal
 
-from zenpyre.agents.factory import BaseAgentFactory, CachingAgentFactory
+from zenpyre.agents.factory import AgentFactory, BaseAgentFactory, CachingAgentFactory
+from zenpyre.utils.config import Config
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 MODULE = "zenpyre.agents.factory.cache"
 
+MINIMAL_AGENT_FACTORY_TARGET = "tests.unit.agents.factory.test_cache.MinimalAgentFactory"
+
+
+class MinimalAgentFactory(BaseAgentFactory):
+    """Minimal concrete BaseAgentFactory for testing."""
+
+    def make_agent(self) -> Any:
+        return AgentFactory(MagicMock())
+
+
+def _make_agent_factory() -> MagicMock:
+    """Return a MagicMock standing in for a BaseAgentFactory."""
+    return MagicMock(spec=BaseAgentFactory)
+
 
 def _make_factory(**overrides: Any) -> CachingAgentFactory:
     """Return a CachingAgentFactory instance for testing."""
     kwargs = {
-        "agent_factory": MagicMock(),
+        "agent_factory": _make_agent_factory(),
         "cache_dir": None,
         "key_fn": None,
         "ignore_none": False,
@@ -41,7 +57,7 @@ def test_caching_agent_factory_is_base_agent_factory() -> None:
 
 
 def test_caching_agent_factory_stores_agent_factory() -> None:
-    agent_factory = MagicMock()
+    agent_factory = _make_agent_factory()
     factory = _make_factory(agent_factory=agent_factory)
     assert factory._agent_factory is agent_factory
 
@@ -72,11 +88,30 @@ def test_caching_agent_factory_stores_ignore_none_true() -> None:
     assert factory._ignore_none is True
 
 
+# --- __init__ resolves agent_factory ---
+
+
+def test_caching_agent_factory_resolves_agent_factory_from_dict() -> None:
+    factory = _make_factory(agent_factory={"_target_": MINIMAL_AGENT_FACTORY_TARGET})
+    assert isinstance(factory._agent_factory, MinimalAgentFactory)
+
+
+def test_caching_agent_factory_resolves_agent_factory_from_base_config() -> None:
+    config = Config.from_kwargs(_target_=MINIMAL_AGENT_FACTORY_TARGET)
+    factory = _make_factory(agent_factory=config)
+    assert isinstance(factory._agent_factory, MinimalAgentFactory)
+
+
+def test_caching_agent_factory_invalid_agent_factory_raises_type_error() -> None:
+    with pytest.raises(TypeError, match=r"Received object is not a BaseAgentFactory instance"):
+        _make_factory(agent_factory="not-an-agent-factory")
+
+
 # --- make_agent wiring ---
 
 
 def test_caching_agent_factory_make_agent_builds_agent_from_factory() -> None:
-    agent_factory = MagicMock()
+    agent_factory = _make_agent_factory()
     factory = _make_factory(agent_factory=agent_factory)
     with patch(f"{MODULE}.CachingRunnable"):
         factory.make_agent()
@@ -84,7 +119,7 @@ def test_caching_agent_factory_make_agent_builds_agent_from_factory() -> None:
 
 
 def test_caching_agent_factory_make_agent_wraps_in_caching_runnable(tmp_path: Path) -> None:
-    agent_factory = MagicMock()
+    agent_factory = _make_agent_factory()
     cache_dir = tmp_path
     key_fn = lambda x: str(x)  # noqa: E731
     factory = _make_factory(
@@ -111,7 +146,7 @@ def test_caching_agent_factory_make_agent_returns_caching_runnable() -> None:
 
 
 def test_caching_agent_factory_get_repr_kwargs(tmp_path: Path) -> None:
-    agent_factory = MagicMock()
+    agent_factory = _make_agent_factory()
     cache_dir = tmp_path
     key_fn = lambda x: str(x)  # noqa: E731
     factory = _make_factory(

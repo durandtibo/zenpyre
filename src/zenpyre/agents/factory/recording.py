@@ -10,14 +10,16 @@ from typing import TYPE_CHECKING, Any
 from coola.display import MultilineDisplayMixin
 
 from zenpyre.agents.factory.base import BaseAgentFactory
+from zenpyre.record_stores.factory.base import BaseRecordStoreFactory
 from zenpyre.runnables import RecordingRunnable
+from zenpyre.utils.resolve import resolve_object
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
     from langchain_core.runnables import Runnable
 
-    from zenpyre.record_stores.factory.base import BaseRecordStoreFactory
+    from zenpyre.utils.config import BaseConfig
 
 
 class RecordingAgentFactory(BaseAgentFactory, MultilineDisplayMixin):
@@ -72,13 +74,15 @@ class RecordingAgentFactory(BaseAgentFactory, MultilineDisplayMixin):
 
     def __init__(
         self,
-        agent_factory: BaseAgentFactory,
-        record_store_factory: BaseRecordStoreFactory,
+        agent_factory: BaseAgentFactory | dict[str, Any] | BaseConfig,
+        record_store_factory: BaseRecordStoreFactory | dict[str, Any] | BaseConfig,
         extra: dict[str, Any] | None = None,
         serializer: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
     ) -> None:
-        self._agent_factory = agent_factory
-        self._record_store_factory = record_store_factory
+        self._agent_factory = resolve_object(agent_factory, cls=BaseAgentFactory)
+        self._record_store_factory = resolve_object(
+            record_store_factory, cls=BaseRecordStoreFactory
+        )
         self._extra = extra
         self._serializer = serializer
 

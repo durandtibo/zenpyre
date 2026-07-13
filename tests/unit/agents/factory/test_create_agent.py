@@ -3,16 +3,36 @@ from __future__ import annotations
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+import pytest
 from coola.equality import objects_are_equal
+from langchain_core.language_models import FakeListChatModel
 
 from zenpyre.agents.factory import BaseAgentFactory, CreateAgentFactory
+from zenpyre.chat_models.factory import BaseChatModelFactory
+from zenpyre.utils.config import Config
 
 MODULE = "zenpyre.agents.factory.create_agent"
+
+MINIMAL_CHAT_MODEL_FACTORY_TARGET = (
+    "tests.unit.agents.factory.test_create_agent.MinimalChatModelFactory"
+)
+
+
+class MinimalChatModelFactory(BaseChatModelFactory):
+    """Minimal concrete BaseChatModelFactory for testing."""
+
+    def make_chat_model(self) -> FakeListChatModel:
+        return FakeListChatModel(responses=["hello"])
+
+
+def _make_chat_model_factory() -> MagicMock:
+    """Return a MagicMock standing in for a BaseChatModelFactory."""
+    return MagicMock(spec=BaseChatModelFactory)
 
 
 def _make_factory(**overrides: Any) -> CreateAgentFactory:
     """Return a CreateAgentFactory instance for testing."""
-    kwargs = {"chat_model_factory": MagicMock()}
+    kwargs = {"chat_model_factory": _make_chat_model_factory()}
     kwargs.update(overrides)
     return CreateAgentFactory(**kwargs)
 
@@ -33,7 +53,7 @@ def test_create_agent_factory_is_base_agent_factory() -> None:
 
 
 def test_create_agent_factory_stores_chat_model_factory() -> None:
-    chat_model_factory = MagicMock()
+    chat_model_factory = _make_chat_model_factory()
     factory = _make_factory(chat_model_factory=chat_model_factory)
     assert factory._chat_model_factory is chat_model_factory
 
@@ -53,11 +73,30 @@ def test_create_agent_factory_stores_kwargs() -> None:
     }
 
 
+# --- __init__ resolves chat_model_factory ---
+
+
+def test_create_agent_factory_resolves_chat_model_factory_from_dict() -> None:
+    factory = _make_factory(chat_model_factory={"_target_": MINIMAL_CHAT_MODEL_FACTORY_TARGET})
+    assert isinstance(factory._chat_model_factory, MinimalChatModelFactory)
+
+
+def test_create_agent_factory_resolves_chat_model_factory_from_base_config() -> None:
+    config = Config.from_kwargs(_target_=MINIMAL_CHAT_MODEL_FACTORY_TARGET)
+    factory = _make_factory(chat_model_factory=config)
+    assert isinstance(factory._chat_model_factory, MinimalChatModelFactory)
+
+
+def test_create_agent_factory_invalid_chat_model_factory_raises_type_error() -> None:
+    with pytest.raises(TypeError, match=r"Received object is not a BaseChatModelFactory instance"):
+        _make_factory(chat_model_factory="not-a-chat-model-factory")
+
+
 # --- make_agent wiring ---
 
 
 def test_create_agent_factory_make_agent_builds_chat_model_from_factory() -> None:
-    chat_model_factory = MagicMock()
+    chat_model_factory = _make_chat_model_factory()
     factory = _make_factory(chat_model_factory=chat_model_factory)
     with patch(f"{MODULE}.create_agent"):
         factory.make_agent()
@@ -65,7 +104,7 @@ def test_create_agent_factory_make_agent_builds_chat_model_from_factory() -> Non
 
 
 def test_create_agent_factory_make_agent_calls_create_agent() -> None:
-    chat_model_factory = MagicMock()
+    chat_model_factory = _make_chat_model_factory()
     tools = [MagicMock()]
     response_format = dict
     factory = _make_factory(
@@ -87,7 +126,7 @@ def test_create_agent_factory_make_agent_calls_create_agent() -> None:
 
 
 def test_create_agent_factory_make_agent_calls_create_agent_with_no_extra_kwargs() -> None:
-    chat_model_factory = MagicMock()
+    chat_model_factory = _make_chat_model_factory()
     factory = _make_factory(chat_model_factory=chat_model_factory)
     with patch(f"{MODULE}.create_agent") as mock_create_agent:
         factory.make_agent()
@@ -104,7 +143,7 @@ def test_create_agent_factory_make_agent_returns_create_agent_result() -> None:
 
 
 def test_create_agent_factory_make_agent_builds_new_agent_each_call() -> None:
-    chat_model_factory = MagicMock()
+    chat_model_factory = _make_chat_model_factory()
     factory = _make_factory(chat_model_factory=chat_model_factory)
     with patch(f"{MODULE}.create_agent") as mock_create_agent:
         factory.make_agent()
@@ -117,7 +156,7 @@ def test_create_agent_factory_make_agent_builds_new_agent_each_call() -> None:
 
 
 def test_create_agent_factory_get_repr_kwargs() -> None:
-    chat_model_factory = MagicMock()
+    chat_model_factory = _make_chat_model_factory()
     tools = [MagicMock()]
     factory = _make_factory(
         chat_model_factory=chat_model_factory,
@@ -139,7 +178,7 @@ def test_create_agent_factory_get_repr_kwargs() -> None:
 
 
 def test_create_agent_factory_get_repr_kwargs_with_no_extra_kwargs() -> None:
-    chat_model_factory = MagicMock()
+    chat_model_factory = _make_chat_model_factory()
     factory = _make_factory(chat_model_factory=chat_model_factory)
     assert objects_are_equal(factory._get_repr_kwargs(), {"chat_model_factory": chat_model_factory})
 
