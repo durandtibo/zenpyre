@@ -7,6 +7,7 @@ from zenpyre.record_stores import (
     InMemoryRecordStore,
     resolve_record_store,
 )
+from zenpyre.utils.config import Config
 
 IN_MEMORY_RECORD_STORE_TARGET = "zenpyre.record_stores.InMemoryRecordStore"
 
@@ -43,6 +44,21 @@ def test_resolve_record_store_from_dict_returns_base_record_store() -> None:
 
 def test_resolve_record_store_from_dict_returns_correct_type() -> None:
     result = resolve_record_store({"_target_": IN_MEMORY_RECORD_STORE_TARGET})
+    assert isinstance(result, InMemoryRecordStore)
+
+
+# --- From BaseConfig ---
+
+
+def test_resolve_record_store_from_base_config_returns_base_record_store() -> None:
+    config = Config.from_kwargs(_target_=IN_MEMORY_RECORD_STORE_TARGET)
+    result = resolve_record_store(config)
+    assert isinstance(result, BaseRecordStore)
+
+
+def test_resolve_record_store_from_base_config_returns_correct_type() -> None:
+    config = Config.from_kwargs(_target_=IN_MEMORY_RECORD_STORE_TARGET)
+    result = resolve_record_store(config)
     assert isinstance(result, InMemoryRecordStore)
 
 

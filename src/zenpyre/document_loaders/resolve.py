@@ -5,34 +5,40 @@ from __future__ import annotations
 
 __all__ = ["resolve_document_loader"]
 
-import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from langchain_core.document_loaders import BaseLoader
-from objectory import factory
 
-logger: logging.Logger = logging.getLogger(__name__)
+from zenpyre.utils.resolve import resolve_object
+
+if TYPE_CHECKING:
+    from zenpyre.utils.config import BaseConfig
 
 
 def resolve_document_loader(
-    document_loader: BaseLoader | dict[str, Any],
+    document_loader: BaseLoader | dict[str, Any] | BaseConfig,
 ) -> BaseLoader:
     """Resolve a LangChain
     :class:`~langchain_core.document_loaders.BaseLoader` instance from
-    an existing object or a configuration dictionary.
+    an existing object, a configuration dictionary, or a
+    :class:`~zenpyre.utils.config.BaseConfig`.
 
     If ``document_loader`` is already a
     :class:`~langchain_core.document_loaders.BaseLoader` instance it is
-    returned as-is.  If it is a :class:`dict`, it is treated as an
+    returned as-is.  If it is a :class:`dict` or a
+    :class:`~zenpyre.utils.config.BaseConfig`, it is treated as an
     ``objectory`` factory configuration and instantiated via
-    :func:`objectory.factory`.
+    :func:`objectory.factory`. See
+    :func:`~zenpyre.utils.resolve.resolve_object` for details.
 
     Args:
         document_loader: Either a fully configured
             :class:`~langchain_core.document_loaders.BaseLoader`
-            instance, or a :class:`dict` containing an ``objectory``
+            instance, a :class:`dict` containing an ``objectory``
             factory specification (must include a ``"_target_"`` key
-            pointing to the fully-qualified class name).
+            pointing to the fully-qualified class name), or a
+            :class:`~zenpyre.utils.config.BaseConfig` whose
+            ``to_kwargs()`` includes a ``"_target_"`` key.
 
     Returns:
         A configured :class:`~langchain_core.document_loaders.BaseLoader`
@@ -63,10 +69,4 @@ def resolve_document_loader(
 
         ```
     """
-    if isinstance(document_loader, dict):
-        logger.info("Initializing a BaseLoader instance from its configuration...")
-        document_loader = factory(**document_loader)
-    if not isinstance(document_loader, BaseLoader):
-        msg = f"Received object is not a BaseLoader instance (received: {type(document_loader)})"
-        raise TypeError(msg)
-    return document_loader
+    return resolve_object(document_loader, cls=BaseLoader)

@@ -4,6 +4,7 @@ import pytest
 from langchain_core.embeddings.fake import FakeEmbeddings
 from langchain_core.vectorstores import InMemoryVectorStore, VectorStore
 
+from zenpyre.utils.config import Config
 from zenpyre.vectorstores import resolve_vector_store
 
 MODULE = "zenpyre.vectorstores.resolve"
@@ -52,6 +53,25 @@ def test_resolve_vector_store_from_dict_returns_correct_type() -> None:
             "embedding": FakeEmbeddings(size=128),
         }
     )
+    assert isinstance(result, InMemoryVectorStore)
+
+
+# --- From BaseConfig ---
+
+
+def test_resolve_vector_store_from_base_config_returns_vector_store() -> None:
+    config = Config.from_kwargs(
+        _target_=IN_MEMORY_VECTOR_STORE_TARGET, embedding=FakeEmbeddings(size=128)
+    )
+    result = resolve_vector_store(config)
+    assert isinstance(result, VectorStore)
+
+
+def test_resolve_vector_store_from_base_config_returns_correct_type() -> None:
+    config = Config.from_kwargs(
+        _target_=IN_MEMORY_VECTOR_STORE_TARGET, embedding=FakeEmbeddings(size=128)
+    )
+    result = resolve_vector_store(config)
     assert isinstance(result, InMemoryVectorStore)
 
 

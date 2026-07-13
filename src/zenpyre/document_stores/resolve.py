@@ -5,35 +5,39 @@ from __future__ import annotations
 
 __all__ = ["resolve_document_store"]
 
-import logging
-from typing import Any
-
-from objectory import factory
+from typing import TYPE_CHECKING, Any
 
 from zenpyre.document_stores.base import BaseDocumentStore
+from zenpyre.utils.resolve import resolve_object
 
-logger: logging.Logger = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from zenpyre.utils.config import BaseConfig
 
 
 def resolve_document_store(
-    document_store: BaseDocumentStore | dict[str, Any],
+    document_store: BaseDocumentStore | dict[str, Any] | BaseConfig,
 ) -> BaseDocumentStore:
     """Resolve a
     :class:`~zenpyre.document_stores.base.BaseDocumentStore` instance
-    from an existing object or a configuration dictionary.
+    from an existing object, a configuration dictionary, or a
+    :class:`~zenpyre.utils.config.BaseConfig`.
 
     If ``document_store`` is already a
     :class:`~zenpyre.document_stores.base.BaseDocumentStore` instance
-    it is returned as-is.  If it is a :class:`dict`, it is treated as
-    an ``objectory`` factory configuration and instantiated via
-    :func:`objectory.factory`.
+    it is returned as-is.  If it is a :class:`dict` or a
+    :class:`~zenpyre.utils.config.BaseConfig`, it is treated as an
+    ``objectory`` factory configuration and instantiated via
+    :func:`objectory.factory`. See
+    :func:`~zenpyre.utils.resolve.resolve_object` for details.
 
     Args:
         document_store: Either a fully configured
             :class:`~zenpyre.document_stores.base.BaseDocumentStore`
-            instance, or a :class:`dict` containing an ``objectory``
+            instance, a :class:`dict` containing an ``objectory``
             factory specification (must include a ``"_target_"`` key
-            pointing to the fully-qualified class name).
+            pointing to the fully-qualified class name), or a
+            :class:`~zenpyre.utils.config.BaseConfig` whose
+            ``to_kwargs()`` includes a ``"_target_"`` key.
 
     Returns:
         A configured
@@ -57,13 +61,4 @@ def resolve_document_store(
 
         ```
     """
-    if isinstance(document_store, dict):
-        logger.info("Initializing a BaseDocumentStore instance from its configuration...")
-        document_store = factory(**document_store)
-    if not isinstance(document_store, BaseDocumentStore):
-        msg = (
-            f"Received object is not a BaseDocumentStore instance "
-            f"(received: {type(document_store)})"
-        )
-        raise TypeError(msg)
-    return document_store
+    return resolve_object(document_store, cls=BaseDocumentStore)

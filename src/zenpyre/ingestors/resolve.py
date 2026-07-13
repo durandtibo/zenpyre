@@ -5,36 +5,40 @@ from __future__ import annotations
 
 __all__ = ["resolve_ingestor"]
 
-import logging
-from typing import Any, TypeVar
-
-from objectory import factory
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from zenpyre.ingestors.base import BaseIngestor
+from zenpyre.utils.resolve import resolve_object
 
-logger: logging.Logger = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from zenpyre.utils.config import BaseConfig
 
 T = TypeVar("T")
 
 
 def resolve_ingestor(
-    ingestor: BaseIngestor[T] | dict[str, Any],
+    ingestor: BaseIngestor[T] | dict[str, Any] | BaseConfig,
 ) -> BaseIngestor[T]:
     """Resolve a :class:`~zenpyre.ingestors.base.BaseIngestor` instance
-    from an existing object or a configuration dictionary.
+    from an existing object, a configuration dictionary, or a
+    :class:`~zenpyre.utils.config.BaseConfig`.
 
     If ``ingestor`` is already a
     :class:`~zenpyre.ingestors.base.BaseIngestor` instance it is
-    returned as-is.  If it is a :class:`dict`, it is treated as an
+    returned as-is.  If it is a :class:`dict` or a
+    :class:`~zenpyre.utils.config.BaseConfig`, it is treated as an
     ``objectory`` factory configuration and instantiated via
-    :func:`objectory.factory`.
+    :func:`objectory.factory`. See
+    :func:`~zenpyre.utils.resolve.resolve_object` for details.
 
     Args:
         ingestor: Either a fully configured
             :class:`~zenpyre.ingestors.base.BaseIngestor`
-            instance, or a :class:`dict` containing an ``objectory``
+            instance, a :class:`dict` containing an ``objectory``
             factory specification (must include a ``"_target_"`` key
-            pointing to the fully-qualified class name).
+            pointing to the fully-qualified class name), or a
+            :class:`~zenpyre.utils.config.BaseConfig` whose
+            ``to_kwargs()`` includes a ``"_target_"`` key.
 
     Returns:
         A configured :class:`~zenpyre.ingestors.base.BaseIngestor`
@@ -62,10 +66,4 @@ def resolve_ingestor(
 
         ```
     """
-    if isinstance(ingestor, dict):
-        logger.info("Initializing a BaseIngestor instance from its configuration...")
-        ingestor = factory(**ingestor)
-    if not isinstance(ingestor, BaseIngestor):
-        msg = f"Received object is not a BaseIngestor instance (received: {type(ingestor)})"
-        raise TypeError(msg)
-    return ingestor
+    return resolve_object(ingestor, cls=BaseIngestor)
