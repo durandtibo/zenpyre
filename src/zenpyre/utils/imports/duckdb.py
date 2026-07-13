@@ -86,4 +86,4 @@ def duckdb_available(fn: F) -> F:
 def raise_duckdb_missing_error() -> NoReturn:
     r"""Raise a RuntimeError to indicate the ``duckdb`` package is
     missing."""
-    raise_package_missing_error("duckdb", "langchain-anthropic")
+    raise_package_missing_error("duckdb", "duckdb")

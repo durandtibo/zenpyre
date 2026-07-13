@@ -86,4 +86,4 @@ def faker_available(fn: F) -> F:
 def raise_faker_missing_error() -> NoReturn:
     r"""Raise a RuntimeError to indicate the ``faker`` package is
     missing."""
-    raise_package_missing_error("faker", "langchain-anthropic")
+    raise_package_missing_error("faker", "faker")
