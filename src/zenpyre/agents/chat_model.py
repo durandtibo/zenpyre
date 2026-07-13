@@ -55,10 +55,10 @@ class AgentChatModel(Runnable[LanguageModelInput | dict[str, Any], dict[str, Any
     a ``SystemMessage`` built from ``system_prompt`` is prepended.
 
     Attributes:
-        model: The chat model to wrap.
-        system_prompt: An optional system prompt to prepend to every
+        _model: The chat model to wrap.
+        _system_prompt: An optional system prompt to prepend to every
             call, unless the input already contains a system message.
-        response_format: An optional schema (e.g. a Pydantic model, a
+        _response_format: An optional schema (e.g. a Pydantic model, a
             TypedDict, or a JSON schema dict) passed to the wrapped
             model's ``with_structured_output``. When set, ``invoke``/
             ``ainvoke`` additionally return a ``"structured_response"``
@@ -103,17 +103,17 @@ class AgentChatModel(Runnable[LanguageModelInput | dict[str, Any], dict[str, Any
                 ``invoke``/``ainvoke``. Defaults to ``None`` (no
                 structured output).
         """
-        self.model = model
-        self.system_prompt = system_prompt
-        self.response_format = response_format
+        self._model = model
+        self._system_prompt = system_prompt
+        self._response_format = response_format
 
         # Pre-bind the structured-output wrapper once, mirroring how a
         # tool-calling agent pre-binds tools in __init__. include_raw=True
         # gives us back both the raw AIMessage and the parsed object in a
         # single model call.
         self._structured_model = (
-            self.model.with_structured_output(self.response_format, include_raw=True)
-            if self.response_format is not None
+            self._model.with_structured_output(self._response_format, include_raw=True)
+            if self._response_format is not None
             else None
         )
 
@@ -157,7 +157,7 @@ class AgentChatModel(Runnable[LanguageModelInput | dict[str, Any], dict[str, Any
                 "structured_response": result["parsed"],
             }
 
-        ai_message = self.model.invoke(messages, config=config, **kwargs)
+        ai_message = self._model.invoke(messages, config=config, **kwargs)
         messages.append(ai_message)
         return {"messages": messages}
 
@@ -199,7 +199,7 @@ class AgentChatModel(Runnable[LanguageModelInput | dict[str, Any], dict[str, Any
                 "structured_response": result["parsed"],
             }
 
-        ai_message = await self.model.ainvoke(messages, config=config, **kwargs)
+        ai_message = await self._model.ainvoke(messages, config=config, **kwargs)
         messages.append(ai_message)
         return {"messages": messages}
 
@@ -251,7 +251,7 @@ class AgentChatModel(Runnable[LanguageModelInput | dict[str, Any], dict[str, Any
                 )
             return output
 
-        ai_messages = self.model.batch(all_messages, config=config, **kwargs)
+        ai_messages = self._model.batch(all_messages, config=config, **kwargs)
         return [
             {"messages": [*messages, ai_message]}
             for messages, ai_message in zip(all_messages, ai_messages, strict=True)
@@ -298,7 +298,7 @@ class AgentChatModel(Runnable[LanguageModelInput | dict[str, Any], dict[str, Any
                 )
             return output
 
-        ai_messages = await self.model.abatch(all_messages, config=config, **kwargs)
+        ai_messages = await self._model.abatch(all_messages, config=config, **kwargs)
         return [
             {"messages": [*messages, ai_message]}
             for messages, ai_message in zip(all_messages, ai_messages, strict=True)
@@ -345,7 +345,7 @@ class AgentChatModel(Runnable[LanguageModelInput | dict[str, Any], dict[str, Any
             Successive ``BaseMessage`` chunks from the wrapped model.
         """
         messages = self._coerce_input(input)
-        yield from self.model.stream(messages, config=config, **kwargs)
+        yield from self._model.stream(messages, config=config, **kwargs)
 
     async def astream(
         self,
@@ -374,7 +374,7 @@ class AgentChatModel(Runnable[LanguageModelInput | dict[str, Any], dict[str, Any
             Successive ``BaseMessage`` chunks from the wrapped model.
         """
         messages = self._coerce_input(input)
-        async for chunk in self.model.astream(messages, config=config, **kwargs):
+        async for chunk in self._model.astream(messages, config=config, **kwargs):
             yield chunk
 
     # ------------------------------------------------------------------
@@ -400,9 +400,9 @@ class AgentChatModel(Runnable[LanguageModelInput | dict[str, Any], dict[str, Any
         Returns:
             A new list of ``BaseMessage`` objects (never the same list
             object as any list passed in, so callers may safely mutate
-            the result). If ``self.system_prompt`` is set and the list
+            the result). If ``self._system_prompt`` is set and the list
             does not already contain a ``SystemMessage``, a
-            ``SystemMessage`` built from ``self.system_prompt`` is
+            ``SystemMessage`` built from ``self._system_prompt`` is
             prepended.
 
         Raises:
@@ -420,7 +420,7 @@ class AgentChatModel(Runnable[LanguageModelInput | dict[str, Any], dict[str, Any
             msg = f"Unsupported input type for AgentChatModel: {type(input)}"
             raise TypeError(msg)
 
-        if self.system_prompt and not any(isinstance(m, SystemMessage) for m in messages):
-            messages = [SystemMessage(content=self.system_prompt), *messages]
+        if self._system_prompt and not any(isinstance(m, SystemMessage) for m in messages):
+            messages = [SystemMessage(content=self._system_prompt), *messages]
 
         return messages
