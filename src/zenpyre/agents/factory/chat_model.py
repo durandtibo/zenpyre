@@ -8,6 +8,7 @@ __all__ = ["AgentChatModelFactory"]
 from typing import TYPE_CHECKING, Any
 
 from coola.display import MultilineDisplayMixin
+from coola.utils.string import truncate_str
 
 from zenpyre.agents.chat_model import AgentChatModel
 from zenpyre.agents.factory.base import BaseAgentFactory
@@ -79,6 +80,6 @@ class AgentChatModelFactory(BaseAgentFactory, MultilineDisplayMixin):
     def _get_repr_kwargs(self) -> dict[str, Any]:
         return {
             "chat_model_factory": self._chat_model_factory,
-            "system_prompt": self._system_prompt,
+            "system_prompt": truncate_str(self._system_prompt) if self._system_prompt else None,
             "response_format": self._response_format,
         }

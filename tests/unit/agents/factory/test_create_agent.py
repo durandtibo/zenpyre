@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from coola.equality import objects_are_equal
+from coola.utils.string import truncate_str
 from langchain_core.language_models import FakeListChatModel
 
 from zenpyre.agents.factory import BaseAgentFactory, CreateAgentFactory
@@ -181,6 +182,23 @@ def test_create_agent_factory_get_repr_kwargs_with_no_extra_kwargs() -> None:
     chat_model_factory = _make_chat_model_factory()
     factory = _make_factory(chat_model_factory=chat_model_factory)
     assert objects_are_equal(factory._get_repr_kwargs(), {"chat_model_factory": chat_model_factory})
+
+
+def test_create_agent_factory_get_repr_kwargs_truncates_long_system_prompt() -> None:
+    factory = _make_factory(system_prompt="a" * 200)
+    assert factory._get_repr_kwargs()["system_prompt"] == truncate_str("a" * 200)
+    assert len(factory._get_repr_kwargs()["system_prompt"]) < 200
+
+
+def test_create_agent_factory_get_repr_kwargs_no_system_prompt() -> None:
+    factory = _make_factory()
+    assert "system_prompt" not in factory._get_repr_kwargs()
+
+
+def test_create_agent_factory_get_repr_kwargs_non_str_system_prompt_left_as_is() -> None:
+    system_prompt = MagicMock()
+    factory = _make_factory(system_prompt=system_prompt)
+    assert factory._get_repr_kwargs()["system_prompt"] is system_prompt
 
 
 # --- __repr__ and __str__ ---

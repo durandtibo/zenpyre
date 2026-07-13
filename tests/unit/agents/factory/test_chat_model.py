@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from coola.equality import objects_are_equal
+from coola.utils.string import truncate_str
 from langchain_core.language_models import BaseChatModel, FakeListChatModel
 
 from zenpyre.agents.factory import AgentChatModelFactory, BaseAgentFactory
@@ -165,6 +166,17 @@ def test_agent_chat_model_factory_get_repr_kwargs() -> None:
             "response_format": dict,
         },
     )
+
+
+def test_agent_chat_model_factory_get_repr_kwargs_truncates_long_system_prompt() -> None:
+    factory = _make_factory(system_prompt="a" * 200)
+    assert factory._get_repr_kwargs()["system_prompt"] == truncate_str("a" * 200)
+    assert len(factory._get_repr_kwargs()["system_prompt"]) < 200
+
+
+def test_agent_chat_model_factory_get_repr_kwargs_system_prompt_none() -> None:
+    factory = _make_factory(system_prompt=None)
+    assert factory._get_repr_kwargs()["system_prompt"] is None
 
 
 # --- __repr__ and __str__ ---
