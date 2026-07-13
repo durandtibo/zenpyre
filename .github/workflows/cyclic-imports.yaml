@@ -24,14 +24,17 @@ jobs:
       - name: check zenpyre.agents
         run: |
           python -c "from zenpyre import agents"
+          python -c "from zenpyre.agents import factory"
 
       - name: check zenpyre.chat_models
         run: |
           python -c "from zenpyre import chat_models"
+          python -c "from zenpyre.chat_models import factory"
 
       - name: check zenpyre.data_processors
         run: |
           python -c "from zenpyre import data_processors"
+          python -c "from zenpyre.data_processors import factory"
 
       - name: check zenpyre.document_loaders
         run: |
@@ -41,6 +44,7 @@ jobs:
       - name: check zenpyre.document_stores
         run: |
           python -c "from zenpyre import document_stores"
+          python -c "from zenpyre.document_stores import factory"
 
       - name: check zenpyre.documents
         run: |
@@ -55,18 +59,22 @@ jobs:
       - name: check zenpyre.ingestors
         run: |
           python -c "from zenpyre import ingestors"
+          python -c "from zenpyre.ingestors import factory"
 
       - name: check zenpyre.record_stores
         run: |
           python -c "from zenpyre import record_stores"
+          python -c "from zenpyre.record_stores import factory"
 
       - name: check zenpyre.records
         run: |
           python -c "from zenpyre import records"
+          python -c "from zenpyre.records import analysis"
 
       - name: check zenpyre.runnables
         run: |
           python -c "from zenpyre import runnables"
+          python -c "from zenpyre.runnables import factory"
 
       - name: check zenpyre.testing
         run: |
@@ -81,6 +89,7 @@ jobs:
         run: |
           python -c "from zenpyre import utils"
           python -c "from zenpyre.utils import config"
+          python -c "from zenpyre.utils import dataclass"
           python -c "from zenpyre.utils import fallback"
           python -c "from zenpyre.utils import imports"
           python -c "from zenpyre.utils import rich"
