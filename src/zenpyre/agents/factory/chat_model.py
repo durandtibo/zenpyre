@@ -11,11 +11,11 @@ from coola.display import MultilineDisplayMixin
 
 from zenpyre.agents.chat_model import AgentChatModel
 from zenpyre.agents.factory.base import BaseAgentFactory
+from zenpyre.chat_models.factory.base import BaseChatModelFactory
+from zenpyre.utils.resolve import resolve_object
 
 if TYPE_CHECKING:
-    from langchain_core.runnables import Runnable
-
-    from zenpyre.chat_models.factory.base import BaseChatModelFactory
+    from zenpyre.utils.config import BaseConfig
 
 
 class AgentChatModelFactory(BaseAgentFactory, MultilineDisplayMixin):
@@ -61,15 +61,15 @@ class AgentChatModelFactory(BaseAgentFactory, MultilineDisplayMixin):
 
     def __init__(
         self,
-        chat_model_factory: BaseChatModelFactory,
+        chat_model_factory: BaseChatModelFactory | dict[str, Any] | BaseConfig,
         system_prompt: str | None = None,
         response_format: Any | None = None,
     ) -> None:
-        self._chat_model_factory = chat_model_factory
+        self._chat_model_factory = resolve_object(chat_model_factory, cls=BaseChatModelFactory)
         self._system_prompt = system_prompt
         self._response_format = response_format
 
-    def make_agent(self) -> Runnable[dict[str, Any], dict[str, Any]]:
+    def make_agent(self) -> AgentChatModel:
         return AgentChatModel(
             model=self._chat_model_factory.make_chat_model(),
             system_prompt=self._system_prompt,
