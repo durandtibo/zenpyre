@@ -87,4 +87,4 @@ def langchain_google_genai_available(fn: F) -> F:
 def raise_langchain_google_genai_missing_error() -> NoReturn:
     r"""Raise a RuntimeError to indicate the ``langchain_google_genai``
     package is missing."""
-    raise_package_missing_error("langchain_google_genai", "langchain-google_genai")
+    raise_package_missing_error("langchain_google_genai", "langchain-google-genai")
