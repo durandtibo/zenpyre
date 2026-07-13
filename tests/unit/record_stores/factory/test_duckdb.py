@@ -60,6 +60,16 @@ def test_duckdb_record_store_factory_make_record_store_returns_new_instance_each
     assert factory.make_record_store() is not factory.make_record_store()
 
 
+@duckdb_available
+def test_duckdb_record_store_factory_in_memory_path_left_unchanged() -> None:
+    # Regression test: ":memory:" must not be resolved into a real file
+    # path (e.g. relative to the cwd), which would silently create a
+    # file named ":memory:" on disk instead of an in-memory database.
+    factory = DuckDBRecordStoreFactory(":memory:")
+    assert factory._path == ":memory:"
+    factory.make_record_store().close()
+
+
 # --- _get_repr_kwargs ---
 
 
