@@ -458,10 +458,13 @@ def test_hash_matches_cache_key_hash(chat_model: ChatModelConfig) -> None:
 def test_hash_on_subclass_does_not_raise(chat_model: ChatModelConfig) -> None:
     """Regression test: @dataclass(frozen=True) regenerates __hash__ for
     every dataclass-decorated class unless __hash__ is present in that
-    class's own body. MyAgentConfig restates it (delegating to
-    AgentConfig.__hash__) specifically so this doesn't fall back to the
-    auto-generated version, which would try to hash the unhashable
-    `extra` MappingProxyType and raise TypeError."""
+    class's own body.
+
+    MyAgentConfig restates it (delegating to AgentConfig.__hash__)
+    specifically so this doesn't fall back to the auto-generated
+    version, which would try to hash the unhashable `extra`
+    MappingProxyType and raise TypeError.
+    """
     cfg = MyAgentConfig(
         chat_model=chat_model, system_prompt="p", system_prompt_id="id-1", max_tokens=1024
     )
