@@ -716,3 +716,12 @@ def test_context_manager_usable_for_reads_and_writes() -> None:
         assert store.filter(author="Alice")[0].id == "1"
         store.delete("1")
         assert store.count() == 1
+
+
+@duckdb_available
+def test_context_manager_multiple_open_close() -> None:
+    record_store = DuckDBRecordStore(":memory:")
+    for i in range(3):
+        with record_store as store:
+            store.add_records([Record(id=str(i), metadata={})])
+            assert store.count() == i + 1
