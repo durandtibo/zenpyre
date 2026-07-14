@@ -249,9 +249,9 @@ def test_get_value_does_not_expose_extra_itself() -> None:
 
 def test_get_value_extra_key_named_extra_is_unreachable() -> None:
     """Documents current behavior: even if a caller somehow got 'extra'
-    into the extra dict itself (bypassing the collision guard), it
-    would not be reachable through get_value, since 'extra' is
-    explicitly excluded before the extra-dict fallback is checked."""
+    into the extra dict itself (bypassing the collision guard), it would
+    not be reachable through get_value, since 'extra' is explicitly
+    excluded before the extra-dict fallback is checked."""
     config = DummyConfig(name="a", extra={"extra": "nested"})
     assert config.get_value("extra") == "nested"
 
@@ -296,9 +296,9 @@ def test_to_kwargs_mutating_result_does_not_affect_config() -> None:
 
 
 def test_to_kwargs_subclass_field_is_automatically_included() -> None:
-    """The key behavioral guarantee of the shared base: a subclass's
-    own typed field must appear in to_kwargs() via introspection,
-    without the subclass overriding to_kwargs() itself."""
+    """The key behavioral guarantee of the shared base: a subclass's own
+    typed field must appear in to_kwargs() via introspection, without
+    the subclass overriding to_kwargs() itself."""
     config = OtherFieldConfig(max_tokens=1024)
     kwargs = config.to_kwargs()
     assert kwargs["max_tokens"] == 1024
@@ -430,8 +430,11 @@ def test_hash_matches_cache_key_hash(config: DummyConfig) -> None:
 
 def test_hash_does_not_raise_on_unhashable_extra() -> None:
     """The whole point of the custom __hash__: the auto-generated
-    dataclass hash would try to hash `extra` (a MappingProxyType,
-    itself unhashable) directly and fail. This must not happen."""
+    dataclass hash would try to hash `extra` (a MappingProxyType, itself
+    unhashable) directly and fail.
+
+    This must not happen.
+    """
     config = DummyConfig(name="a", extra={"max_retries": 3})
     hash(config)  # should not raise
 

@@ -43,11 +43,12 @@ class BaseDuckDBDocumentStore(BaseDocumentStore, MultilineDisplayMixin):
         """Recreate the store's table schema on a fresh connection.
 
         Called once from ``__init__`` and again each time the store is
-        reopened via :meth:`__enter__` after being closed. A ``:memory:``
-        database starts empty every time it is (re)connected to, so this
-        is what makes reopening a closed in-memory store behave like a
-        reset rather than resuming where it left off. The default
-        implementation does nothing; subclasses override it.
+        reopened via :meth:`__enter__` after being closed. A
+        ``:memory:`` database starts empty every time it is
+        (re)connected to, so this is what makes reopening a closed in-
+        memory store behave like a reset rather than resuming where it
+        left off. The default implementation does nothing; subclasses
+        override it.
         """
 
     def close(self) -> None:

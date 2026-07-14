@@ -129,8 +129,8 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         """The metadata keys reserved for this class's own use.
 
         Neither ``extra`` nor a call's ``config["metadata"]`` may use
-        one of these; doing so raises :exc:`ValueError`. A subclass
-        may override this property to change the reserved set.
+        one of these; doing so raises :exc:`ValueError`. A subclass may
+        override this property to change the reserved set.
         """
         return frozenset({"input", "output", "timestamp", "run_id", "error"})
 
