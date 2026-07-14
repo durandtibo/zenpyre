@@ -2,7 +2,7 @@ r"""Empty document detection."""
 
 from __future__ import annotations
 
-__all__ = ["is_document_empty"]
+__all__ = ["is_document_empty", "is_document_whitespace_only"]
 
 from typing import TYPE_CHECKING
 
@@ -41,3 +41,33 @@ def is_document_empty(document: Document, *, treat_whitespace_as_empty: bool = F
     if not isinstance(content, str) or content == "":
         return True
     return treat_whitespace_as_empty and content.strip() == ""
+
+
+def is_document_whitespace_only(document: Document) -> bool:
+    r"""Determine if a document's ``page_content`` is non-empty but
+    contains only whitespace.
+
+    Args:
+        document: The ``langchain_core.documents.Document`` to check.
+
+    Returns:
+        ``True`` if ``page_content`` is a non-empty string that
+        contains only whitespace characters. ``False`` if
+        ``page_content`` is the empty string, is not a string (e.g.
+        ``None``), or contains any non-whitespace character.
+
+    Example:
+        ```pycon
+        >>> from langchain_core.documents import Document
+        >>> from zenpyre.documents import is_document_whitespace_only
+        >>> is_document_whitespace_only(Document(page_content="  \n"))
+        True
+        >>> is_document_whitespace_only(Document(page_content=""))
+        False
+        >>> is_document_whitespace_only(Document(page_content="hello"))
+        False
+
+        ```
+    """
+    content = document.page_content
+    return isinstance(content, str) and content != "" and content.strip() == ""
