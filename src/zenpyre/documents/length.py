@@ -2,7 +2,7 @@ r"""Document content length utilities."""
 
 from __future__ import annotations
 
-__all__ = ["compute_document_lengths"]
+__all__ = ["compute_document_lengths", "get_document_length"]
 
 from typing import TYPE_CHECKING, Any
 
@@ -10,6 +10,31 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from langchain_core.documents import Document
+
+
+def get_document_length(document: Document) -> int:
+    r"""Compute the number of characters in a document's
+    ``page_content``.
+
+    Args:
+        document: The ``langchain_core.documents.Document`` to
+            measure.
+
+    Returns:
+        The length, in characters, of ``page_content``, or ``0`` if
+        ``page_content`` is not a string (e.g. ``None``).
+
+    Example:
+        ```pycon
+        >>> from langchain_core.documents import Document
+        >>> from zenpyre.documents import get_document_length
+        >>> get_document_length(Document(page_content="hello"))
+        5
+
+        ```
+    """
+    content = document.page_content
+    return len(content) if isinstance(content, str) else 0
 
 
 def compute_document_lengths(
@@ -47,11 +72,7 @@ def compute_document_lengths(
 
         ```
     """
-    result = []
-    for doc in documents:
-        content = doc.page_content
-        length = len(content) if isinstance(content, str) else 0
-        result.append((doc.id, length))
+    result = [(doc.id, get_document_length(doc)) for doc in documents]
     if sort:
         result.sort(key=lambda item: item[1])
     return result

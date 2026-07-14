@@ -2,7 +2,26 @@ from __future__ import annotations
 
 from langchain_core.documents import Document
 
-from zenpyre.documents import compute_document_lengths
+from zenpyre.documents import compute_document_lengths, get_document_length
+
+##########################################
+#     Tests for get_document_length     #
+##########################################
+
+
+def test_get_document_length_basic() -> None:
+    assert get_document_length(Document(page_content="hello")) == 5
+
+
+def test_get_document_length_empty() -> None:
+    assert get_document_length(Document(page_content="")) == 0
+
+
+def test_get_document_length_none_content() -> None:
+    doc = Document(page_content="x")
+    doc.page_content = None
+    assert get_document_length(doc) == 0
+
 
 ##############################################
 #     Tests for compute_document_lengths     #
