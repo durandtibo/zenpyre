@@ -5,13 +5,14 @@ from langchain_core.documents import Document
 from zenpyre.documents import (
     compute_document_lengths,
     get_document_length,
+    get_document_lengths,
     get_longest_document,
     get_shortest_document,
 )
 
-##########################################
+#########################################
 #     Tests for get_document_length     #
-##########################################
+#########################################
 
 
 def test_get_document_length_basic() -> None:
@@ -26,6 +27,37 @@ def test_get_document_length_none_content() -> None:
     doc = Document(page_content="x")
     doc.page_content = None
     assert get_document_length(doc) == 0
+
+
+###########################################
+#     Tests for get_document_lengths     #
+###########################################
+
+
+def test_get_document_lengths_empty() -> None:
+    assert get_document_lengths([]) == []
+
+
+def test_get_document_lengths_basic() -> None:
+    docs = [
+        Document(id="a", page_content="hello"),
+        Document(id="b", page_content="hello world"),
+    ]
+    assert get_document_lengths(docs) == [5, 11]
+
+
+def test_get_document_lengths_none_content() -> None:
+    doc = Document(id="a", page_content="x")
+    doc.page_content = None
+    assert get_document_lengths([doc]) == [0]
+
+
+def test_get_document_lengths_generator() -> None:
+    def gen() -> object:
+        yield Document(id="a", page_content="ab")
+        yield Document(id="b", page_content="")
+
+    assert get_document_lengths(gen()) == [2, 0]
 
 
 ##############################################
