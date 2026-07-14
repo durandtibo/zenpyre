@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 
 class TypedDuckDBDocumentStoreFactory(BaseDocumentStoreFactory, MultilineDisplayMixin):
     """A concrete BaseDocumentStore factory that builds a
-    :class:`~zenpyre.document_stores.TypedDuckDBDocumentStore` backed
-    by a DuckDB file at a given path.
+    :class:`~zenpyre.document_stores.TypedDuckDBDocumentStore` backed by
+    a DuckDB file at a given path.
 
     Use this when you want a factory that lazily constructs a
     fresh :class:`~zenpyre.document_stores.TypedDuckDBDocumentStore`

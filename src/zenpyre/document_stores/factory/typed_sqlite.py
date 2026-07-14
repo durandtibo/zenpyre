@@ -21,8 +21,8 @@ if TYPE_CHECKING:
 
 class TypedSQLiteDocumentStoreFactory(BaseDocumentStoreFactory, MultilineDisplayMixin):
     """A concrete BaseDocumentStore factory that builds a
-    :class:`~zenpyre.document_stores.TypedSQLiteDocumentStore` backed
-    by a SQLite file at a given path.
+    :class:`~zenpyre.document_stores.TypedSQLiteDocumentStore` backed by
+    a SQLite file at a given path.
 
     Use this when you want a factory that lazily constructs a
     fresh :class:`~zenpyre.document_stores.TypedSQLiteDocumentStore`
