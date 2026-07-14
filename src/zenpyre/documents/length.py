@@ -2,7 +2,12 @@ r"""Document content length utilities."""
 
 from __future__ import annotations
 
-__all__ = ["compute_document_lengths", "get_document_length", "get_shortest_document"]
+__all__ = [
+    "compute_document_lengths",
+    "get_document_length",
+    "get_longest_document",
+    "get_shortest_document",
+]
 
 from typing import TYPE_CHECKING, Any
 
@@ -140,3 +145,63 @@ def get_shortest_document(
         if shortest_length is None or length < shortest_length:
             shortest, shortest_length = doc, length
     return shortest
+
+
+def get_longest_document(
+    documents: Iterable[Document],
+    *,
+    ignore_empty: bool = False,
+    treat_whitespace_as_empty: bool = False,
+) -> Document | None:
+    r"""Find the document with the longest ``page_content``.
+
+    Streams through ``documents`` one at a time and keeps only the
+    current longest document, so memory usage is O(1) regardless of
+    how many documents are processed (aside from whatever the input
+    iterable itself holds in memory).
+
+    Args:
+        documents: A list, generator, or other iterable of
+            ``langchain_core.documents.Document`` objects. Consumed
+            exactly once; if a generator/iterator is passed in, it will
+            be exhausted by this call.
+        ignore_empty: If ``True``, documents whose ``page_content`` is
+            empty are skipped, so the longest non-empty document is
+            returned instead.
+        treat_whitespace_as_empty: If ``True``, a ``page_content`` that
+            contains only whitespace is also considered empty for the
+            purpose of ``ignore_empty``. Has no effect if
+            ``ignore_empty`` is ``False``.
+
+    Returns:
+        The first document with the largest ``page_content`` length
+        (ties broken by the earliest occurrence in ``documents``), or
+        ``None`` if ``documents`` is empty or, when ``ignore_empty`` is
+        ``True``, if every document is empty (or whitespace-only, when
+        ``treat_whitespace_as_empty`` is also ``True``).
+
+    Example:
+        ```pycon
+        >>> from langchain_core.documents import Document
+        >>> from zenpyre.documents import get_longest_document
+        >>> docs = [
+        ...     Document(id="a", page_content="hello world"),
+        ...     Document(id="b", page_content=""),
+        ...     Document(id="c", page_content="hi"),
+        ... ]
+        >>> get_longest_document(docs).id
+        'a'
+
+        ```
+    """
+    longest: Document | None = None
+    longest_length: int | None = None
+    for doc in documents:
+        if ignore_empty and is_document_empty(
+            doc, treat_whitespace_as_empty=treat_whitespace_as_empty
+        ):
+            continue
+        length = get_document_length(doc)
+        if longest_length is None or length > longest_length:
+            longest, longest_length = doc, length
+    return longest

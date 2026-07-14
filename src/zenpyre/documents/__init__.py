@@ -15,6 +15,7 @@ __all__ = [
     "format_documents_as_markdown",
     "format_documents_as_xml",
     "get_document_length",
+    "get_longest_document",
     "get_shortest_document",
     "hash_document",
     "hash_document_uuid",
@@ -46,6 +47,7 @@ from zenpyre.documents.id import assign_ids, copy_ids_to_metadata
 from zenpyre.documents.length import (
     compute_document_lengths,
     get_document_length,
+    get_longest_document,
     get_shortest_document,
 )
 from zenpyre.documents.sort import sort_by_metadata
