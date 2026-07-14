@@ -753,3 +753,20 @@ def test_context_manager_usable_for_reads_and_writes() -> None:
         assert store.filter(author="Alice")[0].id == "1"
         store.delete("1")
         assert store.count() == 1
+
+
+def test_context_manager_multiple_open_close_in_memory() -> None:
+    doc_store = TypedSQLiteDocumentStore(":memory:")
+    for i in range(3):
+        with doc_store as store:
+            assert store.count() == 0
+            store.add_documents([Document(id=str(i), page_content="hello", metadata={})])
+            assert store.count() == 1
+
+
+def test_context_manager_multiple_open_close_persistent(tmp_path: Path) -> None:
+    doc_store = TypedSQLiteDocumentStore(tmp_path.joinpath("data.db"))
+    for i in range(3):
+        with doc_store as store:
+            store.add_documents([Document(id=str(i), page_content="hello", metadata={})])
+            assert store.count() == i + 1

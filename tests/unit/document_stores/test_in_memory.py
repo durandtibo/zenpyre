@@ -495,9 +495,10 @@ def test_iter_batches_does_not_mutate_store(
 # --- close ---
 
 
-def test_close_is_no_op(store: InMemoryDocumentStore) -> None:
+def test_close_discards_documents(store: InMemoryDocumentStore, docs: list[Document]) -> None:
+    store.add_documents(docs)
     store.close()
-    store.count()  # still usable after close
+    assert store.count() == 0
 
 
 def test_close_is_idempotent(store: InMemoryDocumentStore) -> None:
@@ -522,7 +523,8 @@ def test_context_manager_closes_on_normal_exit() -> None:
         store.add_documents([Document(id="1", page_content="hello", metadata={})])
         assert store.count() == 1
 
-    assert store.count() == 1  # in-memory: still accessible after close
+    # Closing an in-memory store discards its documents.
+    assert store.count() == 0
 
 
 def test_context_manager_closes_on_exception() -> None:
@@ -545,3 +547,12 @@ def test_context_manager_usable_for_reads_and_writes() -> None:
         assert store.filter(author="Alice")[0].id == "1"
         store.delete("1")
         assert store.count() == 1
+
+
+def test_context_manager_multiple_open_close() -> None:
+    doc_store = InMemoryDocumentStore()
+    for i in range(3):
+        with doc_store as store:
+            assert store.count() == 0
+            store.add_documents([Document(id=str(i), page_content="hello", metadata={})])
+            assert store.count() == 1

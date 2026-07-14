@@ -20,6 +20,8 @@ if TYPE_CHECKING:
     from collections.abc import Generator
     from pathlib import Path
 
+    from typing_extensions import Self
+
 if is_duckdb_available():  # pragma: no cover
     import duckdb
 
@@ -34,11 +36,33 @@ class BaseDuckDBDocumentStore(BaseDocumentStore, MultilineDisplayMixin):
         check_duckdb()
         self._path = prepare_duckdb_path(path)
         self._kwargs = kwargs
+        self._closed = False
         self._conn = duckdb.connect(str(self._path), **kwargs)
 
+    def _ensure_schema(self) -> None:
+        """Recreate the store's table schema on a fresh connection.
+
+        Called once from ``__init__`` and again each time the store is
+        reopened via :meth:`__enter__` after being closed. A ``:memory:``
+        database starts empty every time it is (re)connected to, so this
+        is what makes reopening a closed in-memory store behave like a
+        reset rather than resuming where it left off. The default
+        implementation does nothing; subclasses override it.
+        """
+
     def close(self) -> None:
+        if self._closed:
+            return
         logger.info("Closing DuckDB at %s", self._path)
         self._conn.close()
+        self._closed = True
+
+    def __enter__(self) -> Self:
+        if self._closed:
+            self._conn = duckdb.connect(str(self._path), **self._kwargs)
+            self._closed = False
+            self._ensure_schema()
+        return self
 
     def delete(self, doc_id: str) -> None:
         self._conn.execute("DELETE FROM documents WHERE id = ?", [doc_id])
@@ -136,7 +160,10 @@ class DuckDBDocumentStore(BaseDuckDBDocumentStore):
 
     def __init__(self, path: Path | str = ":memory:", **kwargs: Any) -> None:
         super().__init__(path, **kwargs)
-        if not kwargs.get("read_only", False):
+        self._ensure_schema()
+
+    def _ensure_schema(self) -> None:
+        if not self._kwargs.get("read_only", False):
             self._conn.execute(_CREATE_TABLE)
 
     def add_documents(self, docs: list[Document]) -> None:

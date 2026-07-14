@@ -54,7 +54,11 @@ class InMemoryDocumentStore(BaseDocumentStore, InlineDisplayMixin):
         self._docs: dict[str, Document] = {}
 
     def close(self) -> None:
-        return  # Do nothing because it is in memory
+        # Discard all documents: an in-memory store has nothing to
+        # persist, so closing (and later reopening via the context
+        # manager) it is equivalent to starting over with a fresh, empty
+        # store.
+        self._docs.clear()
 
     def add_documents(self, docs: list[Document]) -> None:
         missing_ids = [i for i, doc in enumerate(docs) if not doc.id]
