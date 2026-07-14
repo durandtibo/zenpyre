@@ -84,7 +84,10 @@ class TypedDuckDBDocumentStore(BaseDuckDBDocumentStore):
     ) -> None:
         super().__init__(path, **kwargs)
         self._schema: dict[str, str] = metadata_schema or {}
-        if not kwargs.get("read_only", False):
+        self._ensure_schema()
+
+    def _ensure_schema(self) -> None:
+        if not self._kwargs.get("read_only", False):
             self._conn.execute(self._build_create_table())
 
     def add_documents(self, docs: list[Document]) -> None:
