@@ -5,7 +5,6 @@ from __future__ import annotations
 __all__ = [
     "DocumentHasher",
     "assign_ids",
-    "compute_document_lengths",
     "copy_ids_to_metadata",
     "filter_by_metadata",
     "filter_by_metadata_range",
@@ -14,6 +13,7 @@ __all__ = [
     "format_documents_as_json",
     "format_documents_as_markdown",
     "format_documents_as_xml",
+    "get_document_id_lengths",
     "get_document_length",
     "get_document_lengths",
     "get_longest_document",
@@ -46,7 +46,7 @@ from zenpyre.documents.hashing import (
 )
 from zenpyre.documents.id import assign_ids, copy_ids_to_metadata
 from zenpyre.documents.length import (
-    compute_document_lengths,
+    get_document_id_lengths,
     get_document_length,
     get_document_lengths,
     get_longest_document,
