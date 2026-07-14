@@ -12,6 +12,7 @@ from zenpyre.records import Record
 if TYPE_CHECKING:
     from pathlib import Path
 
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -758,3 +759,19 @@ def test_context_manager_usable_for_reads_and_writes() -> None:
         assert store.filter(author="Alice")[0].id == "1"
         store.delete("1")
         assert store.count() == 1
+
+
+def test_context_manager_multiple_open_close_in_memory() -> None:
+    record_store = TypedSQLiteRecordStore(":memory:")
+    for i in range(3):
+        with record_store as store:
+            store.add_records([Record(id=str(i), metadata={})])
+            assert store.count() == i + 1
+
+
+def test_context_manager_multiple_open_close_persistent(tmp_path: Path) -> None:
+    record_store = TypedSQLiteRecordStore(tmp_path.joinpath("data.db"))
+    for i in range(3):
+        with record_store as store:
+            store.add_records([Record(id=str(i), metadata={})])
+            assert store.count() == i + 1
