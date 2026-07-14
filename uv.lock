@@ -5825,7 +5825,7 @@ wheels = [
 
 [[package]]
 name = "zenpyre"
-version = "0.0.1a44"
+version = "0.0.1a57"
 source = { editable = "." }
 dependencies = [
     { name = "coola" },

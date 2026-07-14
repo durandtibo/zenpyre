@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-import polars as pl
 from coola.testing.fixtures import polars_available
-from polars.testing import assert_frame_equal
+from coola.utils.imports import is_polars_available
 
 from zenpyre.utils.dataframe import drop_null_cols
+
+if is_polars_available():
+    import polars as pl
+    from polars.testing import assert_frame_equal
 
 ######################################
 #     Tests for drop_null_cols       #
