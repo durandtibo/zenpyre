@@ -16,6 +16,7 @@ __all__ = [
     "hash_document",
     "hash_document_uuid",
     "hash_documents",
+    "is_document_empty",
     "sort_by_metadata",
 ]
 
@@ -25,6 +26,7 @@ from zenpyre.documents.concatenation import (
     format_documents_as_markdown,
     format_documents_as_xml,
 )
+from zenpyre.documents.empty import is_document_empty
 from zenpyre.documents.filter import (
     filter_by_metadata,
     filter_by_metadata_range,

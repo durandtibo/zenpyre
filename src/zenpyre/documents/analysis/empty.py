@@ -6,6 +6,8 @@ __all__ = ["find_empty_documents"]
 
 from typing import TYPE_CHECKING
 
+from zenpyre.documents.empty import is_document_empty
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
@@ -48,13 +50,8 @@ def find_empty_documents(
 
         ```
     """
-    out = []
-    for document in documents:
-        content = document.page_content
-        is_empty = not isinstance(content, str) or content == ""
-        is_whitespace_only = (
-            treat_whitespace_as_empty and isinstance(content, str) and content.strip() == ""
-        )
-        if is_empty or is_whitespace_only:
-            out.append(document)
-    return out
+    return [
+        document
+        for document in documents
+        if is_document_empty(document, treat_whitespace_as_empty=treat_whitespace_as_empty)
+    ]
