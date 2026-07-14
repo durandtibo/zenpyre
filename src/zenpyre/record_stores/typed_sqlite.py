@@ -85,6 +85,9 @@ class TypedSQLiteRecordStore(BaseSQLiteRecordStore):
     ) -> None:
         super().__init__(database, **kwargs)
         self._schema: dict[str, str] = metadata_schema or {}
+        self._ensure_schema()
+
+    def _ensure_schema(self) -> None:
         try:
             self._conn.execute(self._build_create_table())
             self._conn.commit()

@@ -58,7 +58,10 @@ class InMemoryRecordStore(BaseRecordStore, InlineDisplayMixin):
         self._records: dict[str, Record] = {}
 
     def close(self) -> None:
-        return  # Do nothing because it is in memory
+        # Discard all records: an in-memory store has nothing to persist,
+        # so closing (and later reopening via the context manager) it is
+        # equivalent to starting over with a fresh, empty store.
+        self._records.clear()
 
     def add_records(self, records: list[Record]) -> None:
         missing_ids = [i for i, record in enumerate(records) if not record.id]

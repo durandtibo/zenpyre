@@ -511,7 +511,8 @@ def test_context_manager_closes_on_normal_exit() -> None:
         store.add_records([Record(id="1", metadata={})])
         assert store.count() == 1
 
-    assert store.count() == 1
+    # Closing an in-memory store discards its records.
+    assert store.count() == 0
 
 
 def test_context_manager_closes_on_exception() -> None:
@@ -540,5 +541,6 @@ def test_context_manager_multiple_open_close() -> None:
     record_store = InMemoryRecordStore()
     for i in range(3):
         with record_store as store:
+            assert store.count() == 0
             store.add_records([Record(id=str(i), metadata={})])
-            assert store.count() == i + 1
+            assert store.count() == 1
