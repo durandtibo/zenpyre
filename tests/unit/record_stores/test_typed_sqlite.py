@@ -765,8 +765,9 @@ def test_context_manager_multiple_open_close_in_memory() -> None:
     record_store = TypedSQLiteRecordStore(":memory:")
     for i in range(3):
         with record_store as store:
+            assert store.count() == 0
             store.add_records([Record(id=str(i), metadata={})])
-            assert store.count() == i + 1
+            assert store.count() == 1
 
 
 def test_context_manager_multiple_open_close_persistent(tmp_path: Path) -> None:
