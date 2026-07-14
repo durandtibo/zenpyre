@@ -9,6 +9,7 @@ import random
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from zenpyre.documents.length import get_document_length
 from zenpyre.utils.bloom_filter import BloomFilter
 
 if TYPE_CHECKING:
@@ -141,7 +142,7 @@ class ApproxContentStats:
         if self._bloom.add_and_check(content_hash):
             self.approx_duplicate_count += 1
 
-        length = len(content)
+        length = get_document_length(doc)
         self.count += 1
         self.total_chars += length
 

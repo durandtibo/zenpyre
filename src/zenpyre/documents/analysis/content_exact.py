@@ -8,6 +8,8 @@ import hashlib
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from zenpyre.documents.length import get_document_length
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
@@ -124,7 +126,7 @@ class ExactContentStats:
         else:
             self._seen_hashes.add(content_hash)
 
-        length = len(content)
+        length = get_document_length(doc)
         self.count += 1
         self.total_chars += length
         self._lengths.append(length)
