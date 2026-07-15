@@ -6,14 +6,14 @@ from collections.abc import Generator, Iterator
 
 import pytest
 
+from zenpyre.record_stores import PostgreSQLRecordStore
+from zenpyre.records import Record
 from zenpyre.testing.fixtures import psycopg_available
 from zenpyre.utils.imports import is_psycopg_available
 
 if is_psycopg_available():
     import psycopg
 
-    from zenpyre.record_stores import PostgreSQLRecordStore
-    from zenpyre.records import Record
 
 # ---------------------------------------------------------------------------
 # Connection to a live PostgreSQL server is required for these tests. Set
