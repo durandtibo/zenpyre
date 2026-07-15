@@ -7,6 +7,7 @@ __all__ = [
     "ConfigurableRecordStoreFactory",
     "DuckDBRecordStoreFactory",
     "InMemoryRecordStoreFactory",
+    "PostgreSQLRecordStoreFactory",
     "RecordStoreFactory",
     "SQLiteRecordStoreFactory",
     "TypedDuckDBRecordStoreFactory",
@@ -17,6 +18,7 @@ from zenpyre.record_stores.factory.base import BaseRecordStoreFactory
 from zenpyre.record_stores.factory.configurable import ConfigurableRecordStoreFactory
 from zenpyre.record_stores.factory.duckdb import DuckDBRecordStoreFactory
 from zenpyre.record_stores.factory.in_memory import InMemoryRecordStoreFactory
+from zenpyre.record_stores.factory.postgres import PostgreSQLRecordStoreFactory
 from zenpyre.record_stores.factory.sqlite import SQLiteRecordStoreFactory
 from zenpyre.record_stores.factory.typed_duckdb import TypedDuckDBRecordStoreFactory
 from zenpyre.record_stores.factory.typed_sqlite import TypedSQLiteRecordStoreFactory

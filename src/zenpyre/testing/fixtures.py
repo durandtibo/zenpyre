@@ -24,6 +24,8 @@ __all__ = [
     "langchain_openai_not_available",
     "langchain_text_splitters_available",
     "langchain_text_splitters_not_available",
+    "psycopg_available",
+    "psycopg_not_available",
 ]
 
 import pytest
@@ -38,6 +40,7 @@ from zenpyre.utils.imports import (
     is_langchain_ollama_available,
     is_langchain_openai_available,
     is_langchain_text_splitters_available,
+    is_psycopg_available,
 )
 
 duckdb_available: pytest.MarkDecorator = pytest.mark.skipif(
@@ -102,4 +105,11 @@ langchain_text_splitters_available: pytest.MarkDecorator = pytest.mark.skipif(
 )
 langchain_text_splitters_not_available: pytest.MarkDecorator = pytest.mark.skipif(
     is_langchain_text_splitters_available(), reason="Skip if langchain_text_splitters is available"
+)
+
+psycopg_available: pytest.MarkDecorator = pytest.mark.skipif(
+    not is_psycopg_available(), reason="Requires psycopg"
+)
+psycopg_not_available: pytest.MarkDecorator = pytest.mark.skipif(
+    is_psycopg_available(), reason="Skip if psycopg is available"
 )
