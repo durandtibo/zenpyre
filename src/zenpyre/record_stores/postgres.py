@@ -101,7 +101,7 @@ class BasePostgreSQLRecordStore(BaseRecordStore, MultilineDisplayMixin):
         :meth:`get_columns_info` instead.
         """
         for name, dtype in self.get_columns_info().items():
-            print(f"{name}\t{dtype}")  # noqa: T201
+            logger.info(f"{name}\t{dtype}")
 
     def _get_repr_kwargs(self) -> dict[str, Any]:
         return {"count": self.count(), "conninfo": self._conninfo} | self._kwargs
