@@ -116,12 +116,12 @@ def test_caching_chat_model_factory_invalid_chat_model_factory_raises_type_error
 def test_caching_chat_model_factory_make_chat_model_builds_chat_model_from_factory() -> None:
     chat_model_factory = _make_chat_model_factory()
     factory = _make_factory(chat_model_factory=chat_model_factory)
-    with patch(f"{MODULE}.CachingRunnable"):
+    with patch(f"{MODULE}.CachingChatModel"):
         factory.make_chat_model()
         chat_model_factory.make_chat_model.assert_called_once_with()
 
 
-def test_caching_chat_model_factory_make_chat_model_wraps_in_caching_runnable(
+def test_caching_chat_model_factory_make_chat_model_wraps_in_caching_chat_model(
     tmp_path: Path,
 ) -> None:
     chat_model_factory = _make_chat_model_factory()
@@ -133,21 +133,21 @@ def test_caching_chat_model_factory_make_chat_model_wraps_in_caching_runnable(
         key_fn=key_fn,
         ignore_none=True,
     )
-    with patch(f"{MODULE}.CachingRunnable") as mock_caching_runnable_cls:
+    with patch(f"{MODULE}.CachingChatModel") as mock_caching_chat_model_cls:
         factory.make_chat_model()
-        mock_caching_runnable_cls.assert_called_once_with(
-            runnable=chat_model_factory.make_chat_model.return_value,
+        mock_caching_chat_model_cls.assert_called_once_with(
+            chat_model=chat_model_factory.make_chat_model.return_value,
             cache_dir=cache_dir,
             key_fn=key_fn,
             ignore_none=True,
         )
 
 
-def test_caching_chat_model_factory_make_chat_model_returns_caching_runnable() -> None:
+def test_caching_chat_model_factory_make_chat_model_returns_caching_chat_model() -> None:
     factory = _make_factory()
-    with patch(f"{MODULE}.CachingRunnable") as mock_caching_runnable_cls:
+    with patch(f"{MODULE}.CachingChatModel") as mock_caching_chat_model_cls:
         result = factory.make_chat_model()
-        assert result is mock_caching_runnable_cls.return_value
+        assert result is mock_caching_chat_model_cls.return_value
 
 
 # --- _get_repr_kwargs ---
