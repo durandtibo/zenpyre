@@ -14,9 +14,9 @@ def _make_chat_model() -> FakeListChatModel:
     return FakeListChatModel(responses=["hello"])
 
 
-##################################################
-#     Tests for ChatModelFactory                #
-##################################################
+######################################
+#     Tests for ChatModelFactory     #
+######################################
 
 
 # --- Inheritance ---
