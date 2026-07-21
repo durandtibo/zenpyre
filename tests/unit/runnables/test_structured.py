@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 from typing import Any
-from unittest.mock import patch
 
 import pytest
 from langchain_core.messages import AIMessage
@@ -130,38 +129,8 @@ def _make_result(raw_content: str, parsed: Answer | None, parsing_error: Excepti
 
 def test_unwrap_native_success_include_raw_false_returns_parsed() -> None:
     result = _make_result('{"value": 99}', Answer(value=99), None)
-    with patch(f"{MODULE}.log_token_usage") as mock_log:
-        output = _unwrap(result, output_type=Answer, include_raw=False, log_tokens=True)
+    output = _unwrap(result, output_type=Answer, include_raw=False)
     assert output == Answer(value=99)
-    mock_log.assert_called_once_with(result)
-
-
-def test_unwrap_log_tokens_defaults_to_false_does_not_log() -> None:
-    result = _make_result('{"value": 99}', Answer(value=99), None)
-    with patch(f"{MODULE}.log_token_usage") as mock_log:
-        _unwrap(result, output_type=Answer, include_raw=False)
-    mock_log.assert_not_called()
-
-
-def test_unwrap_log_tokens_false_does_not_log() -> None:
-    result = _make_result('{"value": 99}', Answer(value=99), None)
-    with patch(f"{MODULE}.log_token_usage") as mock_log:
-        _unwrap(result, output_type=Answer, include_raw=False, log_tokens=False)
-    mock_log.assert_not_called()
-
-
-def test_unwrap_log_tokens_true_logs_on_fallback_success() -> None:
-    result = _make_result('{"value": 7}', None, ValueError("no tool call"))
-    with patch(f"{MODULE}.log_token_usage") as mock_log:
-        _unwrap(result, output_type=Answer, include_raw=False, log_tokens=True)
-    mock_log.assert_called_once_with(result)
-
-
-def test_unwrap_log_tokens_true_logs_even_when_both_fail() -> None:
-    result = _make_result("not json", None, ValueError("no tool call"))
-    with patch(f"{MODULE}.log_token_usage") as mock_log, pytest.raises(StructuredOutputError):
-        _unwrap(result, output_type=Answer, include_raw=False, log_tokens=True)
-    mock_log.assert_called_once_with(result)
 
 
 def test_unwrap_fallback_success_include_raw_false_returns_parsed() -> None:
@@ -286,30 +255,6 @@ def test_structured_output_runnable_include_raw_defaults_to_false() -> None:
     chain = structured_output_runnable(_native_ok_model(), Answer)
     result = chain.invoke("hi")
     assert isinstance(result, Answer)
-
-
-# --- log_tokens ---
-
-
-def test_structured_output_runnable_log_tokens_defaults_to_false() -> None:
-    chain = structured_output_runnable(_native_ok_model(), Answer)
-    with patch(f"{MODULE}.log_token_usage") as mock_log:
-        chain.invoke("hi")
-    mock_log.assert_not_called()
-
-
-def test_structured_output_runnable_log_tokens_false_does_not_log() -> None:
-    chain = structured_output_runnable(_native_ok_model(), Answer, log_tokens=False)
-    with patch(f"{MODULE}.log_token_usage") as mock_log:
-        chain.invoke("hi")
-    mock_log.assert_not_called()
-
-
-def test_structured_output_runnable_log_tokens_true_logs() -> None:
-    chain = structured_output_runnable(_native_ok_model(), Answer, log_tokens=True)
-    with patch(f"{MODULE}.log_token_usage") as mock_log:
-        chain.invoke("hi")
-    mock_log.assert_called_once()
 
 
 # --- include_raw=True ---

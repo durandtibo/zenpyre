@@ -16,7 +16,6 @@ from zenpyre.utils.json_to_structured import (
     JsonStructuredOutputParseError,
     parse_json_to_structured,
 )
-from zenpyre.utils.token_usage import log_token_usage
 
 if TYPE_CHECKING:
     from langchain_core.language_models import BaseChatModel, LanguageModelInput
@@ -42,7 +41,6 @@ def structured_output_runnable(
     output_type: type[T],
     *,
     include_raw: Literal[False] = False,
-    log_tokens: bool = False,
 ) -> Runnable[LanguageModelInput, T]: ...  # pragma: no cover
 
 
@@ -52,7 +50,6 @@ def structured_output_runnable(
     output_type: type[T],
     *,
     include_raw: Literal[True],
-    log_tokens: bool = False,
 ) -> Runnable[LanguageModelInput, dict[str, Any]]: ...  # pragma: no cover
 
 
@@ -61,7 +58,6 @@ def structured_output_runnable(
     output_type: type[T],
     *,
     include_raw: bool = False,
-    log_tokens: bool = False,
 ) -> Runnable[LanguageModelInput, T] | Runnable[LanguageModelInput, dict[str, Any]]:
     r"""Build a Runnable that returns validated, structured output, with
     a JSON-parsing fallback.
@@ -114,9 +110,6 @@ def structured_output_runnable(
             ``True``, invoking returns a
             ``{"raw", "parsed", "parsing_error", "used_fallback"}``
             dict and never raises on parse failure.
-        log_tokens: If ``True``, logs token usage for each call via
-            :func:`~zenpyre.utils.token_usage.log_token_usage`.
-            Disabled by default.
 
     Returns:
         A ``Runnable[LanguageModelInput, T]`` if ``include_raw=False``,
@@ -137,15 +130,13 @@ def structured_output_runnable(
     """
     structured = chat_model.with_structured_output(output_type, include_raw=True)
     unwrap = RunnableLambda(
-        functools.partial(
-            _unwrap, output_type=output_type, include_raw=include_raw, log_tokens=log_tokens
-        )
+        functools.partial(_unwrap, output_type=output_type, include_raw=include_raw)
     ).with_config(run_name="unwrap_structured_output")
     return structured | unwrap
 
 
 def _unwrap(
-    result: dict[str, Any], *, output_type: type[T], include_raw: bool, log_tokens: bool = False
+    result: dict[str, Any], *, output_type: type[T], include_raw: bool
 ) -> T | dict[str, Any]:
     """Extract (or assemble) the unwrapped structured-output result.
 
@@ -155,10 +146,6 @@ def _unwrap(
     content as JSON via
     :func:`~zenpyre.utils.json_to_structured.parse_json_to_structured`.
 
-    If ``log_tokens`` is ``True``, this also logs token usage for the
-    call via :func:`~zenpyre.utils.token_usage.log_token_usage`,
-    regardless of whether parsing ultimately succeeds.
-
     Args:
         result: The dict returned by the underlying LLM when
             ``include_raw=True``, containing ``"raw"``, ``"parsed"``,
@@ -167,8 +154,6 @@ def _unwrap(
         include_raw: Controls both the return shape and the failure
             behavior -- see :func:`structured_output_runnable`'s
             docstring for the full contract.
-        log_tokens: If ``True``, logs token usage for the call. Disabled
-            by default.
 
     Returns:
         If ``include_raw`` is ``False``: the parsed ``output_type``
@@ -180,9 +165,6 @@ def _unwrap(
         StructuredOutputError: If ``include_raw`` is ``False`` and
             both native parsing and the JSON fallback fail.
     """
-    if log_tokens:
-        log_token_usage(result)
-
     if result["parsing_error"] is None and result["parsed"] is not None:
         if include_raw:
             return {**result, "used_fallback": False}
