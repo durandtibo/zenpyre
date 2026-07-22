@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
 from coola.equality import objects_are_equal
 from langchain_core.language_models import FakeListChatModel
+from persista.cache import Cache
 
 from zenpyre.chat_models.factory import BaseChatModelFactory, CachingChatModelFactory
 from zenpyre.utils.config import Config
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 MODULE = "zenpyre.chat_models.factory.cache"
 
@@ -36,7 +34,7 @@ def _make_factory(**overrides: Any) -> CachingChatModelFactory:
     """Return a CachingChatModelFactory instance for testing."""
     kwargs = {
         "chat_model_factory": _make_chat_model_factory(),
-        "cache_dir": None,
+        "cache": None,
         "key_fn": None,
         "ignore_none": False,
     }
@@ -65,14 +63,15 @@ def test_caching_chat_model_factory_stores_chat_model_factory() -> None:
     assert factory._chat_model_factory is chat_model_factory
 
 
-def test_caching_chat_model_factory_stores_cache_dir(tmp_path: Path) -> None:
-    factory = _make_factory(cache_dir=tmp_path)
-    assert factory._cache_dir == tmp_path
+def test_caching_chat_model_factory_stores_cache() -> None:
+    cache = Cache()
+    factory = _make_factory(cache=cache)
+    assert factory._cache is cache
 
 
-def test_caching_chat_model_factory_default_cache_dir_is_none() -> None:
+def test_caching_chat_model_factory_default_cache_is_none() -> None:
     factory = _make_factory()
-    assert factory._cache_dir is None
+    assert factory._cache is None
 
 
 def test_caching_chat_model_factory_stores_key_fn() -> None:
@@ -121,15 +120,13 @@ def test_caching_chat_model_factory_make_chat_model_builds_chat_model_from_facto
         chat_model_factory.make_chat_model.assert_called_once_with()
 
 
-def test_caching_chat_model_factory_make_chat_model_wraps_in_caching_chat_model(
-    tmp_path: Path,
-) -> None:
+def test_caching_chat_model_factory_make_chat_model_wraps_in_caching_chat_model() -> None:
     chat_model_factory = _make_chat_model_factory()
-    cache_dir = tmp_path
+    cache = Cache()
     key_fn = lambda x: str(x)  # noqa: E731
     factory = _make_factory(
         chat_model_factory=chat_model_factory,
-        cache_dir=cache_dir,
+        cache=cache,
         key_fn=key_fn,
         ignore_none=True,
     )
@@ -137,7 +134,7 @@ def test_caching_chat_model_factory_make_chat_model_wraps_in_caching_chat_model(
         factory.make_chat_model()
         mock_caching_chat_model_cls.assert_called_once_with(
             chat_model=chat_model_factory.make_chat_model.return_value,
-            cache_dir=cache_dir,
+            result_cache=cache,
             key_fn=key_fn,
             ignore_none=True,
         )
@@ -153,13 +150,13 @@ def test_caching_chat_model_factory_make_chat_model_returns_caching_chat_model()
 # --- _get_repr_kwargs ---
 
 
-def test_caching_chat_model_factory_get_repr_kwargs(tmp_path: Path) -> None:
+def test_caching_chat_model_factory_get_repr_kwargs() -> None:
     chat_model_factory = _make_chat_model_factory()
-    cache_dir = tmp_path
+    cache = Cache()
     key_fn = lambda x: str(x)  # noqa: E731
     factory = _make_factory(
         chat_model_factory=chat_model_factory,
-        cache_dir=cache_dir,
+        cache=cache,
         key_fn=key_fn,
         ignore_none=True,
     )
@@ -167,7 +164,7 @@ def test_caching_chat_model_factory_get_repr_kwargs(tmp_path: Path) -> None:
         factory._get_repr_kwargs(),
         {
             "chat_model_factory": chat_model_factory,
-            "cache_dir": cache_dir,
+            "cache": cache,
             "key_fn": key_fn,
             "ignore_none": True,
         },
