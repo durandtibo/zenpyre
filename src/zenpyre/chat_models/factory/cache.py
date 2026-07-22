@@ -15,9 +15,9 @@ from zenpyre.utils.resolve import resolve_object
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from pathlib import Path
 
     from langchain_core.language_models import BaseChatModel
+    from persista.cache import Cache
 
     from zenpyre.utils.config import BaseConfig
 
@@ -30,7 +30,7 @@ class CachingChatModelFactory(BaseChatModelFactory, MultilineDisplayMixin):
     The wrapped chat model is built by delegating to the inner
     factory, then wrapped in a
     :class:`~zenpyre.chat_models.CachingChatModel` so every call to the
-    model transparently reads from and writes to ``cache_dir``. Unlike
+    model transparently reads from and writes to ``cache``. Unlike
     :class:`~zenpyre.runnables.CachingRunnable`, the returned object is
     a genuine :class:`~langchain_core.language_models.BaseChatModel`
     instance, so ``bind_tools`` and other ``BaseChatModel``-specific
@@ -40,8 +40,8 @@ class CachingChatModelFactory(BaseChatModelFactory, MultilineDisplayMixin):
         chat_model_factory: The wrapped chat model factory, an
             objectory configuration, or a :class:`~BaseConfig` that
             resolves to a :class:`~BaseChatModelFactory`.
-        cache_dir: The directory used to store cached results. If
-            ``None``, caching is disabled.
+        cache: The :class:`~persista.cache.Cache` used to store cached
+            results. If ``None``, caching is disabled.
         key_fn: A function that derives a cache key from an input. See
             :class:`~zenpyre.chat_models.CachingChatModel` for details.
         ignore_none: If ``True``, ``None`` results are treated as if
@@ -50,17 +50,14 @@ class CachingChatModelFactory(BaseChatModelFactory, MultilineDisplayMixin):
 
     Example:
         ```pycon
-        >>> import tempfile
-        >>> from pathlib import Path
         >>> from langchain_core.language_models import FakeListChatModel
+        >>> from persista.cache import Cache
         >>> from zenpyre.chat_models.factory import CachingChatModelFactory, ChatModelFactory
-        >>> with tempfile.TemporaryDirectory() as tmpdir:
-        ...     factory = CachingChatModelFactory(
-        ...         chat_model_factory=ChatModelFactory(FakeListChatModel(responses=["hello"])),
-        ...         cache_dir=Path(tmpdir),
-        ...     )
-        ...     chat_model = factory.make_chat_model()
-        ...
+        >>> factory = CachingChatModelFactory(
+        ...     chat_model_factory=ChatModelFactory(FakeListChatModel(responses=["hello"])),
+        ...     cache=Cache(),
+        ... )
+        >>> chat_model = factory.make_chat_model()
 
         ```
     """
@@ -68,12 +65,12 @@ class CachingChatModelFactory(BaseChatModelFactory, MultilineDisplayMixin):
     def __init__(
         self,
         chat_model_factory: BaseChatModelFactory | dict[str, Any] | BaseConfig,
-        cache_dir: Path | str | None = None,
+        cache: Cache | None = None,
         key_fn: Callable[[Any], str] | None = None,
         ignore_none: bool = False,
     ) -> None:
         self._chat_model_factory = resolve_object(chat_model_factory, cls=BaseChatModelFactory)
-        self._cache_dir = cache_dir
+        self._cache = cache
         self._key_fn = key_fn
         self._ignore_none = ignore_none
 
@@ -81,7 +78,7 @@ class CachingChatModelFactory(BaseChatModelFactory, MultilineDisplayMixin):
         chat_model = self._chat_model_factory.make_chat_model()
         return CachingChatModel(
             chat_model=chat_model,
-            cache_dir=self._cache_dir,
+            result_cache=self._cache,
             key_fn=self._key_fn,
             ignore_none=self._ignore_none,
         )
@@ -89,7 +86,7 @@ class CachingChatModelFactory(BaseChatModelFactory, MultilineDisplayMixin):
     def _get_repr_kwargs(self) -> dict[str, Any]:
         return {
             "chat_model_factory": self._chat_model_factory,
-            "cache_dir": self._cache_dir,
+            "cache": self._cache,
             "key_fn": self._key_fn,
             "ignore_none": self._ignore_none,
         }
