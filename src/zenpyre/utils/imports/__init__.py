@@ -12,6 +12,7 @@ __all__ = [
     "check_langchain_ollama",
     "check_langchain_openai",
     "check_langchain_text_splitters",
+    "check_persista",
     "duckdb_available",
     "faker_available",
     "is_duckdb_available",
@@ -23,6 +24,7 @@ __all__ = [
     "is_langchain_ollama_available",
     "is_langchain_openai_available",
     "is_langchain_text_splitters_available",
+    "is_persista_available",
     "langchain_anthropic_available",
     "langchain_chroma_available",
     "langchain_google_genai_available",
@@ -30,6 +32,7 @@ __all__ = [
     "langchain_ollama_available",
     "langchain_openai_available",
     "langchain_text_splitters_available",
+    "persista_available",
     "raise_duckdb_missing_error",
     "raise_faker_missing_error",
     "raise_langchain_anthropic_missing_error",
@@ -39,6 +42,7 @@ __all__ = [
     "raise_langchain_ollama_missing_error",
     "raise_langchain_openai_missing_error",
     "raise_langchain_text_splitters_missing_error",
+    "raise_persista_missing_error",
 ]
 
 from zenpyre.utils.imports.duckdb import (
@@ -94,4 +98,10 @@ from zenpyre.utils.imports.langchain_text_splitters import (
     is_langchain_text_splitters_available,
     langchain_text_splitters_available,
     raise_langchain_text_splitters_missing_error,
+)
+from zenpyre.utils.imports.persista import (
+    check_persista,
+    is_persista_available,
+    persista_available,
+    raise_persista_missing_error,
 )
