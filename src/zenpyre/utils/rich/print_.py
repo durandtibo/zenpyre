@@ -12,6 +12,8 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.pretty import Pretty
 
+from zenpyre.utils.rich.document import _truncate
+
 if TYPE_CHECKING:
     from rich.align import AlignMethod
     from rich.console import Console
@@ -57,6 +59,7 @@ def print_markdown(
     title: str | None = None,
     title_align: AlignMethod = "left",
     box: bool = True,
+    max_length: int | None = None,
     console: Console | None = None,
 ) -> None:
     r"""Render a Markdown string to the console inside a Rich panel.
@@ -77,6 +80,10 @@ def print_markdown(
         box: If ``True`` (the default), render the panel with a visible
             rounded border.  If ``False``, render with a minimal
             (near-invisible) border.
+        max_length: Maximum number of characters of ``msg`` to render
+            before truncating on a word boundary, with the omitted
+            character count appended. Pass ``None`` (the default) to
+            render ``msg`` in full.
         console: Optional :class:`~rich.console.Console` instance to use
             for this call.  Overrides the shared default for this
             invocation only.  Pass ``None`` (the default) to use the
@@ -90,6 +97,12 @@ def print_markdown(
 
         ```
     """
+    if max_length is not None:
+        original_length = len(msg)
+        msg, truncated = _truncate(msg, max_length)
+        if truncated:
+            omitted = original_length - len(msg)
+            msg += f"\n\n*… ({omitted:,} more characters)*"
     _print_in_panel(Markdown(msg), title=title, title_align=title_align, box=box, console=console)
 
 
