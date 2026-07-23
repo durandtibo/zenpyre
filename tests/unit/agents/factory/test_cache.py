@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
 from coola.equality import objects_are_equal
+from persista.cache.cache import Cache
 
 from zenpyre.agents.factory import AgentFactory, BaseAgentFactory, CachingAgentFactory
 from zenpyre.utils.config import Config
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 MODULE = "zenpyre.agents.factory.cache"
 
@@ -33,9 +31,8 @@ def _make_factory(**overrides: Any) -> CachingAgentFactory:
     """Return a CachingAgentFactory instance for testing."""
     kwargs = {
         "agent_factory": _make_agent_factory(),
-        "cache_dir": None,
+        "cache": None,
         "key_fn": None,
-        "ignore_none": False,
     }
     kwargs.update(overrides)
     return CachingAgentFactory(**kwargs)
@@ -62,30 +59,21 @@ def test_caching_agent_factory_stores_agent_factory() -> None:
     assert factory._agent_factory is agent_factory
 
 
-def test_caching_agent_factory_stores_cache_dir(tmp_path: Path) -> None:
-    factory = _make_factory(cache_dir=tmp_path)
-    assert factory._cache_dir == tmp_path
+def test_caching_agent_factory_stores_cache() -> None:
+    cache = Cache()
+    factory = _make_factory(cache=cache)
+    assert factory._cache is cache
 
 
-def test_caching_agent_factory_default_cache_dir_is_none() -> None:
+def test_caching_agent_factory_default_cache_is_none() -> None:
     factory = _make_factory()
-    assert factory._cache_dir is None
+    assert factory._cache is None
 
 
 def test_caching_agent_factory_stores_key_fn() -> None:
     key_fn = lambda x: str(x)  # noqa: E731
     factory = _make_factory(key_fn=key_fn)
     assert factory._key_fn is key_fn
-
-
-def test_caching_agent_factory_default_ignore_none_is_false() -> None:
-    factory = _make_factory()
-    assert factory._ignore_none is False
-
-
-def test_caching_agent_factory_stores_ignore_none_true() -> None:
-    factory = _make_factory(ignore_none=True)
-    assert factory._ignore_none is True
 
 
 # --- __init__ resolves agent_factory ---
@@ -118,20 +106,17 @@ def test_caching_agent_factory_make_agent_builds_agent_from_factory() -> None:
         agent_factory.make_agent.assert_called_once_with()
 
 
-def test_caching_agent_factory_make_agent_wraps_in_caching_runnable(tmp_path: Path) -> None:
+def test_caching_agent_factory_make_agent_wraps_in_caching_runnable() -> None:
     agent_factory = _make_agent_factory()
-    cache_dir = tmp_path
+    cache = Cache()
     key_fn = lambda x: str(x)  # noqa: E731
-    factory = _make_factory(
-        agent_factory=agent_factory, cache_dir=cache_dir, key_fn=key_fn, ignore_none=True
-    )
+    factory = _make_factory(agent_factory=agent_factory, cache=cache, key_fn=key_fn)
     with patch(f"{MODULE}.CachingRunnable") as mock_caching_runnable_cls:
         factory.make_agent()
         mock_caching_runnable_cls.assert_called_once_with(
             runnable=agent_factory.make_agent.return_value,
-            cache_dir=cache_dir,
+            cache=cache,
             key_fn=key_fn,
-            ignore_none=True,
         )
 
 
@@ -145,20 +130,17 @@ def test_caching_agent_factory_make_agent_returns_caching_runnable() -> None:
 # --- _get_repr_kwargs ---
 
 
-def test_caching_agent_factory_get_repr_kwargs(tmp_path: Path) -> None:
+def test_caching_agent_factory_get_repr_kwargs() -> None:
     agent_factory = _make_agent_factory()
-    cache_dir = tmp_path
+    cache = Cache()
     key_fn = lambda x: str(x)  # noqa: E731
-    factory = _make_factory(
-        agent_factory=agent_factory, cache_dir=cache_dir, key_fn=key_fn, ignore_none=True
-    )
+    factory = _make_factory(agent_factory=agent_factory, cache=cache, key_fn=key_fn)
     assert objects_are_equal(
         factory._get_repr_kwargs(),
         {
             "agent_factory": agent_factory,
-            "cache_dir": cache_dir,
+            "cache": cache,
             "key_fn": key_fn,
-            "ignore_none": True,
         },
     )
 
