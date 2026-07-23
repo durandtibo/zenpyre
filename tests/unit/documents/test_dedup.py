@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import logging
+
+import pytest
 from langchain_core.documents import Document
 
 from zenpyre.documents import deduplicate_documents
@@ -86,3 +89,56 @@ def test_deduplicate_documents_does_not_mutate_input_list() -> None:
     original = list(docs)
     deduplicate_documents(docs)
     assert docs == original
+
+
+def test_deduplicate_documents_log_true_logs_summary(caplog: pytest.LogCaptureFixture) -> None:
+    docs = [
+        Document(id="1", page_content="A", metadata={"source": "a.txt"}),
+        Document(id="1", page_content="A", metadata={"source": "a.txt"}),
+        Document(id="2", page_content="B", metadata={"source": "b.txt"}),
+    ]
+    with caplog.at_level(logging.INFO):
+        result = deduplicate_documents(docs, log=True)
+    assert result == [docs[0], docs[2]]
+    assert len(caplog.records) == 1
+    message = caplog.records[0].getMessage()
+    assert "3" in message
+    assert "2" in message
+    assert "1" in message
+
+
+def test_deduplicate_documents_log_false_does_not_log(caplog: pytest.LogCaptureFixture) -> None:
+    docs = [
+        Document(id="1", page_content="A", metadata={"source": "a.txt"}),
+        Document(id="1", page_content="A", metadata={"source": "a.txt"}),
+    ]
+    with caplog.at_level(logging.INFO):
+        deduplicate_documents(docs)
+    assert len(caplog.records) == 0
+
+
+def test_deduplicate_documents_log_true_no_duplicates_logs_zero_removed(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    docs = [
+        Document(id="1", page_content="A", metadata={"source": "a.txt"}),
+        Document(id="2", page_content="B", metadata={"source": "b.txt"}),
+    ]
+    with caplog.at_level(logging.INFO):
+        result = deduplicate_documents(docs, log=True)
+    assert result == docs
+    assert len(caplog.records) == 1
+    message = caplog.records[0].getMessage()
+    assert "2" in message
+    assert "0" in message
+
+
+def test_deduplicate_documents_log_true_empty_list_logs_zeros(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    with caplog.at_level(logging.INFO):
+        result = deduplicate_documents([], log=True)
+    assert result == []
+    assert len(caplog.records) == 1
+    message = caplog.records[0].getMessage()
+    assert "0" in message
