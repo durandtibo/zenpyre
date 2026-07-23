@@ -126,7 +126,9 @@ def test_caching_runnable_invoke_no_cache_always_calls_inner() -> None:
 
 def test_caching_runnable_invoke_returns_correct_result() -> None:
     cached = CachingRunnable(
-        runnable=RunnableLambda(lambda x: x.upper()), cache=Cache(), key_fn=_identity_key
+        runnable=RunnableLambda(lambda x: x.upper()),
+        cache=Cache(),
+        key_fn=_identity_key,
     )
     assert cached.invoke("hello") == "HELLO"
 
@@ -218,7 +220,9 @@ def test_caching_runnable_ainvoke_propagates_inner_exception() -> None:
 
 def test_caching_runnable_batch_empty_list_returns_empty_list() -> None:
     cached = CachingRunnable(
-        runnable=RunnableLambda(lambda x: x.upper()), cache=Cache(), key_fn=_identity_key
+        runnable=RunnableLambda(lambda x: x.upper()),
+        cache=Cache(),
+        key_fn=_identity_key,
     )
     assert cached.batch([]) == []
 
@@ -233,7 +237,9 @@ def test_caching_runnable_batch_no_cache_delegates_to_inner_batch() -> None:
 
 def test_caching_runnable_batch_returns_correct_results() -> None:
     cached = CachingRunnable(
-        runnable=RunnableLambda(lambda x: x.upper()), cache=Cache(), key_fn=_identity_key
+        runnable=RunnableLambda(lambda x: x.upper()),
+        cache=Cache(),
+        key_fn=_identity_key,
     )
     assert cached.batch(["a", "b", "c"]) == ["A", "B", "C"]
 
@@ -309,7 +315,9 @@ def test_caching_runnable_batch_return_exceptions_does_not_cache_failure() -> No
 
 def test_caching_runnable_abatch_empty_list_returns_empty_list() -> None:
     cached = CachingRunnable(
-        runnable=RunnableLambda(lambda x: x.upper()), cache=Cache(), key_fn=_identity_key
+        runnable=RunnableLambda(lambda x: x.upper()),
+        cache=Cache(),
+        key_fn=_identity_key,
     )
     assert asyncio.run(cached.abatch([])) == []
 
@@ -397,7 +405,9 @@ def test_caching_runnable_cache_ignore_none_true_does_not_cache_none_result() ->
     assert not cache.contains("a")
 
 
-def test_caching_runnable_cache_ignore_none_true_none_result_is_a_miss_next_call() -> None:
+def test_caching_runnable_cache_ignore_none_true_none_result_is_a_miss_next_call() -> (
+    None
+):
     cache = Cache(ignore_none=True)
     inner = TrackingRunnable(none_on="a")
     cached = CachingRunnable(runnable=inner, cache=cache, key_fn=_identity_key)
@@ -411,7 +421,9 @@ def test_caching_runnable_cache_ignore_none_true_none_result_is_a_miss_next_call
     assert inner.invoke_calls == ["a"]
 
 
-def test_caching_runnable_cache_ignore_none_true_non_none_results_still_cached() -> None:
+def test_caching_runnable_cache_ignore_none_true_non_none_results_still_cached() -> (
+    None
+):
     cache = Cache(ignore_none=True)
     inner = TrackingRunnable(none_on="skip-me")
     cached = CachingRunnable(runnable=inner, cache=cache, key_fn=_identity_key)
@@ -755,7 +767,9 @@ from zenpyre.utils.config import Config
 
 MODULE = "zenpyre.agents.factory.cache"
 
-MINIMAL_AGENT_FACTORY_TARGET = "tests.unit.agents.factory.test_cache.MinimalAgentFactory"
+MINIMAL_AGENT_FACTORY_TARGET = (
+    "tests.unit.agents.factory.test_cache.MinimalAgentFactory"
+)
 
 
 class MinimalAgentFactory(BaseAgentFactory):
@@ -834,7 +848,9 @@ def test_caching_agent_factory_resolves_agent_factory_from_base_config() -> None
 
 
 def test_caching_agent_factory_invalid_agent_factory_raises_type_error() -> None:
-    with pytest.raises(TypeError, match=r"Received object is not a BaseAgentFactory instance"):
+    with pytest.raises(
+        TypeError, match=r"Received object is not a BaseAgentFactory instance"
+    ):
         _make_factory(agent_factory="not-an-agent-factory")
 
 
