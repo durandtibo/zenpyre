@@ -36,6 +36,18 @@ def test_print_markdown_box(box: bool) -> None:
     print_markdown("**hello**", box=box)
 
 
+def test_print_markdown_max_length_no_truncation() -> None:
+    assert print_markdown("**hello**", max_length=500) is None
+
+
+def test_print_markdown_max_length_truncates() -> None:
+    assert print_markdown("word " * 200, max_length=50) is None
+
+
+def test_print_markdown_max_length_none_renders_full() -> None:
+    assert print_markdown("word " * 200, max_length=None) is None
+
+
 ####################################
 #     Tests for print_pretty       #
 ####################################
