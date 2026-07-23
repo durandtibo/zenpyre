@@ -101,10 +101,8 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
 
         key = self._key_fn(input)
         if (out := self._cache.get(key)) is not None:
-            logger.info("Cache hit: %s", key)
             return out
 
-        logger.info("Cache miss: %s", key)
         result = self._runnable.invoke(input, config=config, **kwargs)
         self._cache.set(key, result)
         return result
@@ -119,11 +117,9 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
             return await self._runnable.ainvoke(input, config=config, **kwargs)
 
         key = self._key_fn(input)
-        if self._cache.contains(key):
-            logger.info("Cache hit: %s", key)
-            return self._cache.get(key)
+        if (out := self._cache.get(key)) is not None:
+            return out
 
-        logger.info("Cache miss: %s", key)
         result = await self._runnable.ainvoke(input, config=config, **kwargs)
         self._cache.set(key, result)
         return result
