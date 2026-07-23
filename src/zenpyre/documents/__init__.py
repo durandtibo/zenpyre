@@ -3,8 +3,10 @@ r"""Contain utilities for documents."""
 from __future__ import annotations
 
 __all__ = [
+    "DocumentConsistencyError",
     "DocumentHasher",
     "assign_ids",
+    "check_document_consistency",
     "copy_ids_to_metadata",
     "deduplicate_documents",
     "filter_by_metadata",
@@ -32,6 +34,10 @@ from zenpyre.documents.concatenation import (
     format_documents_as_json,
     format_documents_as_markdown,
     format_documents_as_xml,
+)
+from zenpyre.documents.consistency import (
+    DocumentConsistencyError,
+    check_document_consistency,
 )
 from zenpyre.documents.dedup import deduplicate_documents
 from zenpyre.documents.empty import is_document_empty, is_document_whitespace_only
