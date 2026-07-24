@@ -13,7 +13,6 @@ from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_core.runnables.config import get_config_list
 from langchain_core.runnables.utils import Input, Output
 
-from zenpyre.utils.imports import check_persista
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -85,8 +84,6 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
         key_fn: Callable[[Input], str] | None = None,
     ) -> None:
         self._runnable = runnable
-        if cache is not None:
-            check_persista()
         self._cache = cache
         self._key_fn = key_fn if key_fn is not None else hash_object
 
