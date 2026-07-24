@@ -59,10 +59,6 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
             input-specific hashing behavior that differs from the
             registered default.
 
-    Raises:
-        RuntimeError: If ``cache`` is not ``None`` and the ``persista``
-            package is not installed.
-
     Example:
         ```pycon
         >>> from langchain_core.runnables import RunnableLambda
