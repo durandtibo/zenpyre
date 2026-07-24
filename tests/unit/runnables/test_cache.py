@@ -13,6 +13,8 @@ from zenpyre.utils.imports import is_persista_available
 if is_persista_available():
     from persista.cache import Cache
 
+pytest.importorskip("persista")
+
 MODULE = "zenpyre.runnables.cache"
 
 
