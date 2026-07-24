@@ -18,7 +18,7 @@ from zenpyre.utils.imports import check_persista
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from persista.cache.cache import Cache
+    from persista.cache import Cache
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -100,8 +100,8 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
             return self._runnable.invoke(input, config=config, **kwargs)
 
         key = self._key_fn(input)
-        if (out := self._cache.get(key)) is not None:
-            return out
+        if self._cache.contains(key):
+            return self._cache.get(key)
 
         result = self._runnable.invoke(input, config=config, **kwargs)
         self._cache.set(key, result)
@@ -117,11 +117,11 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
             return await self._runnable.ainvoke(input, config=config, **kwargs)
 
         key = self._key_fn(input)
-        if (out := self._cache.get(key)) is not None:
-            return out
+        if await self._cache.acontains(key):
+            return await self._cache.aget(key)
 
         result = await self._runnable.ainvoke(input, config=config, **kwargs)
-        self._cache.set(key, result)
+        await self._cache.aset(key, result)
         return result
 
     def batch(
@@ -142,11 +142,12 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
         configs = get_config_list(config, len(inputs))
         keys = [self._key_fn(inp) for inp in inputs]
 
+        hits = self._cache.get_many(keys)
         results: list[Any] = [None] * len(inputs)
         miss_indices: list[int] = []
         for i, key in enumerate(keys):
-            if self._cache.contains(key):
-                results[i] = self._cache.get(key)
+            if key in hits:
+                results[i] = hits[key]
             else:
                 miss_indices.append(i)
 
@@ -158,11 +159,13 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
                 return_exceptions=return_exceptions,
                 **kwargs,
             )
+            new_items: dict[str, Any] = {}
             for idx, output in zip(miss_indices, miss_outputs, strict=True):
                 results[idx] = output
                 if return_exceptions and isinstance(output, BaseException):
                     continue
-                self._cache.set(keys[idx], output)
+                new_items[keys[idx]] = output
+            self._cache.set_many(new_items)
 
         return results
 
@@ -184,11 +187,12 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
         configs = get_config_list(config, len(inputs))
         keys = [self._key_fn(inp) for inp in inputs]
 
+        hits = await self._cache.aget_many(keys)
         results: list[Any] = [None] * len(inputs)
         miss_indices: list[int] = []
         for i, key in enumerate(keys):
-            if self._cache.contains(key):
-                results[i] = self._cache.get(key)
+            if key in hits:
+                results[i] = hits[key]
             else:
                 miss_indices.append(i)
 
@@ -200,11 +204,13 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
                 return_exceptions=return_exceptions,
                 **kwargs,
             )
+            new_items: dict[str, Any] = {}
             for idx, output in zip(miss_indices, miss_outputs, strict=True):
                 results[idx] = output
                 if return_exceptions and isinstance(output, BaseException):
                     continue
-                self._cache.set(keys[idx], output)
+                new_items[keys[idx]] = output
+            await self._cache.aset_many(new_items)
 
         return results
 

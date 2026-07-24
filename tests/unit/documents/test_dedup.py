@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
-import pytest
 from langchain_core.documents import Document
 
 from zenpyre.documents import deduplicate_documents
+
+if TYPE_CHECKING:
+    import pytest
 
 ###########################################
 #     Tests for deduplicate_documents     #
