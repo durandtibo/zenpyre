@@ -7,6 +7,7 @@ from langchain_core.runnables import RunnableLambda
 
 from tests.unit.runnables.helpers import TrackingRunnable
 from zenpyre.runnables import CachingRunnable
+from zenpyre.testing.fixtures import persista_available
 from zenpyre.utils.imports import is_persista_available
 
 if is_persista_available():
