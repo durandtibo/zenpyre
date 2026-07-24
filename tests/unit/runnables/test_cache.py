@@ -4,7 +4,7 @@ import asyncio
 
 import pytest
 from langchain_core.runnables import RunnableLambda
-from persista.cache.cache import Cache
+from persista.cache import Cache
 
 from tests.unit.runnables.helpers import TrackingRunnable
 from zenpyre.runnables import CachingRunnable

@@ -48,7 +48,7 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
 
     Args:
         runnable: The runnable whose output should be cached.
-        cache: The :class:`~persista.cache.cache.Cache` instance used
+        cache: The :class:`~persista.cache.Cache` instance used
             to store cached results. If ``None``, caching is disabled.
             The caller configures the cache's backing store, TTL, and
             ``ignore_none`` behavior; ``CachingRunnable`` has no
@@ -68,7 +68,7 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
     Example:
         ```pycon
         >>> from langchain_core.runnables import RunnableLambda
-        >>> from persista.cache.cache import Cache
+        >>> from persista.cache import Cache
         >>> from zenpyre.runnables import CachingRunnable
         >>> runnable = RunnableLambda(lambda x: x.upper())
         >>> cached = CachingRunnable(runnable=runnable, cache=Cache())

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from langchain_core.runnables import Runnable
-    from persista.cache.cache import Cache
+    from persista.cache import Cache
 
     from zenpyre.utils.config import BaseConfig
 
@@ -37,7 +37,7 @@ class CachingAgentFactory(BaseAgentFactory, MultilineDisplayMixin):
     Args:
         agent_factory: The factory used to build the underlying agent
             to cache.
-        cache: The :class:`~persista.cache.cache.Cache` instance used
+        cache: The :class:`~persista.cache.Cache` instance used
             to store cached results. If ``None``, caching is disabled.
         key_fn: An optional function used to compute a cache key from
             the agent's input. If ``None``,
@@ -47,7 +47,7 @@ class CachingAgentFactory(BaseAgentFactory, MultilineDisplayMixin):
     Example:
         ```pycon
         >>> from langchain_core.language_models import FakeListChatModel
-        >>> from persista.cache.cache import Cache
+        >>> from persista.cache import Cache
         >>> from zenpyre.agents import AgentChatModel
         >>> from zenpyre.agents.factory import AgentFactory, CachingAgentFactory
         >>> inner_agent = AgentChatModel(model=FakeListChatModel(responses=["hello"]))
