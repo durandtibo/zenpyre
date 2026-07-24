@@ -24,6 +24,8 @@ __all__ = [
     "langchain_openai_not_available",
     "langchain_text_splitters_available",
     "langchain_text_splitters_not_available",
+    "persista_available",
+    "persista_not_available",
 ]
 
 import pytest
@@ -38,6 +40,7 @@ from zenpyre.utils.imports import (
     is_langchain_ollama_available,
     is_langchain_openai_available,
     is_langchain_text_splitters_available,
+    is_persista_available,
 )
 
 duckdb_available: pytest.MarkDecorator = pytest.mark.skipif(
@@ -102,4 +105,11 @@ langchain_text_splitters_available: pytest.MarkDecorator = pytest.mark.skipif(
 )
 langchain_text_splitters_not_available: pytest.MarkDecorator = pytest.mark.skipif(
     is_langchain_text_splitters_available(), reason="Skip if langchain_text_splitters is available"
+)
+
+persista_available: pytest.MarkDecorator = pytest.mark.skipif(
+    not is_persista_available(), reason="Requires persista"
+)
+persista_not_available: pytest.MarkDecorator = pytest.mark.skipif(
+    is_persista_available(), reason="Skip if persista is available"
 )

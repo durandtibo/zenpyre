@@ -265,7 +265,7 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
             return False, None
         try:
             result = load_pickle(filepath)
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.warning("Failed to load cache: %s", filepath, exc_info=True)
             return False, None
         if self._ignore_none and result is None:
@@ -281,7 +281,7 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
             return False, None
         try:
             result = await asyncio.to_thread(load_pickle, filepath)
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.warning("Failed to load cache: %s", filepath, exc_info=True)
             return False, None
         if self._ignore_none and result is None:
@@ -311,7 +311,7 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
         try:
             filepath.parent.mkdir(parents=True, exist_ok=True)
             save_pickle(result, filepath, exist_ok=True)
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.warning("Failed to write cache: %s", filepath, exc_info=True)
 
     async def _asave_cache(self, result: Output, filepath: Path) -> None:
@@ -327,7 +327,7 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
 
         try:
             await asyncio.to_thread(_write)
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.warning("Failed to write cache: %s", filepath, exc_info=True)
 
     def _get_repr_kwargs(self) -> dict[str, Any]:
