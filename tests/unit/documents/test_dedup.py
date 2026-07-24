@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 from langchain_core.documents import Document
 
 from zenpyre.documents import deduplicate_documents
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import pytest
