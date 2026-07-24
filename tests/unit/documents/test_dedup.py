@@ -10,9 +10,6 @@ from zenpyre.documents import deduplicate_documents
 if TYPE_CHECKING:
     import pytest
 
-if TYPE_CHECKING:
-    import pytest
-
 ###########################################
 #     Tests for deduplicate_documents     #
 ###########################################

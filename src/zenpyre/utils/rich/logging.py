@@ -13,6 +13,7 @@ from rich.logging import RichHandler
 
 def configure_rich_logging(
     level: int = logging.INFO,
+    *,
     fmt: str = "%(message)s",
     datefmt: str = "[%Y-%m-%d %H:%M:%S]",
     rich_tracebacks: bool = True,
