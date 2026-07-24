@@ -4,10 +4,13 @@ import asyncio
 
 import pytest
 from langchain_core.runnables import RunnableLambda
-from persista.cache import Cache
 
 from tests.unit.runnables.helpers import TrackingRunnable
 from zenpyre.runnables import CachingRunnable
+from zenpyre.utils.imports import is_persista_available
+
+if is_persista_available():
+    from persista.cache import Cache
 
 MODULE = "zenpyre.runnables.cache"
 
@@ -26,14 +29,15 @@ def _failing_lambda(fail_on: str) -> RunnableLambda:
     return RunnableLambda(fn)
 
 
-##################################
+###################################
 #     Tests for CachingRunnable   #
-##################################
+###################################
 
 
 # --- constructor ---
 
 
+@persista_available
 def test_caching_runnable_default_key_fn_is_hash_object() -> None:
     from coola.hashing import hash_object
 
@@ -41,40 +45,38 @@ def test_caching_runnable_default_key_fn_is_hash_object() -> None:
     assert cached._key_fn is hash_object
 
 
+@persista_available
 def test_caching_runnable_cache_none_disables_caching() -> None:
     cached = CachingRunnable(runnable=RunnableLambda(lambda x: x))
     assert cached._cache is None
 
 
+@persista_available
 def test_caching_runnable_stores_cache() -> None:
     cache = Cache()
     cached = CachingRunnable(runnable=RunnableLambda(lambda x: x), cache=cache)
     assert cached._cache is cache
 
 
-def test_caching_runnable_missing_persista_raises_runtime_error(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    def raising_check() -> None:
-        msg = "persista is not installed"
-        raise RuntimeError(msg)
-
-    monkeypatch.setattr(f"{MODULE}.check_persista", raising_check)
-    with pytest.raises(RuntimeError, match="persista is not installed"):
-        CachingRunnable(runnable=RunnableLambda(lambda x: x), cache=Cache())
+# --- repr/str ---
 
 
-# --- repr ---
-
-
+@persista_available
 def test_caching_runnable_repr_contains_class_name() -> None:
     cached = CachingRunnable(runnable=RunnableLambda(lambda x: x), cache=Cache())
     assert "CachingRunnable" in repr(cached)
 
 
+@persista_available
+def test_caching_runnable_str_contains_class_name() -> None:
+    cached = CachingRunnable(runnable=RunnableLambda(lambda x: x), cache=Cache())
+    assert "CachingRunnable" in str(cached)
+
+
 # --- invoke: caching disabled ---
 
 
+@persista_available
 def test_caching_runnable_invoke_no_cache_always_calls_inner() -> None:
     inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache=None)
@@ -86,6 +88,7 @@ def test_caching_runnable_invoke_no_cache_always_calls_inner() -> None:
 # --- invoke: caching enabled ---
 
 
+@persista_available
 def test_caching_runnable_invoke_returns_correct_result() -> None:
     cached = CachingRunnable(
         runnable=RunnableLambda(lambda x: x.upper()), cache=Cache(), key_fn=_identity_key
@@ -93,6 +96,7 @@ def test_caching_runnable_invoke_returns_correct_result() -> None:
     assert cached.invoke("hello") == "HELLO"
 
 
+@persista_available
 def test_caching_runnable_invoke_cache_miss_calls_inner() -> None:
     inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache=Cache(), key_fn=_identity_key)
@@ -100,6 +104,7 @@ def test_caching_runnable_invoke_cache_miss_calls_inner() -> None:
     assert inner.invoke_calls == ["a"]
 
 
+@persista_available
 def test_caching_runnable_invoke_cache_hit_does_not_call_inner() -> None:
     inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache=Cache(), key_fn=_identity_key)
@@ -110,6 +115,7 @@ def test_caching_runnable_invoke_cache_hit_does_not_call_inner() -> None:
     assert inner.invoke_calls == []
 
 
+@persista_available
 def test_caching_runnable_invoke_writes_cache_entry() -> None:
     cache = Cache()
     cached = CachingRunnable(
@@ -119,6 +125,7 @@ def test_caching_runnable_invoke_writes_cache_entry() -> None:
     assert cache.get("a") == "A"
 
 
+@persista_available
 def test_caching_runnable_invoke_key_with_dot_not_truncated() -> None:
     # Regression test: the old pickle-file backend used
     # Path.with_suffix(".pkl"), which would turn a key like "3.14" into
@@ -133,6 +140,7 @@ def test_caching_runnable_invoke_key_with_dot_not_truncated() -> None:
     assert cache.get("3") is None
 
 
+@persista_available
 def test_caching_runnable_invoke_propagates_inner_exception() -> None:
     cached = CachingRunnable(
         runnable=_failing_lambda(fail_on="a"), cache=Cache(), key_fn=_identity_key
@@ -144,6 +152,7 @@ def test_caching_runnable_invoke_propagates_inner_exception() -> None:
 # --- ainvoke ---
 
 
+@persista_available
 def test_caching_runnable_ainvoke_no_cache_uses_inner_ainvoke() -> None:
     inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache=None)
@@ -153,6 +162,7 @@ def test_caching_runnable_ainvoke_no_cache_uses_inner_ainvoke() -> None:
     assert inner.invoke_calls == []
 
 
+@persista_available
 def test_caching_runnable_ainvoke_cache_miss_then_hit() -> None:
     inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache=Cache(), key_fn=_identity_key)
@@ -167,6 +177,7 @@ def test_caching_runnable_ainvoke_cache_miss_then_hit() -> None:
     assert inner.ainvoke_calls == []
 
 
+@persista_available
 def test_caching_runnable_ainvoke_propagates_inner_exception() -> None:
     cached = CachingRunnable(
         runnable=_failing_lambda(fail_on="a"), cache=Cache(), key_fn=_identity_key
@@ -178,6 +189,7 @@ def test_caching_runnable_ainvoke_propagates_inner_exception() -> None:
 # --- batch ---
 
 
+@persista_available
 def test_caching_runnable_batch_empty_list_returns_empty_list() -> None:
     cached = CachingRunnable(
         runnable=RunnableLambda(lambda x: x.upper()), cache=Cache(), key_fn=_identity_key
@@ -185,6 +197,7 @@ def test_caching_runnable_batch_empty_list_returns_empty_list() -> None:
     assert cached.batch([]) == []
 
 
+@persista_available
 def test_caching_runnable_batch_no_cache_delegates_to_inner_batch() -> None:
     inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache=None)
@@ -193,6 +206,7 @@ def test_caching_runnable_batch_no_cache_delegates_to_inner_batch() -> None:
     assert inner.batch_calls == [["a", "b"]]
 
 
+@persista_available
 def test_caching_runnable_batch_returns_correct_results() -> None:
     cached = CachingRunnable(
         runnable=RunnableLambda(lambda x: x.upper()), cache=Cache(), key_fn=_identity_key
@@ -200,6 +214,7 @@ def test_caching_runnable_batch_returns_correct_results() -> None:
     assert cached.batch(["a", "b", "c"]) == ["A", "B", "C"]
 
 
+@persista_available
 def test_caching_runnable_batch_calls_inner_batch_only_for_misses() -> None:
     inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache=Cache(), key_fn=_identity_key)
@@ -215,6 +230,7 @@ def test_caching_runnable_batch_calls_inner_batch_only_for_misses() -> None:
     assert inner.batch_calls == [["b", "c"]]
 
 
+@persista_available
 def test_caching_runnable_batch_writes_cache_for_new_misses() -> None:
     cache = Cache()
     cached = CachingRunnable(
@@ -225,6 +241,7 @@ def test_caching_runnable_batch_writes_cache_for_new_misses() -> None:
     assert cache.get("b") == "B"
 
 
+@persista_available
 def test_caching_runnable_batch_second_call_all_hits() -> None:
     inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache=Cache(), key_fn=_identity_key)
@@ -237,6 +254,7 @@ def test_caching_runnable_batch_second_call_all_hits() -> None:
     assert inner.batch_calls == []
 
 
+@persista_available
 def test_caching_runnable_batch_raises_by_default_on_failure() -> None:
     cached = CachingRunnable(
         runnable=_failing_lambda(fail_on="b"), cache=Cache(), key_fn=_identity_key
@@ -245,6 +263,7 @@ def test_caching_runnable_batch_raises_by_default_on_failure() -> None:
         cached.batch(["a", "b", "c"])
 
 
+@persista_available
 def test_caching_runnable_batch_return_exceptions_keeps_raw_exception() -> None:
     cached = CachingRunnable(
         runnable=_failing_lambda(fail_on="b"), cache=Cache(), key_fn=_identity_key
@@ -255,6 +274,7 @@ def test_caching_runnable_batch_return_exceptions_keeps_raw_exception() -> None:
     assert results[2] == "C"
 
 
+@persista_available
 def test_caching_runnable_batch_return_exceptions_does_not_cache_failure() -> None:
     cache = Cache()
     cached = CachingRunnable(
@@ -269,6 +289,7 @@ def test_caching_runnable_batch_return_exceptions_does_not_cache_failure() -> No
 # --- abatch ---
 
 
+@persista_available
 def test_caching_runnable_abatch_empty_list_returns_empty_list() -> None:
     cached = CachingRunnable(
         runnable=RunnableLambda(lambda x: x.upper()), cache=Cache(), key_fn=_identity_key
@@ -276,6 +297,7 @@ def test_caching_runnable_abatch_empty_list_returns_empty_list() -> None:
     assert asyncio.run(cached.abatch([])) == []
 
 
+@persista_available
 def test_caching_runnable_abatch_no_cache_delegates_to_inner_abatch() -> None:
     inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache=None)
@@ -284,6 +306,7 @@ def test_caching_runnable_abatch_no_cache_delegates_to_inner_abatch() -> None:
     assert inner.abatch_calls == [["a", "b"]]
 
 
+@persista_available
 def test_caching_runnable_abatch_calls_inner_abatch_only_for_misses() -> None:
     inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache=Cache(), key_fn=_identity_key)
@@ -297,6 +320,7 @@ def test_caching_runnable_abatch_calls_inner_abatch_only_for_misses() -> None:
     assert inner.abatch_calls == [["b", "c"]]
 
 
+@persista_available
 def test_caching_runnable_abatch_second_call_all_hits() -> None:
     inner = TrackingRunnable()
     cached = CachingRunnable(runnable=inner, cache=Cache(), key_fn=_identity_key)
@@ -311,6 +335,7 @@ def test_caching_runnable_abatch_second_call_all_hits() -> None:
     assert inner.abatch_calls == []
 
 
+@persista_available
 def test_caching_runnable_abatch_return_exceptions_keeps_raw_exception() -> None:
     cached = CachingRunnable(
         runnable=_failing_lambda(fail_on="b"), cache=Cache(), key_fn=_identity_key
@@ -321,6 +346,7 @@ def test_caching_runnable_abatch_return_exceptions_keeps_raw_exception() -> None
     assert results[2] == "C"
 
 
+@persista_available
 def test_caching_runnable_abatch_return_exceptions_does_not_cache_failure() -> None:
     cache = Cache()
     cached = CachingRunnable(
@@ -333,6 +359,7 @@ def test_caching_runnable_abatch_return_exceptions_does_not_cache_failure() -> N
 # --- ignore_none delegated to the Cache instance ---
 
 
+@persista_available
 def test_caching_runnable_cache_ignore_none_false_caches_none_result() -> None:
     cache = Cache()  # ignore_none defaults to False
     inner = TrackingRunnable(none_on="a")
@@ -348,6 +375,7 @@ def test_caching_runnable_cache_ignore_none_false_caches_none_result() -> None:
     assert inner.invoke_calls == []  # cache hit, no call to inner
 
 
+@persista_available
 def test_caching_runnable_cache_ignore_none_true_does_not_cache_none_result() -> None:
     cache = Cache(ignore_none=True)
     inner = TrackingRunnable(none_on="a")
@@ -359,6 +387,7 @@ def test_caching_runnable_cache_ignore_none_true_does_not_cache_none_result() ->
     assert not cache.contains("a")
 
 
+@persista_available
 def test_caching_runnable_cache_ignore_none_true_none_result_is_a_miss_next_call() -> None:
     cache = Cache(ignore_none=True)
     inner = TrackingRunnable(none_on="a")
@@ -373,6 +402,7 @@ def test_caching_runnable_cache_ignore_none_true_none_result_is_a_miss_next_call
     assert inner.invoke_calls == ["a"]
 
 
+@persista_available
 def test_caching_runnable_cache_ignore_none_true_non_none_results_still_cached() -> None:
     cache = Cache(ignore_none=True)
     inner = TrackingRunnable(none_on="skip-me")
@@ -387,6 +417,7 @@ def test_caching_runnable_cache_ignore_none_true_non_none_results_still_cached()
     assert inner.invoke_calls == []  # cache hit
 
 
+@persista_available
 def test_caching_runnable_cache_ignore_none_true_batch_mixed_results() -> None:
     cache = Cache(ignore_none=True)
     inner = TrackingRunnable(none_on="b")
@@ -400,6 +431,7 @@ def test_caching_runnable_cache_ignore_none_true_batch_mixed_results() -> None:
     assert cache.get("c") == "C"
 
 
+@persista_available
 def test_caching_runnable_cache_ignore_none_true_abatch_mixed_results() -> None:
     cache = Cache(ignore_none=True)
     inner = TrackingRunnable(none_on="b")
@@ -413,6 +445,7 @@ def test_caching_runnable_cache_ignore_none_true_abatch_mixed_results() -> None:
     assert cache.get("c") == "C"
 
 
+@persista_available
 def test_caching_runnable_cache_ignore_none_true_ainvoke_does_not_cache_none() -> None:
     cache = Cache(ignore_none=True)
     inner = TrackingRunnable(none_on="a")

@@ -13,7 +13,6 @@ from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_core.runnables.config import get_config_list
 from langchain_core.runnables.utils import Input, Output
 
-
 if TYPE_CHECKING:
     from collections.abc import Callable
 
