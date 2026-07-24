@@ -5,11 +5,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from coola.equality import objects_are_equal
-from persista.cache import Cache
 
 from zenpyre.agents.factory import AgentFactory, BaseAgentFactory, CachingAgentFactory
 from zenpyre.testing.fixtures import persista_available
 from zenpyre.utils.config import Config
+from zenpyre.utils.imports import is_persista_available
+
+if is_persista_available():
+    from persista.cache import Cache
 
 MODULE = "zenpyre.agents.factory.cache"
 
