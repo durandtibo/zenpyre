@@ -124,7 +124,22 @@ def test_serializable_hasher_hash_delegates_to_given_registry() -> None:
     result = hasher.hash(message, registry=mock_registry, length=32)
 
     assert result == "mock-hash"
-    mock_registry.hash.assert_called_once_with(message.to_json(), length=32)
+    mock_registry.hash.assert_called_once_with(
+        message.to_json(), length=32, ignore_unhashable=False
+    )
+
+
+def test_serializable_hasher_hash_passes_ignore_unhashable_to_registry() -> None:
+    hasher = SerializableHasher()
+    message = HumanMessage(content="hello")
+    mock_registry = Mock(spec=HasherRegistry)
+    mock_registry.hash.return_value = "mock-hash"
+
+    hasher.hash(message, registry=mock_registry, ignore_unhashable=True)
+
+    mock_registry.hash.assert_called_once_with(
+        message.to_json(), length=64, ignore_unhashable=True
+    )
 
 
 def test_serializable_hasher_hash_uses_registry_not_a_different_one() -> None:
@@ -174,5 +189,37 @@ def test_serializable_hasher_hash_raises_before_touching_registry() -> None:
 
     with pytest.raises(TypeError):
         hasher.hash(obj, registry=mock_registry)
+
+    mock_registry.hash.assert_not_called()
+
+
+def test_serializable_hasher_hash_does_not_raise_for_non_serializable_when_ignore_unhashable(
+    registry: HasherRegistry,
+) -> None:
+    hasher = SerializableHasher()
+    obj = Serializable()
+    assert len(hasher.hash(obj, registry=registry, ignore_unhashable=True)) == 64
+
+
+def test_serializable_hasher_hash_non_serializable_ignore_unhashable_is_deterministic(
+    registry: HasherRegistry,
+) -> None:
+    hasher = SerializableHasher()
+    assert hasher.hash(
+        Serializable(), registry=registry, ignore_unhashable=True
+    ) == hasher.hash(Serializable(), registry=registry, ignore_unhashable=True)
+
+
+def test_serializable_hasher_hash_non_serializable_ignore_unhashable_does_not_touch_registry() -> (
+    None
+):
+    # The placeholder hash for a non-serializable object must not
+    # reach the registry, since to_json() would return a meaningless
+    # "not implemented" sentinel for it.
+    hasher = SerializableHasher()
+    obj = Serializable()
+    mock_registry = Mock(spec=HasherRegistry)
+
+    hasher.hash(obj, registry=mock_registry, ignore_unhashable=True)
 
     mock_registry.hash.assert_not_called()
