@@ -203,7 +203,7 @@ class CachingChatModel(BaseChatModel):
     def _load_cached(self, key: str) -> tuple[bool, ChatResult | None]:
         try:
             result = self.result_cache.get(key)
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.warning("Failed to load cache: %s", key, exc_info=True)
             return False, None
         if result is None:
@@ -214,7 +214,7 @@ class CachingChatModel(BaseChatModel):
     async def _aload_cached(self, key: str) -> tuple[bool, ChatResult | None]:
         try:
             result = await asyncio.to_thread(self.result_cache.get, key)
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.warning("Failed to load cache: %s", key, exc_info=True)
             return False, None
         if result is None:
@@ -228,7 +228,7 @@ class CachingChatModel(BaseChatModel):
             return
         try:
             self.result_cache.set(key, result)
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.warning("Failed to write cache: %s", key, exc_info=True)
 
     async def _asave_cache(self, result: ChatResult | None, key: str) -> None:
@@ -237,5 +237,5 @@ class CachingChatModel(BaseChatModel):
             return
         try:
             await asyncio.to_thread(self.result_cache.set, key, result)
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.warning("Failed to write cache: %s", key, exc_info=True)

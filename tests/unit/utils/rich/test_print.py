@@ -36,6 +36,23 @@ def test_print_markdown_box(box: bool) -> None:
     print_markdown("**hello**", box=box)
 
 
+def test_print_markdown_max_length_no_truncation() -> None:
+    assert print_markdown("**hello**", max_length=500) is None
+
+
+def test_print_markdown_max_length_truncates() -> None:
+    assert print_markdown("word " * 200, max_length=50) is None
+
+
+def test_print_markdown_max_length_none_renders_full() -> None:
+    assert print_markdown("word " * 200, max_length=None) is None
+
+
+@pytest.mark.parametrize("panel", [True, False])
+def test_print_markdown_panel(panel: bool) -> None:
+    assert print_markdown("**hello**", title="Demo", box=False, panel=panel) is None
+
+
 ####################################
 #     Tests for print_pretty       #
 ####################################
@@ -70,3 +87,8 @@ def test_print_pretty_title_align(title_align: str) -> None:
 @pytest.mark.parametrize("box", [True, False])
 def test_print_pretty_box(box: bool) -> None:
     print_pretty({"key": "value"}, box=box)
+
+
+@pytest.mark.parametrize("panel", [True, False])
+def test_print_pretty_panel(panel: bool) -> None:
+    assert print_pretty({"key": "value"}, title="Demo", box=False, panel=panel) is None

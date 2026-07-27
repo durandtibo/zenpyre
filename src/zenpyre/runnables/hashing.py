@@ -5,7 +5,7 @@ from __future__ import annotations
 __all__ = ["SerializableHasher"]
 
 
-from coola.hashing import BaseHasher, HasherRegistry, get_default_registry
+from coola.hashing import BaseHasher, HasherRegistry, get_default_registry, hash_string
 from langchain_core.load import Serializable
 
 
@@ -27,11 +27,15 @@ class SerializableHasher(BaseHasher[Serializable]):
     Raises:
         TypeError: Raised by :meth:`hash` if ``data`` is not
             LangChain-serializable (``data.is_lc_serializable()`` is
-            ``False``). In that case ``to_json()`` would return a
-            generic "not implemented" sentinel shared by every
-            non-serializable instance, which would silently hash all
-            such instances to the same value regardless of their actual
-            content -- raising instead of doing that.
+            ``False``) and ``ignore_unhashable`` is ``False``. In that
+            case ``to_json()`` would return a generic "not implemented"
+            sentinel shared by every non-serializable instance, which
+            would silently hash all such instances to the same value
+            regardless of their actual content -- raising instead of
+            doing that. If ``ignore_unhashable`` is ``True``, a
+            deterministic placeholder hash is returned instead, mirroring
+            how ``HasherRegistry.hash`` handles types with no registered
+            hasher.
 
     Example:
         ```pycon
@@ -57,11 +61,36 @@ class SerializableHasher(BaseHasher[Serializable]):
         data: Serializable,
         registry: HasherRegistry,
         length: int = 64,
+        ignore_unhashable: bool = False,
     ) -> str:
+        r"""Compute a deterministic hash of a ``Serializable`` object.
+
+        Args:
+            data: The ``Serializable`` instance to hash.
+            registry: The hasher registry used to hash the nested
+                values found in ``data.to_json()``.
+            length: The desired length of the returned hex string.
+                Defaults to 64.
+            ignore_unhashable: If ``True``, non-serializable ``data``
+                (and nested values within ``data.to_json()`` for which
+                ``registry`` has no registered hasher) are replaced by
+                a deterministic placeholder hash instead of raising -
+                also passed through to ``registry.hash``.
+
+        Returns:
+            A lowercase hexadecimal string of exactly ``length``
+            characters.
+
+        Raises:
+            TypeError: If ``data.is_lc_serializable()`` is ``False``
+                and ``ignore_unhashable`` is ``False``.
+        """
         if not data.is_lc_serializable():
+            if ignore_unhashable:
+                return hash_string(f"<unhashable:{type(data)!r}>", length=length)
             msg = f"Cannot hash non-serializable object of type {type(data).__qualname__}"
             raise TypeError(msg)
-        return registry.hash(data.to_json(), length=length)
+        return registry.hash(data.to_json(), length=length, ignore_unhashable=ignore_unhashable)
 
 
 get_default_registry().register(Serializable, SerializableHasher(), exist_ok=True)
