@@ -14,10 +14,10 @@ from langchain_core.messages import BaseMessage  # noqa: TC002
 from langchain_core.outputs import ChatGeneration, ChatResult
 from langchain_core.runnables import Runnable  # noqa: TC002
 from langchain_core.tools import BaseTool  # noqa: TC002
-from persista.cache import Cache  # noqa: TC002
 from pydantic import ConfigDict
 
 from zenpyre.runnables import hashing as _hashing  # noqa: F401
+from zenpyre.utils.imports import is_persista_available
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -26,6 +26,9 @@ if TYPE_CHECKING:
         AsyncCallbackManagerForLLMRun,
         CallbackManagerForLLMRun,
     )
+
+if is_persista_available():
+    from persista.cache import Cache  # noqa: TC002
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -124,9 +127,10 @@ class CachingChatModel(BaseChatModel):
         key = self._make_key(messages, stop, kwargs)
         hit, result = self.response_cache.try_get(key)
         if hit:
+            logger.debug("Cache hit: %s", key)
             return result
 
-        logger.info("Cache miss: %s", key)
+        logger.debug("Cache miss: %s", key)
         result = self._call_chat_model(messages, stop=stop, run_manager=run_manager, **kwargs)
         self.response_cache.set(key, result)
         return result
@@ -148,7 +152,7 @@ class CachingChatModel(BaseChatModel):
         if hit:
             return result
 
-        logger.info("Cache miss: %s", key)
+        logger.debug("Cache miss: %s", key)
         result = await self._acall_chat_model(
             messages, stop=stop, run_manager=run_manager, **kwargs
         )

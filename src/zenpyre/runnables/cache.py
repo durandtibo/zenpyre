@@ -48,9 +48,13 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
         runnable: The runnable whose output should be cached.
         cache: The :class:`~persista.cache.Cache` instance used
             to store cached results. If ``None``, caching is disabled.
-            The caller configures the cache's backing store, TTL, and
-            ``ignore_none`` behavior; ``CachingRunnable`` has no
-            caching policy of its own beyond what ``cache`` provides.
+            The caller configures the cache's backing store and TTL;
+            ``CachingRunnable`` has no caching policy of its own
+            beyond what ``cache`` provides. ``cache`` must already be
+            open (via :meth:`~persista.cache.Cache.open` /
+            :meth:`~persista.cache.Cache.aopen`, or used as a context
+            manager) before it is passed in -- ``CachingRunnable``
+            does not manage its lifecycle.
         key_fn: A function that derives a cache key from an input. The
             returned string is used directly as the ``cache`` key.
             Defaults to ``hash_object``, which dispatches through
@@ -65,8 +69,10 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
         >>> from persista.cache import Cache
         >>> from zenpyre.runnables import CachingRunnable
         >>> runnable = RunnableLambda(lambda x: x.upper())
-        >>> cached = CachingRunnable(runnable=runnable, cache=Cache())
-        >>> cached.invoke("hello")
+        >>> with Cache() as cache:
+        ...     cached = CachingRunnable(runnable=runnable, cache=cache)
+        ...     cached.invoke("hello")
+        ...
         'HELLO'
 
         ```
@@ -92,9 +98,12 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
             return self._runnable.invoke(input, config=config, **kwargs)
 
         key = self._key_fn(input)
-        if self._cache.contains(key):
-            return self._cache.get(key)
+        hit, result = self._cache.try_get(key)
+        if hit:
+            logger.debug("Cache hit: %s", key)
+            return result
 
+        logger.debug("Cache miss: %s", key)
         result = self._runnable.invoke(input, config=config, **kwargs)
         self._cache.set(key, result)
         return result
@@ -109,9 +118,12 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
             return await self._runnable.ainvoke(input, config=config, **kwargs)
 
         key = self._key_fn(input)
-        if await self._cache.acontains(key):
-            return await self._cache.aget(key)
+        hit, result = await self._cache.atry_get(key)
+        if hit:
+            logger.debug("Cache hit: %s", key)
+            return result
 
+        logger.debug("Cache miss: %s", key)
         result = await self._runnable.ainvoke(input, config=config, **kwargs)
         await self._cache.aset(key, result)
         return result
@@ -134,7 +146,7 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
         configs = get_config_list(config, len(inputs))
         keys = [self._key_fn(inp) for inp in inputs]
 
-        hits = self._cache.get_many(keys)
+        hits = self._cache.try_get_many(keys)
         results: list[Any] = [None] * len(inputs)
         miss_indices: list[int] = []
         for i, key in enumerate(keys):
@@ -144,7 +156,7 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
                 miss_indices.append(i)
 
         if miss_indices:
-            logger.info("Cache miss: %d/%d input(s)", len(miss_indices), len(inputs))
+            logger.debug("Cache miss: %d/%d input(s)", len(miss_indices), len(inputs))
             miss_outputs = self._runnable.batch(
                 [inputs[i] for i in miss_indices],
                 config=[configs[i] for i in miss_indices],
@@ -179,7 +191,7 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
         configs = get_config_list(config, len(inputs))
         keys = [self._key_fn(inp) for inp in inputs]
 
-        hits = await self._cache.aget_many(keys)
+        hits = await self._cache.atry_get_many(keys)
         results: list[Any] = [None] * len(inputs)
         miss_indices: list[int] = []
         for i, key in enumerate(keys):
@@ -189,7 +201,7 @@ class CachingRunnable(Runnable[Input, Output], MultilineDisplayMixin):
                 miss_indices.append(i)
 
         if miss_indices:
-            logger.info("Cache miss: %d/%d input(s)", len(miss_indices), len(inputs))
+            logger.debug("Cache miss: %d/%d input(s)", len(miss_indices), len(inputs))
             miss_outputs = await self._runnable.abatch(
                 [inputs[i] for i in miss_indices],
                 config=[configs[i] for i in miss_indices],
