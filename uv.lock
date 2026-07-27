@@ -238,15 +238,15 @@ wheels = [
 
 [[package]]
 name = "backrefs"
-version = "7.0"
+version = "8.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/5e/a7/a7dd63622beef68cc0d3c3c36d472e143dd95443d5ebf14cd1a5b4dfbf11/backrefs-7.0.tar.gz", hash = "sha256:4989bb9e1e99eb23647c7160ed51fb21d0b41b5d200f2d3017da41e023097e82", size = 7012453, upload-time = "2026-04-28T16:28:04.215Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ec/56/4744bcd0c82184e80c52b0ac4076c261a8ffa1f1b343ff2f6e89ce0e1cef/backrefs-8.0.tar.gz", hash = "sha256:b556cd7d36c3a3a2f256b89590b176b8eddfb73bcfaee3a3ddd84ea66d21ce50", size = 7013081, upload-time = "2026-07-26T19:54:24.638Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d4/39/39a31d7eae729ea14ed10c3ccef79371197177b9355a86cb3525709e8502/backrefs-7.0-py310-none-any.whl", hash = "sha256:b57cd227ea556b0aed3dc9b8da4628db4eabc0402c6d7fcfc69283a93955f7e9", size = 380824, upload-time = "2026-04-28T16:27:55.647Z" },
-    { url = "https://files.pythonhosted.org/packages/c9/b5/9302644225ba7dfa934a2ff2b9c7bb85701313a90dddb3dfaf693fa5bae2/backrefs-7.0-py311-none-any.whl", hash = "sha256:a0fa7360c63509e9e077e174ef4e6d3c21c8db94189b9d957289ae6d794b9475", size = 392626, upload-time = "2026-04-28T16:27:57.42Z" },
-    { url = "https://files.pythonhosted.org/packages/36/da/87912ddec6e06feffbaa3d7aa18fc6352bee2e8f1fee185d7d1690f8f4e8/backrefs-7.0-py312-none-any.whl", hash = "sha256:ca42ce6a49ace3d75684dfa9937f3373902a63284ecb385ce36d15e5dcb41c12", size = 398537, upload-time = "2026-04-28T16:27:58.913Z" },
-    { url = "https://files.pythonhosted.org/packages/00/bb/90ba423612b6aa0adccc6b1874bcd4a9b44b660c0c16f346611e00f64ac3/backrefs-7.0-py313-none-any.whl", hash = "sha256:f2c52955d631b9e1ac4cd56209f0a3a946d592b98e7790e77699339ae01c102a", size = 400491, upload-time = "2026-04-28T16:28:00.928Z" },
-    { url = "https://files.pythonhosted.org/packages/3e/5c/fb93d3092640a24dfb7bd7727a24016d7c01774ca013e60efd3f683c8002/backrefs-7.0-py314-none-any.whl", hash = "sha256:a6448b28180e3ca01134c9cf09dcebafad8531072e09903c5451748a05f24bc9", size = 412349, upload-time = "2026-04-28T16:28:02.412Z" },
+    { url = "https://files.pythonhosted.org/packages/e3/fd/9bf53b6a6f6f519ffaac765df2f2a25e5c2fc6d32cfd2b2747099e72c911/backrefs-8.0-py310-none-any.whl", hash = "sha256:4a627b817fd2dce43b79ab48da63613340509381cd8ce0897078a0bce79a2ab8", size = 380377, upload-time = "2026-07-26T19:54:17.457Z" },
+    { url = "https://files.pythonhosted.org/packages/e1/29/4bd7ae72a2634da00379c2b3bcc5439e7c94620235c6afea8af15229a973/backrefs-8.0-py311-none-any.whl", hash = "sha256:f0c35cf0102ba6b6070c12a492be3c1c1d3f5839529784b9a9565d6d04569a01", size = 392169, upload-time = "2026-07-26T19:54:18.782Z" },
+    { url = "https://files.pythonhosted.org/packages/29/13/232505664e8e2a0c7a2eb0c505cfade9d715538f89a5d62bc4c272968f62/backrefs-8.0-py312-none-any.whl", hash = "sha256:87f0fae8c5f207fe9f4b2887efc71d42f4900ac78faa1af08d675ef303692dc5", size = 398084, upload-time = "2026-07-26T19:54:19.954Z" },
+    { url = "https://files.pythonhosted.org/packages/8a/69/47a3dc20abc4fa5486655fde681bd55e63211b46c886d8c02223d6468431/backrefs-8.0-py313-none-any.whl", hash = "sha256:601ce68ca12385dbda06ce264406b4c4210cf5b79fd0fd627592365c92f29a88", size = 400040, upload-time = "2026-07-26T19:54:21.194Z" },
+    { url = "https://files.pythonhosted.org/packages/1c/cf/e5f9b68a5b0e939a2fb933a66c20180d0c9241bf8927f7a47fa48c1675e9/backrefs-8.0-py314-none-any.whl", hash = "sha256:9ec96efa080938be92323e8e730e57718c9c88eb15ad70bbef4e1766df591408", size = 411903, upload-time = "2026-07-26T19:54:23.221Z" },
 ]
 
 [[package]]
@@ -667,11 +667,11 @@ wheels = [
 
 [[package]]
 name = "coola"
-version = "1.1.10a0"
+version = "1.1.10a1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/18/f5/44ddf8b48ca240189d969d3345936b7cd45c1d6b83b376f782be4f857727/coola-1.1.10a0.tar.gz", hash = "sha256:728461d739777730d1de8c7a8062f62f8cc5f97610099492b0eb5582e19261dc", size = 115345, upload-time = "2026-07-25T22:01:19.634Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/52/3b/46be084fbbdef08bfaeb833f98f786a04babe800a2f59301771c6b710d30/coola-1.1.10a1.tar.gz", hash = "sha256:7a07a8dc2ba8346cc8eee6c69237203a414008325ad7ae36b42e4b23cf71cccc", size = 117386, upload-time = "2026-07-26T01:59:47.672Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/61/8b/1faff58dc16d06b7bd9dfac4b0ecfcf66485c86e9f68a164219e8cb79227/coola-1.1.10a0-py3-none-any.whl", hash = "sha256:af0198e6d203453a28fae13a5fcae9f3488fda61cca1a9ef2dababc3bb7ea34b", size = 203880, upload-time = "2026-07-25T22:01:18.425Z" },
+    { url = "https://files.pythonhosted.org/packages/44/17/b330dcfb6486de51f3a5503d13de10730624e3c3a0cc426709366d24d222/coola-1.1.10a1-py3-none-any.whl", hash = "sha256:9b1eaf9d4c62e8f7e8295b0718099c345e61b701ad6f5f93afb4f913205f96e6", size = 206307, upload-time = "2026-07-26T01:59:45.995Z" },
 ]
 
 [[package]]
@@ -1236,14 +1236,14 @@ wheels = [
 
 [[package]]
 name = "gitpython"
-version = "3.1.56"
+version = "3.1.57"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "gitdb" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/81/45/d45f94fa38b199862959cd7b5461a31f03746d75ef59363339fc0c394345/gitpython-3.1.56.tar.gz", hash = "sha256:127adf5c73f1a822e368301c4d5ffa5d305ce611eccab76f3336f9380a78ad0b", size = 229619, upload-time = "2026-07-25T07:41:43.179Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ba/0d/132ed135c871b6bf91adf16a0e43797cd535b81d4973b5d09291c54fc5ee/gitpython-3.1.57.tar.gz", hash = "sha256:c493ec57c0ef6b19743798b6a5af859c71814b524e7e6f97baa2f8e658961488", size = 225898, upload-time = "2026-07-26T07:33:26.351Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/06/27/8b9b039c7f026d4af8954dbbdcc9f101f8d6901daa3a65b065d8f450c0bd/gitpython-3.1.56-py3-none-any.whl", hash = "sha256:bedffdc4bdd2e3cf21b328711a552b0529751f08bff6591339d18492291ad035", size = 216644, upload-time = "2026-07-25T07:41:41.737Z" },
+    { url = "https://files.pythonhosted.org/packages/41/6e/2139de986d9c7c3ac86f1f8be43858ce90bdfe2f7175e6c80c650ba15242/gitpython-3.1.57-py3-none-any.whl", hash = "sha256:4ccf7d73c10f5c9e76043fbb2675ac5a1b3ff5b41e648f56bcbed5f63792ecaf", size = 217151, upload-time = "2026-07-26T07:33:24.838Z" },
 ]
 
 [[package]]
@@ -3257,15 +3257,15 @@ wheels = [
 
 [[package]]
 name = "persista"
-version = "0.0.3a3"
+version = "0.0.3a7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "coola" },
     { name = "iden" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0e/74/19d6f5e31ca08943a2704c3e5bd13763cc12775857b298995c197d376d8e/persista-0.0.3a3.tar.gz", hash = "sha256:ccbe8c24d3fa4b71896198279480889604598952108978195e74971413657dae", size = 65882, upload-time = "2026-07-25T23:41:00.503Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d0/de/eb9c00f021329bb4321857755c2ea1bc7142de2d365a4bcd7b594f858de3/persista-0.0.3a7.tar.gz", hash = "sha256:1f1f708ac5ac31853ce53e276c0c0fe06b5c5cb9f7653529e058aecb51fedc33", size = 68705, upload-time = "2026-07-27T07:19:43.265Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cf/07/3d5f4c2a624b54ac8658b0472eb0589a4c9d39d062af78f4e95a8b23b1d4/persista-0.0.3a3-py3-none-any.whl", hash = "sha256:a0eb416b6a9cb0a6450dd159a2690d8b4f18be416372e8770a887e621e6f7753", size = 98786, upload-time = "2026-07-25T23:40:59.307Z" },
+    { url = "https://files.pythonhosted.org/packages/52/c6/6e073db913f0191e3293f20d43468e503244ed822876fba12b35299810fe/persista-0.0.3a7-py3-none-any.whl", hash = "sha256:1f1ddf91f25586dd6d4848243bd8eb95a6360e5679e7f209d72e5ac7d7e86ec3", size = 102411, upload-time = "2026-07-27T07:19:42.033Z" },
 ]
 
 [[package]]
@@ -5921,7 +5921,7 @@ requires-dist = [
     { name = "langchain-text-splitters", marker = "extra == 'text-splitters'", specifier = ">=1.0,<2.0" },
     { name = "langgraph", specifier = ">=1.2,<2.0" },
     { name = "objectory", specifier = ">=0.3,<1.0" },
-    { name = "persista", marker = "extra == 'persista'", specifier = ">=0.0.3a3" },
+    { name = "persista", marker = "extra == 'persista'", specifier = ">=0.0.3a7" },
     { name = "polars", marker = "extra == 'polars'", specifier = ">=1.0,<2.0" },
     { name = "pydantic", specifier = ">=2.10,<3.0" },
     { name = "rich", specifier = ">=15.0,<16.0" },
