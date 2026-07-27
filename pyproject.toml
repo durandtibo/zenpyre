@@ -12,7 +12,7 @@ only-include = ["src"]
 
 [project]
 name = "zenpyre"
-version = "0.0.1a64"
+version = "0.0.1a65"
 description = "Utilities for LangChain"
 readme = "README.md"
 authors = [
@@ -55,7 +55,6 @@ dependencies = [
     "pydantic >=2.10,<3.0",
     "rich >=15.0,<16.0",
 ]
-
 
 [project.optional-dependencies]
 anthropic = [ "langchain-anthropic >= 1.4,<2.0" ]
