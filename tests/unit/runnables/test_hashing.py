@@ -137,9 +137,7 @@ def test_serializable_hasher_hash_passes_ignore_unhashable_to_registry() -> None
 
     hasher.hash(message, registry=mock_registry, ignore_unhashable=True)
 
-    mock_registry.hash.assert_called_once_with(
-        message.to_json(), length=64, ignore_unhashable=True
-    )
+    mock_registry.hash.assert_called_once_with(message.to_json(), length=64, ignore_unhashable=True)
 
 
 def test_serializable_hasher_hash_uses_registry_not_a_different_one() -> None:
@@ -205,9 +203,9 @@ def test_serializable_hasher_hash_non_serializable_ignore_unhashable_is_determin
     registry: HasherRegistry,
 ) -> None:
     hasher = SerializableHasher()
-    assert hasher.hash(
+    assert hasher.hash(Serializable(), registry=registry, ignore_unhashable=True) == hasher.hash(
         Serializable(), registry=registry, ignore_unhashable=True
-    ) == hasher.hash(Serializable(), registry=registry, ignore_unhashable=True)
+    )
 
 
 def test_serializable_hasher_hash_non_serializable_ignore_unhashable_does_not_touch_registry() -> (

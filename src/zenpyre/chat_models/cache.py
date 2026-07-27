@@ -15,11 +15,11 @@ from langchain_core.messages import BaseMessage  # noqa: TC002
 from langchain_core.outputs import ChatGeneration, ChatResult
 from langchain_core.runnables import Runnable  # noqa: TC002
 from langchain_core.tools import BaseTool  # noqa: TC002
-from persista.cache import Cache
+from persista.cache import Cache  # noqa: TC002
 from pydantic import ConfigDict
 
 from zenpyre.runnables import hashing as _hashing  # noqa: F401
-from zenpyre.utils.imports import check_persista
+
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -59,12 +59,12 @@ class CachingChatModel(BaseChatModel):
     Args:
         chat_model: The chat model whose output should be cached.
         result_cache: The :class:`persista.cache.Cache` used to store
-            cached results. If ``None``, caching is disabled. Typed as
-            ``Any`` (rather than importing ``persista.cache.Cache``
-            unconditionally) since ``persista`` is an optional
-            dependency; :func:`~zenpyre.utils.imports.check_persista`
-            is invoked instead whenever ``result_cache`` is used. Named
-            ``result_cache`` rather than ``cache`` to avoid shadowing
+            cached results. If ``None``, caching is disabled.
+            :func:`~zenpyre.utils.imports.check_persista` is still
+            invoked whenever ``result_cache`` is used, to raise a
+            clear error if the optional ``persista`` extra wasn't
+            installed at run time. Named ``result_cache`` rather than
+            ``cache`` to avoid shadowing
             :class:`~langchain_core.language_models.BaseChatModel`'s
             own built-in ``cache`` field, which controls an unrelated
             LangChain caching mechanism.
@@ -102,8 +102,9 @@ class CachingChatModel(BaseChatModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     chat_model: Runnable[Any, BaseMessage]
-    cache: Cache
+    result_cache: Cache | None = None
     key_fn: Callable[[Any], str] | None = None
+    ignore_none: bool = False
 
     @property
     def _llm_type(self) -> str:
@@ -125,7 +126,6 @@ class CachingChatModel(BaseChatModel):
         if self.result_cache is None:
             return self._call_chat_model(messages, stop=stop, run_manager=run_manager, **kwargs)
 
-        check_persista()
         key = self._cache_key(messages, stop, kwargs)
         hit, result = self._load_cached(key)
         if hit:
@@ -148,7 +148,6 @@ class CachingChatModel(BaseChatModel):
                 messages, stop=stop, run_manager=run_manager, **kwargs
             )
 
-        check_persista()
         key = self._cache_key(messages, stop, kwargs)
         hit, result = await self._aload_cached(key)
         if hit:
