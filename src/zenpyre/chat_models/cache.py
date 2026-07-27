@@ -124,9 +124,10 @@ class CachingChatModel(BaseChatModel):
         key = self._make_key(messages, stop, kwargs)
         hit, result = self.response_cache.try_get(key)
         if hit:
+            logger.debug("Cache hit: %s", key)
             return result
 
-        logger.info("Cache miss: %s", key)
+        logger.debug("Cache miss: %s", key)
         result = self._call_chat_model(messages, stop=stop, run_manager=run_manager, **kwargs)
         self.response_cache.set(key, result)
         return result
@@ -148,7 +149,7 @@ class CachingChatModel(BaseChatModel):
         if hit:
             return result
 
-        logger.info("Cache miss: %s", key)
+        logger.debug("Cache miss: %s", key)
         result = await self._acall_chat_model(
             messages, stop=stop, run_manager=run_manager, **kwargs
         )
