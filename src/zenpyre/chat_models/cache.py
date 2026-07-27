@@ -14,10 +14,10 @@ from langchain_core.messages import BaseMessage  # noqa: TC002
 from langchain_core.outputs import ChatGeneration, ChatResult
 from langchain_core.runnables import Runnable  # noqa: TC002
 from langchain_core.tools import BaseTool  # noqa: TC002
-from persista.cache import Cache  # noqa: TC002
 from pydantic import ConfigDict
 
 from zenpyre.runnables import hashing as _hashing  # noqa: F401
+from zenpyre.utils.imports import is_persista_available
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -26,6 +26,9 @@ if TYPE_CHECKING:
         AsyncCallbackManagerForLLMRun,
         CallbackManagerForLLMRun,
     )
+
+if is_persista_available():
+    from persista.cache import Cache  # noqa: TC002
 
 logger: logging.Logger = logging.getLogger(__name__)
 
