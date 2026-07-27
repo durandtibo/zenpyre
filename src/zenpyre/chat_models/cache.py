@@ -27,7 +27,7 @@ if TYPE_CHECKING:
         CallbackManagerForLLMRun,
     )
 
-if is_persista_available():
+if is_persista_available():  # pragma: no cover
     from persista.cache import Cache  # noqa: TC002
 
 logger: logging.Logger = logging.getLogger(__name__)
