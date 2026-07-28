@@ -40,12 +40,16 @@ class FakeChatModel:
         self._raw_content = raw_content
         self._parsed = parsed
         self._parsing_error = parsing_error
+        self.with_structured_output_kwargs: dict[str, Any] | None = None
 
     def with_structured_output(
         self,
         output_type: type,  # noqa: ARG002
         include_raw: bool = True,  # noqa: ARG002
+        **kwargs: Any,
     ) -> RunnableLambda:
+        self.with_structured_output_kwargs = kwargs
+
         def _call(_input: Any) -> dict[str, Any]:
             return {
                 "raw": AIMessage(content=self._raw_content),
@@ -330,3 +334,18 @@ def test_structured_output_runnable_config_run_name_set_on_unwrap_step() -> None
     # useful for tracing; doesn't assert exact internal structure.
     chain = structured_output_runnable(_native_ok_model(), Answer)
     assert chain.invoke("hi") == Answer(value=99)  # behavior unaffected by the config
+
+
+# --- **kwargs forwarding ---
+
+
+def test_structured_output_runnable_forwards_kwargs_to_with_structured_output() -> None:
+    model = _native_ok_model()
+    structured_output_runnable(model, Answer, method="json_mode", strict=True)
+    assert model.with_structured_output_kwargs == {"method": "json_mode", "strict": True}
+
+
+def test_structured_output_runnable_no_kwargs_forwards_empty_dict() -> None:
+    model = _native_ok_model()
+    structured_output_runnable(model, Answer)
+    assert model.with_structured_output_kwargs == {}
