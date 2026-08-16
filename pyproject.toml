@@ -120,7 +120,7 @@ exclude_lines = [
     "if TYPE_CHECKING:"
 ]
 
-[tool.pytest]
+[tool.pytest.ini_options]
 minversion = "9.0"
 pythonpath = ["src"]
 testpaths = ["tests/"]
@@ -305,7 +305,7 @@ max-doc-length = 72
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
 combine-as-imports = true
-known-first-party = ["src"]
+known-first-party = ["zenpyre"]
 
 [tool.ruff.lint.flake8-import-conventions]
 [tool.ruff.lint.flake8-import-conventions.aliases]
