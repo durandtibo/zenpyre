@@ -1140,15 +1140,15 @@ wheels = [
 
 [[package]]
 name = "feu"
-version = "0.8.1"
+version = "0.8.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
     { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7a/87/2c6b1a5fd5a1e608cfb072ad6f533267f8d6792d367f2d77ec3973e9bc71/feu-0.8.1.tar.gz", hash = "sha256:569838698082f191f30daa02540240db535b9da2eb8d674e291e2a8078e43d13", size = 56008, upload-time = "2026-08-10T01:22:36.204Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5d/cf/d566c338bec4bd077f2576eaf96c30d44b0078a13dd39c72c9b3c30d44e9/feu-0.8.2.tar.gz", hash = "sha256:f91240f1b6823d9452dd00573a61c4494f895aad4693c554ad3af8ba3aa27e2e", size = 56124, upload-time = "2026-08-16T22:32:31.249Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/09/e9/f5c019ff6fb82fb2fab962dacd375694962ba10f31238b1d6ff8ed9c608a/feu-0.8.1-py3-none-any.whl", hash = "sha256:2c55a33baafb01e68c01c1b09a710a3eec3558656ba64d2a9dfdecdea3e5ad28", size = 91072, upload-time = "2026-08-10T01:22:34.825Z" },
+    { url = "https://files.pythonhosted.org/packages/ae/f7/d2996a1dc80c4dd324858a2ccedb0bf82af135620e1dfa89361f228d6192/feu-0.8.2-py3-none-any.whl", hash = "sha256:657158de43688c57f2971a8920d73fa291685db0b2e3c621eaa63a7b1ff99a77", size = 91244, upload-time = "2026-08-16T22:32:29.889Z" },
 ]
 
 [package.optional-dependencies]
@@ -1405,11 +1405,11 @@ wheels = [
 
 [[package]]
 name = "griffelib"
-version = "2.1.0"
+version = "2.2.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/33/e4/8d187ea29c2e30b3a09505c567513077d6117861bde1fbd997a167f262ec/griffelib-2.1.0.tar.gz", hash = "sha256:762a186d2c6fd6794d4ea20d428d597ffb857cb56b66421651cbba15bdd5e813", size = 216234, upload-time = "2026-06-19T12:05:42.278Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f0/b4/a767e91c606deefc447a96eaf59edd77397960b1d677dffd833ee8449831/griffelib-2.2.0.tar.gz", hash = "sha256:e1bc36fe9cd21d4b6b659b456346755e4cfdc5676c0a5214083126ee12612b3c", size = 227048, upload-time = "2026-08-16T14:04:58.383Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e4/d3/5268aeabf2ad82658c4e2ff3a060648d0f02f3926cb53247c0e4d0dab49e/griffelib-2.1.0-py3-none-any.whl", hash = "sha256:cc7b3d2d2865ad0b909fcc38086e3f554b5ea7acbaa7bbb7ecaa3f5dfb7d9f00", size = 142560, upload-time = "2026-06-19T12:05:38.742Z" },
+    { url = "https://files.pythonhosted.org/packages/f6/b6/f65ac785d4ac90dcf7c831ac6256f5dd4a19780f4e1575b2c0d6eeebe319/griffelib-2.2.0-py3-none-any.whl", hash = "sha256:d71c3bc2bbed9f958488634fe788b843a9f705d6d2838ca32cd6c25eeb64dfc4", size = 166779, upload-time = "2026-08-16T14:04:54.365Z" },
 ]
 
 [[package]]
@@ -2380,7 +2380,7 @@ python = [
 
 [[package]]
 name = "mkdocstrings-python"
-version = "2.0.5"
+version = "2.0.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "griffelib" },
@@ -2388,9 +2388,9 @@ dependencies = [
     { name = "mkdocstrings" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b1/b6/e858701499d57eee8b3fd8e78168083956c6683ddbe727b46758b19e1119/mkdocstrings_python-2.0.5.tar.gz", hash = "sha256:3a4d92556ad39637e88af94a5374213af9a8e3040c3824ceaed04b486c017594", size = 199578, upload-time = "2026-06-19T10:41:08.868Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/39/02/97c98a64de554251956d6584b61aea995c8fc3b2b2ca3e791209bcde071f/mkdocstrings_python-2.0.6.tar.gz", hash = "sha256:472a97ec73b40298970ec5db3eed7a5500361e5d76f67b528c5f4acce2fb74bd", size = 200642, upload-time = "2026-08-16T13:52:06.817Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d1/fc/10ab7e80650a9c9e8f4f1105f8c8e73567f88ed0c06ada589ab81d38687c/mkdocstrings_python-2.0.5-py3-none-any.whl", hash = "sha256:30c837bbff016549f659fcba6539ac351303f0fd7e713c89a040611072236e9d", size = 104951, upload-time = "2026-06-19T10:41:07.378Z" },
+    { url = "https://files.pythonhosted.org/packages/78/37/ee6de2bde70f4f0fa279a4bb05fc8de723cb64d12f36be11d05f575dfaa7/mkdocstrings_python-2.0.6-py3-none-any.whl", hash = "sha256:0cb3d1f16c1a9131c0d88ec9e6047f343332b457f5c5b9d3a3203a4f93e65e48", size = 105268, upload-time = "2026-08-16T13:52:05.017Z" },
 ]
 
 [[package]]
@@ -4099,14 +4099,14 @@ wheels = [
 
 [[package]]
 name = "pytest-timeout"
-version = "2.4.0"
+version = "2.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pytest" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ac/82/4c9ecabab13363e72d880f2fb504c5f750433b2b6f16e99f4ec21ada284c/pytest_timeout-2.4.0.tar.gz", hash = "sha256:7e68e90b01f9eff71332b25001f85c75495fc4e3a836701876183c4bcfd0540a", size = 17973, upload-time = "2025-05-05T19:44:34.99Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/99/26/f323cce2eda4e7fbf2d283e1babb2ef9d3a5872681113ff305abdb93d08e/pytest_timeout-2.5.0.tar.gz", hash = "sha256:68c9d82dfe95fa65712e107010c9344e7d8b4afe8c975a7be0d273d939583a93", size = 18248, upload-time = "2026-08-16T16:19:49.254Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fa/b6/3127540ecdf1464a00e5a01ee60a1b09175f6913f0644ac748494d9c4b21/pytest_timeout-2.4.0-py3-none-any.whl", hash = "sha256:c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2", size = 14382, upload-time = "2025-05-05T19:44:33.502Z" },
+    { url = "https://files.pythonhosted.org/packages/4b/2a/82d7bc4cfc3fec5ec1680e955cf821d78e98638aeb716244ed7dca955f29/pytest_timeout-2.5.0-py3-none-any.whl", hash = "sha256:030217c22532b6cb88917518f07afa7e3623476ab5afb5a8c0d0dccf6cd9b2de", size = 14562, upload-time = "2026-08-16T16:19:47.545Z" },
 ]
 
 [[package]]
@@ -4135,11 +4135,11 @@ wheels = [
 
 [[package]]
 name = "python-dotenv"
-version = "1.2.2"
+version = "1.2.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/82/ed/0301aeeac3e5353ef3d94b6ec08bbcabd04a72018415dcb29e588514bba8/python_dotenv-1.2.2.tar.gz", hash = "sha256:2c371a91fbd7ba082c2c1dc1f8bf89ca22564a087c2c287cd9b662adde799cf3", size = 50135, upload-time = "2026-03-01T16:00:26.196Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6a/53/ed9d74092561d4b01a2ef1349d52cdbc135e526c245f366b089cfca6de49/python_dotenv-1.2.3.tar.gz", hash = "sha256:a20a594dabeaa385725aa239d5244871c143ecb356add8a20fcf23773a6c3a35", size = 58945, upload-time = "2026-08-16T16:54:54.067Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0b/d7/1959b9648791274998a9c3526f6d0ec8fd2233e4d4acce81bbae76b44b2a/python_dotenv-1.2.2-py3-none-any.whl", hash = "sha256:1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a", size = 22101, upload-time = "2026-03-01T16:00:25.09Z" },
+    { url = "https://files.pythonhosted.org/packages/0d/17/c5c6b53ddc18f297992099b3d9ec16c855c0ccc83263a21fe4d1c625ec6c/python_dotenv-1.2.3-py3-none-any.whl", hash = "sha256:904552145e8bfed22162c09dab1c2b9b54fefa7b23ba780f4f26ca0316b0f0d9", size = 22780, upload-time = "2026-08-16T16:54:52.473Z" },
 ]
 
 [[package]]
@@ -6162,24 +6162,24 @@ provides-extras = ["anthropic", "chroma", "duckdb", "faker", "google-genai", "hu
 [package.metadata.requires-dev]
 dev = [
     { name = "black", specifier = ">=26.5.1" },
-    { name = "coverage", extras = ["toml"], specifier = ">=7.14.3,<8.0" },
+    { name = "coverage", extras = ["toml"], specifier = ">=7.15,<8.0" },
     { name = "docformatter", extras = ["tomli"], specifier = ">=1.7.8,<2.0" },
-    { name = "feu", extras = ["all"], specifier = ">=0.7.1,<1.0" },
+    { name = "feu", extras = ["all"], specifier = ">=0.8.2,<1.0" },
     { name = "invoke", specifier = ">=3.0,<4.0" },
     { name = "pre-commit", specifier = ">=4.6,<5.0" },
     { name = "pygments", specifier = ">=2.20,<3.0" },
-    { name = "pyright", specifier = ">=1.1.409,<2.0" },
-    { name = "pytest", specifier = ">=9.0,<10.0" },
+    { name = "pyright", specifier = ">=1.1.411,<2.0" },
+    { name = "pytest", specifier = ">=9.1,<10.0" },
     { name = "pytest-cov", specifier = ">=7.1,<8.0" },
     { name = "pytest-timeout", specifier = ">=2.4,<3.0" },
-    { name = "ruff", specifier = ">=0.15,<1.0" },
+    { name = "ruff", specifier = ">=0.16,<1.0" },
     { name = "xdoctest", specifier = ">=1.3,<2.0" },
 ]
 docs = [
     { name = "mike", specifier = ">=2.2,<3.0" },
     { name = "mkdocs-include-markdown-plugin", specifier = ">=7.3,<8.0" },
     { name = "mkdocs-material", specifier = ">=9.7,<10.0" },
-    { name = "mkdocstrings", extras = ["python"], specifier = ">=1.0.4,<2.0" },
+    { name = "mkdocstrings", extras = ["python"], specifier = ">=1.0,<2.0" },
 ]
 
 [[package]]
