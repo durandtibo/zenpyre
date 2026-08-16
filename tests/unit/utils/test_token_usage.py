@@ -13,6 +13,7 @@ from langchain_core.messages import (
 
 from zenpyre.utils.token_usage import (
     _sum_usage,
+    accumulate_token_usage,
     format_token_usage,
     get_token_usage,
     log_token_usage,
@@ -523,3 +524,98 @@ def test_log_token_usage_only_if_nonzero_false_still_logs_nonzero_usage(
         log_token_usage(result, only_if_nonzero=False)
     expected_usage = UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15)
     assert caplog.messages == [format_token_usage(expected_usage)]
+
+
+######################################################
+#     Tests for accumulate_token_usage               #
+######################################################
+
+
+def test_accumulate_token_usage_empty_dict_adds_usage() -> None:
+    usage: dict[str, int] = {}
+    result = {
+        "messages": [
+            AIMessage(
+                content="hi",
+                usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+            )
+        ]
+    }
+    accumulate_token_usage(usage, result)
+    assert usage == {"input_tokens": 10, "output_tokens": 5, "total_tokens": 15}
+
+
+def test_accumulate_token_usage_updates_in_place_and_returns_none() -> None:
+    usage: dict[str, int] = {}
+    result = AIMessage(
+        content="hi",
+        usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+    )
+    output = accumulate_token_usage(usage, result)
+    assert output is None
+    assert usage == {"input_tokens": 10, "output_tokens": 5, "total_tokens": 15}
+
+
+def test_accumulate_token_usage_adds_to_existing_totals() -> None:
+    usage = {"input_tokens": 100, "output_tokens": 50, "total_tokens": 150}
+    result = {
+        "messages": [
+            AIMessage(
+                content="hi",
+                usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+            )
+        ]
+    }
+    accumulate_token_usage(usage, result)
+    assert usage == {"input_tokens": 110, "output_tokens": 55, "total_tokens": 165}
+
+
+def test_accumulate_token_usage_called_multiple_times_accumulates() -> None:
+    usage: dict[str, int] = {}
+    for tokens in (10, 20, 30):
+        accumulate_token_usage(
+            usage,
+            AIMessage(
+                content="hi",
+                usage_metadata=UsageMetadata(
+                    input_tokens=tokens, output_tokens=0, total_tokens=tokens
+                ),
+            ),
+        )
+    assert usage == {"input_tokens": 60, "output_tokens": 0, "total_tokens": 60}
+
+
+def test_accumulate_token_usage_non_message_input_leaves_usage_unchanged() -> None:
+    usage = {"input_tokens": 10, "output_tokens": 5, "total_tokens": 15}
+    accumulate_token_usage(usage, "not a valid result")
+    assert usage == {"input_tokens": 10, "output_tokens": 5, "total_tokens": 15}
+
+
+def test_accumulate_token_usage_result_without_usage_metadata_leaves_usage_unchanged() -> None:
+    usage: dict[str, int] = {}
+    accumulate_token_usage(usage, AIMessage(content="no usage"))
+    assert usage == {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
+
+
+def test_accumulate_token_usage_docstring_example() -> None:
+    usage: dict[str, int] = {}
+    accumulate_token_usage(
+        usage,
+        AIMessage(
+            content="hi",
+            usage_metadata=UsageMetadata(input_tokens=10, output_tokens=5, total_tokens=15),
+        ),
+    )
+    assert usage == {"input_tokens": 10, "output_tokens": 5, "total_tokens": 15}
+
+
+def test_accumulate_token_usage_delegates_to_get_token_usage() -> None:
+    usage: dict[str, int] = {}
+    result = {"messages": []}
+    with patch(
+        f"{MODULE}.get_token_usage",
+        return_value=UsageMetadata(input_tokens=1, output_tokens=2, total_tokens=3),
+    ) as mock_get_usage:
+        accumulate_token_usage(usage, result)
+    mock_get_usage.assert_called_once_with(result)
+    assert usage == {"input_tokens": 1, "output_tokens": 2, "total_tokens": 3}
