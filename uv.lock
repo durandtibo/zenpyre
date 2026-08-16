@@ -6137,7 +6137,7 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "coola", specifier = ">=1.1.10a0,<2.0" },
+    { name = "coola", specifier = ">=1.1.10,<2.0" },
     { name = "duckdb", marker = "extra == 'duckdb'", specifier = ">=1.5,<2.0" },
     { name = "faker", marker = "extra == 'faker'", specifier = ">=40.0,<41.0" },
     { name = "iden", specifier = ">=0.4.1,<1.0" },
