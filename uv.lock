@@ -6113,6 +6113,7 @@ text-splitters = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "anyio" },
     { name = "black" },
     { name = "coverage", extra = ["toml"] },
     { name = "docformatter", extra = ["tomli"] },
@@ -6161,6 +6162,7 @@ provides-extras = ["anthropic", "chroma", "duckdb", "faker", "google-genai", "hu
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "anyio", specifier = ">=4.0,<5.0" },
     { name = "black", specifier = ">=26.5.1" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.15,<8.0" },
     { name = "docformatter", extras = ["tomli"], specifier = ">=1.7.8,<2.0" },
