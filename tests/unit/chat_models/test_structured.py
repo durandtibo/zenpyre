@@ -5,10 +5,7 @@ from unittest.mock import MagicMock, patch
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel
 
-from zenpyre.chat_models.structured import (
-    ainvoke_structured_llm,
-    invoke_structured_llm,
-)
+from zenpyre.chat_models import ainvoke_structured_llm, invoke_structured_llm
 
 MODULE = "zenpyre.chat_models.structured"
 
