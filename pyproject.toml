@@ -68,7 +68,7 @@ ollama = [ "langchain-ollama >= 1.1,<2.0" ]
 openai = [ "langchain-openai >=1.2,<2.0" ]
 persista = [ "persista >=0.0.3" ]
 polars = ["polars>=1.0,<2.0"]
-sentence-transformers = [ "sentence-transformers >=5.0,<6.0" ]
+sentence-transformers = [ "sentence-transformers>=5.0,<7.0" ]
 text-splitters = [ "langchain-text-splitters >=1.0,<2.0" ]
 
 [dependency-groups]
