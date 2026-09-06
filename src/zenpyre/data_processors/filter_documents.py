@@ -9,10 +9,10 @@ import logging
 from typing import Any
 
 from coola.display import InlineDisplayMixin
+from docculus.transform import filter_by_metadata
 from langchain_core.documents import Document
 
 from zenpyre.data_processors.base import BaseProcessor
-from zenpyre.documents import filter_by_metadata
 
 logger: logging.Logger = logging.getLogger(__name__)
 
