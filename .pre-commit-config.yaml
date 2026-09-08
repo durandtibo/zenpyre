@@ -6,6 +6,12 @@ default_stages: [ pre-commit ]
 repos:
   - repo: local
     hooks:
+      - id: pyright
+        name: pyright
+        entry: uv run inv check-types
+        language: system
+        types: [ python ]
+        pass_filenames: false
       - id: docformatter
         name: docformatter
         entry: python -Im docformatter
@@ -44,7 +50,7 @@ repos:
     rev: 26.5.1
     hooks:
       - id: black
-        language_version: python3.13
+        language_version: python3.14
   - repo: https://github.com/adamchainz/blacken-docs
     rev: "1.20.0"
     hooks:
