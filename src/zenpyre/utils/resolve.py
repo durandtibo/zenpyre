@@ -8,7 +8,7 @@ __all__ = ["resolve_object"]
 import logging
 from typing import Any, TypeVar
 
-from objectory import factory
+from coola.factory import resolve_object as resolve_object_base
 
 from zenpyre.utils.config import BaseConfig
 
@@ -71,10 +71,4 @@ def resolve_object(obj: T | dict[str, Any] | BaseConfig, cls: type[T] = object) 
     """
     if isinstance(obj, BaseConfig):
         obj = obj.to_kwargs()
-    if isinstance(obj, dict):
-        logger.info("Initializing a %s instance from its configuration...", cls.__qualname__)
-        obj = factory(**obj)
-    if not isinstance(obj, cls):
-        msg = f"Received object is not a {cls.__name__} instance (received: {type(obj)})"
-        raise TypeError(msg)
-    return obj
+    return resolve_object_base(obj, cls)
