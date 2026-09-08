@@ -43,6 +43,37 @@ def test_document_store_loader_str(store: InMemoryDocumentStore) -> None:
     assert str(DocumentStoreLoader(store)).startswith("DocumentStoreLoader(")
 
 
+# --- context manager ---
+
+
+def test_document_store_loader_context_manager_opens_store() -> None:
+    raw_store = InMemoryDocumentStore()
+    with DocumentStoreLoader(raw_store) as loader:
+        assert list(loader.lazy_load()) == []
+
+
+def test_document_store_loader_context_manager_closes_store_on_exit() -> None:
+    raw_store = InMemoryDocumentStore()
+    with DocumentStoreLoader(raw_store):
+        pass
+    assert raw_store.closed
+
+
+def test_document_store_loader_context_manager_closes_store_on_error() -> None:
+    raw_store = InMemoryDocumentStore()
+    msg = "boom"
+    with pytest.raises(ValueError, match="boom"), DocumentStoreLoader(raw_store):
+        raise ValueError(msg)
+    assert raw_store.closed
+
+
+def test_document_store_loader_context_manager_returns_the_loader() -> None:
+    raw_store = InMemoryDocumentStore()
+    loader = DocumentStoreLoader(raw_store)
+    with loader as entered:
+        assert entered is loader
+
+
 # --- lazy_load ---
 
 
