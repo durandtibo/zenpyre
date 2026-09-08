@@ -19,6 +19,8 @@ from zenpyre.utils.serialization import default_serialize
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable, Iterator, Sequence
+    from types import TracebackType
+    from typing import Self
 
     from langchain_core.runnables import RunnableConfig
     from persista.record.store import BaseRecordStore
@@ -43,6 +45,16 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
     its content), so that two calls with identical input/output/extra
     are still both recorded rather than one silently overwriting the
     other via the store's upsert semantics.
+
+    ``record_store`` must already be open (see :class:`BaseRecordStore`)
+    when ``invoke``/``batch``/``stream``/... is called; this class does
+    not open it itself. Use ``RecordingRunnable`` as a context manager
+    (rather than opening/closing ``record_store`` directly) to be sure
+    it's closed once you're done with it: ``__enter__``/``__exit__``
+    delegate to ``record_store.open()``/``record_store.close()``, so
+    ``with RecordingRunnable(runnable, record_store) as recorded: ...``
+    guarantees ``record_store`` is closed on exit, even if a call
+    raises.
 
     Note:
         If the wrapped ``runnable`` raises during ``invoke``/
@@ -110,11 +122,11 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         >>> from persista.record.store import DuckDBRecordStore
         >>> from zenpyre.runnables import RecordingRunnable
         >>> store = DuckDBRecordStore(":memory:")
-        >>> store.open()  # doctest: +SKIP
-        >>> recorded = RecordingRunnable(
+        >>> with RecordingRunnable(
         ...     chat_model, store, extra={"experiment_id": "exp-42"}
-        ... )  # doctest: +SKIP
-        >>> recorded.invoke("Hello!", config={"metadata": {"session_id": "s-1"}})  # doctest: +SKIP
+        ... ) as recorded:  # doctest: +SKIP
+        ...     recorded.invoke("Hello!", config={"metadata": {"session_id": "s-1"}})
+        ...
         AIMessage(content='Hi there!')
         >>> record = next(store.values())  # doctest: +SKIP
         >>> record.metadata["experiment_id"], record.metadata["session_id"]  # doctest: +SKIP
@@ -171,6 +183,34 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         # doesn't silently leak into every subsequently written record.
         self._extra = dict(extra) if extra else {}
         self._serializer = serializer or default_serialize
+
+    def __enter__(self) -> Self:
+        """Open ``record_store`` and return this wrapper.
+
+        Returns:
+            This wrapper, unchanged.
+        """
+        self._record_store.open()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        """Close ``record_store``, regardless of whether the ``with``
+        block raised.
+
+        Args:
+            exc_type: The exception type, if the ``with`` block
+                raised; otherwise ``None``.
+            exc_value: The exception instance, if the ``with`` block
+                raised; otherwise ``None``.
+            traceback: The exception's traceback, if the ``with``
+                block raised; otherwise ``None``.
+        """
+        self._record_store.close()
 
     def invoke(
         self,

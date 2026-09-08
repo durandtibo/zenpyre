@@ -103,6 +103,45 @@ def test_init_extra_is_not_aliased(
     assert next(iter(store.values())).metadata["experiment_id"] == "exp-A"
 
 
+# --- context manager ---
+
+
+def test_recording_runnable_context_manager_opens_store(upper_runnable: RunnableLambda) -> None:
+    raw_store = InMemoryRecordStore()
+    with RecordingRunnable(upper_runnable, raw_store) as recorded:
+        assert recorded.invoke("hi") == "HI"
+
+
+def test_recording_runnable_context_manager_closes_store_on_exit(
+    upper_runnable: RunnableLambda,
+) -> None:
+    raw_store = InMemoryRecordStore()
+    with RecordingRunnable(upper_runnable, raw_store):
+        pass
+    assert raw_store.closed
+
+
+def test_recording_runnable_context_manager_closes_store_on_error(
+    failing_runnable: RunnableLambda,
+) -> None:
+    raw_store = InMemoryRecordStore()
+    with (
+        pytest.raises(ValueError, match="boom"),
+        RecordingRunnable(failing_runnable, raw_store) as recorded,
+    ):
+        recorded.invoke("bad")
+    assert raw_store.closed
+
+
+def test_recording_runnable_context_manager_returns_the_wrapper(
+    upper_runnable: RunnableLambda,
+) -> None:
+    raw_store = InMemoryRecordStore()
+    recorded = RecordingRunnable(upper_runnable, raw_store)
+    with recorded as entered:
+        assert entered is recorded
+
+
 # --- invoke ---
 
 
