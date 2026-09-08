@@ -3095,15 +3095,6 @@ wheels = [
 ]
 
 [[package]]
-name = "objectory"
-version = "0.3.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/20/38/f46a0603c7f59ffea5c44d0bd2f484c1ed2ecbd44a0c3b6cd61ef41d781e/objectory-0.3.1.tar.gz", hash = "sha256:c3b4f387db31470058d8b34d930daeaacb25eb09384c1e266eaf62ca5b15fc8b", size = 16595, upload-time = "2025-12-19T09:13:32.658Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d5/4d/35db369f225cc44df8fd1a7b06b332da3aefe5ed5b9db512046bf195d0a8/objectory-0.3.1-py3-none-any.whl", hash = "sha256:663a433c7c8ac4971617a61be4f0a9c258bd518bea00bf9eb3f337504ac4c7ce", size = 20701, upload-time = "2025-12-19T09:13:33.809Z" },
-]
-
-[[package]]
 name = "ollama"
 version = "0.6.2"
 source = { registry = "https://pypi.org/simple" }
@@ -6165,7 +6156,7 @@ dependencies = [
     { name = "langchain" },
     { name = "langchain-core" },
     { name = "langgraph" },
-    { name = "objectory" },
+    { name = "persista" },
     { name = "pydantic" },
     { name = "rich" },
 ]
@@ -6191,9 +6182,6 @@ ollama = [
 ]
 openai = [
     { name = "langchain-openai" },
-]
-persista = [
-    { name = "persista" },
 ]
 polars = [
     { name = "polars" },
@@ -6244,14 +6232,13 @@ requires-dist = [
     { name = "langchain-openai", marker = "extra == 'openai'", specifier = ">=1.2,<2.0" },
     { name = "langchain-text-splitters", marker = "extra == 'text-splitters'", specifier = ">=1.0,<2.0" },
     { name = "langgraph", specifier = ">=1.2,<2.0" },
-    { name = "objectory", specifier = ">=0.3,<1.0" },
-    { name = "persista", marker = "extra == 'persista'", specifier = ">=0.0.4a0" },
+    { name = "persista", specifier = ">=0.0.4a0" },
     { name = "polars", marker = "extra == 'polars'", specifier = ">=1.0,<2.0" },
     { name = "pydantic", specifier = ">=2.10,<3.0" },
     { name = "rich", specifier = ">=15.0,<16.0" },
     { name = "sentence-transformers", marker = "extra == 'sentence-transformers'", specifier = ">=5.0,<7.0" },
 ]
-provides-extras = ["anthropic", "chroma", "faker", "google-genai", "huggingface", "ollama", "openai", "persista", "polars", "sentence-transformers", "text-splitters"]
+provides-extras = ["anthropic", "chroma", "faker", "google-genai", "huggingface", "ollama", "openai", "polars", "sentence-transformers", "text-splitters"]
 
 [package.metadata.requires-dev]
 dev = [
