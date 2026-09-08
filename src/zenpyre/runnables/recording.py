@@ -44,6 +44,13 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
     are still both recorded rather than one silently overwriting the
     other via the store's upsert semantics.
 
+    Each write uses ``record_store`` as a context manager, so it's
+    opened right before the write and closed right after, rather than
+    relying on the caller to open/close it. ``open``/``close`` are
+    expected to be idempotent (per :class:`BaseRecordStore`'s
+    contract), so ``record_store`` may still be reused across multiple
+    calls or shared with other code.
+
     Note:
         If the wrapped ``runnable`` raises during ``invoke``/
         ``ainvoke``, the exception propagates immediately and *no*
@@ -110,7 +117,6 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         >>> from persista.record.store import DuckDBRecordStore
         >>> from zenpyre.runnables import RecordingRunnable
         >>> store = DuckDBRecordStore(":memory:")
-        >>> store.open()  # doctest: +SKIP
         >>> recorded = RecordingRunnable(
         ...     chat_model, store, extra={"experiment_id": "exp-42"}
         ... )  # doctest: +SKIP
@@ -490,7 +496,8 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         # calls with identical metadata are both recorded rather than
         # one overwriting the other via the store's upsert semantics.
         record = Record(id=str(uuid.uuid4()), metadata=self._serializer(metadata))
-        self._record_store.set_many([record])
+        with self._record_store:
+            self._record_store.set_many([record])
 
     def _record_batch(
         self,
@@ -541,7 +548,8 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
                 **extra,
             }
             records.append(Record(id=str(uuid.uuid4()), metadata=self._serializer(metadata)))
-        self._record_store.set_many(records)
+        with self._record_store:
+            self._record_store.set_many(records)
 
     def _merge_extra(self, config: RunnableConfig | None) -> dict[str, Any]:
         """Merge constructor-level ``extra`` with one call's

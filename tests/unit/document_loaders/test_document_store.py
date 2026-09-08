@@ -3,10 +3,10 @@ from __future__ import annotations
 from collections.abc import Iterator
 
 import pytest
+from docculus.store import InMemoryDocumentStore
 from langchain_core.documents import Document
 
 from zenpyre.document_loaders import DocumentStoreLoader
-from zenpyre.document_stores import InMemoryDocumentStore
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -14,8 +14,9 @@ from zenpyre.document_stores import InMemoryDocumentStore
 
 
 @pytest.fixture
-def store() -> InMemoryDocumentStore:
-    return InMemoryDocumentStore()
+def store() -> Iterator[InMemoryDocumentStore]:
+    with InMemoryDocumentStore() as store_:
+        yield store_
 
 
 @pytest.fixture
@@ -61,7 +62,7 @@ def test_document_store_loader_lazy_load_returns_iterator(store: InMemoryDocumen
 def test_document_store_loader_lazy_load_yields_all_documents(
     store: InMemoryDocumentStore, docs: list[Document]
 ) -> None:
-    store.add_documents(docs)
+    store.set_many(docs)
     loader = DocumentStoreLoader(store)
     result = list(loader.lazy_load())
     assert len(result) == len(docs)
@@ -71,7 +72,7 @@ def test_document_store_loader_lazy_load_yields_all_documents(
 def test_document_store_loader_lazy_load_yields_document_instances(
     store: InMemoryDocumentStore, docs: list[Document]
 ) -> None:
-    store.add_documents(docs)
+    store.set_many(docs)
     loader = DocumentStoreLoader(store)
     result = list(loader.lazy_load())
     assert all(isinstance(doc, Document) for doc in result)
@@ -80,7 +81,7 @@ def test_document_store_loader_lazy_load_yields_document_instances(
 def test_document_store_loader_lazy_load_preserves_page_content_and_metadata(
     store: InMemoryDocumentStore, docs: list[Document]
 ) -> None:
-    store.add_documents(docs)
+    store.set_many(docs)
     loader = DocumentStoreLoader(store)
     result = {doc.id: doc for doc in loader.lazy_load()}
     for doc in docs:
@@ -91,10 +92,10 @@ def test_document_store_loader_lazy_load_preserves_page_content_and_metadata(
 def test_document_store_loader_lazy_load_matches_store_all(
     store: InMemoryDocumentStore, docs: list[Document]
 ) -> None:
-    store.add_documents(docs)
+    store.set_many(docs)
     loader = DocumentStoreLoader(store)
     loaded = sorted(loader.lazy_load(), key=lambda d: d.id)
-    all_docs = sorted(store.all(), key=lambda d: d.id)
+    all_docs = sorted(store.values(), key=lambda d: d.id)
     assert loaded == all_docs
 
 
@@ -105,7 +106,7 @@ def test_document_store_loader_lazy_load_reflects_store_state_at_call_time(
     begins should still be picked up if the store is populated between
     creating the loader and calling load()."""
     loader = DocumentStoreLoader(store)
-    store.add_documents(docs)
+    store.set_many(docs)
     result = loader.load()
     assert len(result) == len(docs)
 
@@ -116,7 +117,7 @@ def test_document_store_loader_lazy_load_reflects_store_state_at_call_time(
 def test_document_store_loader_load_returns_list(
     store: InMemoryDocumentStore, docs: list[Document]
 ) -> None:
-    store.add_documents(docs)
+    store.set_many(docs)
     loader = DocumentStoreLoader(store)
     result = loader.load()
     assert isinstance(result, list)
@@ -132,14 +133,14 @@ def test_document_store_loader_load_empty_store_returns_empty_list(
 def test_document_store_loader_load_does_not_mutate_store(
     store: InMemoryDocumentStore, docs: list[Document]
 ) -> None:
-    store.add_documents(docs)
+    store.set_many(docs)
     loader = DocumentStoreLoader(store)
     loader.load()
     assert store.count() == len(docs)
 
 
 def test_document_store_loader_load_single_document(store: InMemoryDocumentStore) -> None:
-    store.add_documents([Document(id="1", page_content="Solo")])
+    store.set_many([Document(id="1", page_content="Solo")])
     loader = DocumentStoreLoader(store)
     result = loader.load()
     assert len(result) == 1
@@ -151,7 +152,7 @@ def test_document_store_loader_load_mutating_result_does_not_affect_store(
 ) -> None:
     """InMemoryDocumentStore deep-copies on read, so mutating a loaded
     Document must not leak back into the store."""
-    store.add_documents(docs)
+    store.set_many(docs)
     loader = DocumentStoreLoader(store)
     result = loader.load()
     result[0].page_content = "Mutated"

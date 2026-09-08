@@ -13,9 +13,8 @@ from langchain_core.document_loaders import BaseLoader
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+    from docculus.store.base import BaseDocumentStore
     from langchain_core.documents import Document
-
-    from zenpyre.document_stores.base import BaseDocumentStore
 
 
 class DocumentStoreLoader(BaseLoader, MultilineDisplayMixin):
@@ -27,17 +26,26 @@ class DocumentStoreLoader(BaseLoader, MultilineDisplayMixin):
     for example, to feed a store's contents into a pipeline (e.g. a
     vector store indexer) that expects a loader.
 
+    Each call to :meth:`lazy_load` (and therefore :meth:`load`) uses
+    ``store`` as a context manager, so it's opened before reading and
+    closed once the read completes (or is abandoned), rather than
+    relying on the caller to open/close it. ``open``/``close`` are
+    expected to be idempotent (per :class:`BaseDocumentStore`'s
+    contract), so ``store`` may still be reused across multiple loads
+    or shared with other code.
+
     Args:
-        store: The :class:`~zenpyre.document_stores.base
-            .BaseDocumentStore` to load documents from.
+        store: The :class:`~docculus.store.base.BaseDocumentStore`
+            to load documents from.
 
     Example:
         ```pycon
         >>> from langchain_core.documents import Document
         >>> from zenpyre.document_loaders import DocumentStoreLoader
-        >>> from zenpyre.document_stores import InMemoryDocumentStore
+        >>> from docculus.store import InMemoryDocumentStore
         >>> store = InMemoryDocumentStore()
-        >>> store.add_documents(
+        >>> store.open()
+        >>> store.set_many(
         ...     [Document(id="1", page_content="Hello"), Document(id="2", page_content="World")]
         ... )
         >>> loader = DocumentStoreLoader(store)
@@ -50,7 +58,8 @@ class DocumentStoreLoader(BaseLoader, MultilineDisplayMixin):
         self._store = store
 
     def lazy_load(self) -> Iterator[Document]:
-        yield from self._store.lazy_all()
+        with self._store:
+            yield from self._store.values()
 
     def _get_repr_kwargs(self) -> dict[str, Any]:
         return {"store": self._store}
