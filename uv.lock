@@ -3409,14 +3409,14 @@ wheels = [
 
 [[package]]
 name = "persista"
-version = "0.0.4a0"
+version = "0.0.4a1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "coola" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/90/5c/aa215bf4570757af64f5b57a3c4467ee5cf4a825eda5268959383fd1d323/persista-0.0.4a0.tar.gz", hash = "sha256:6bc802639040cce8c8932636bcb7864218eec1bb85da49f21ddce2ecd65c49e0", size = 94698, upload-time = "2026-09-08T01:21:40.478Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e2/b3/9ee2fe6a6198b8321b7d514d5c447f4f549b3954b0550f5166034d61e42f/persista-0.0.4a1.tar.gz", hash = "sha256:3346e278b6bda3d6a85f81141b667ee3c45ba66a30644cb545e3f0119ab719cf", size = 95215, upload-time = "2026-09-08T07:46:59.667Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ec/5d/e644606b15ad179348d54ac7259a17d9da6e2ff3962d0f6f87208abbc1cc/persista-0.0.4a0-py3-none-any.whl", hash = "sha256:ee79fb5ebc2df02f8bb3ed33ca63568d808266db8597b09caf820bfb46ef0859", size = 144327, upload-time = "2026-09-08T01:21:39.231Z" },
+    { url = "https://files.pythonhosted.org/packages/9f/07/5fbeee9dab58ce29c2c119537b813bcd95e0cd04619ced3d4ff206526155/persista-0.0.4a1-py3-none-any.whl", hash = "sha256:681ef793f5cbcf427ef78f445a64d968c19746c5e9e526f3a850f0b2a3250456", size = 145316, upload-time = "2026-09-08T07:46:58.499Z" },
 ]
 
 [[package]]
@@ -6232,7 +6232,7 @@ requires-dist = [
     { name = "langchain-openai", marker = "extra == 'openai'", specifier = ">=1.2,<2.0" },
     { name = "langchain-text-splitters", marker = "extra == 'text-splitters'", specifier = ">=1.0,<2.0" },
     { name = "langgraph", specifier = ">=1.2,<2.0" },
-    { name = "persista", specifier = ">=0.0.4a0" },
+    { name = "persista", specifier = ">=0.0.4a1" },
     { name = "polars", marker = "extra == 'polars'", specifier = ">=1.0,<2.0" },
     { name = "pydantic", specifier = ">=2.10,<3.0" },
     { name = "rich", specifier = ">=15.0,<16.0" },
