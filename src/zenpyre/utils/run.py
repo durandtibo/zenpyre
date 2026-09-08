@@ -7,7 +7,7 @@ __all__ = ["extract_run_id", "extract_run_ids", "generate_run_id"]
 import uuid
 from typing import TYPE_CHECKING, Any
 
-from zenpyre.utils.hashing import hash_dict_uuid
+from coola.identifier import generate_stable_uuid5
 
 if TYPE_CHECKING:
     from langchain_core.runnables import RunnableConfig
@@ -111,4 +111,4 @@ def generate_run_id(config: dict[str, Any] | None = None) -> str:
     """
     if config is None:
         return str(uuid.uuid4())
-    return hash_dict_uuid(config)
+    return generate_stable_uuid5(config)
