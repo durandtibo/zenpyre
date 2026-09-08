@@ -6245,7 +6245,7 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "coola", specifier = ">=1.1.10,<2.0" },
+    { name = "coola", specifier = ">=1.1.11a0,<2.0" },
     { name = "docculus", specifier = ">=0.0.1" },
     { name = "faker", marker = "extra == 'faker'", specifier = ">=40.0,<41.0" },
     { name = "iden", specifier = ">=0.4.1,<1.0" },

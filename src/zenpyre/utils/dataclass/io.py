@@ -9,8 +9,8 @@ import logging
 from dataclasses import asdict, is_dataclass
 from typing import TYPE_CHECKING, Any, TypeVar
 
+from coola.io import load_json, save_json
 from coola.utils.path import sanitize_path
-from iden.io import load_json, save_json
 
 if TYPE_CHECKING:
     from pathlib import Path

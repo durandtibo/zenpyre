@@ -8,8 +8,8 @@ import logging
 from typing import TYPE_CHECKING, Any, TypeVar
 
 from coola.display import InlineDisplayMixin
+from coola.io import load_pickle
 from coola.utils.path import sanitize_path
-from iden.io import load_pickle
 
 from zenpyre.ingestors.base import BaseIngestor
 

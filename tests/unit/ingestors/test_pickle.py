@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from iden.io import save_pickle
+from coola.io import save_pickle
 
 from zenpyre.ingestors import PickleIngestor
 
