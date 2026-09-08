@@ -3,9 +3,9 @@ from __future__ import annotations
 from unittest.mock import patch
 
 import pytest
+from persista.record import Record
 
 from zenpyre.data_processors import SortRecordsByMetadataProcessor
-from zenpyre.records import Record
 
 MODULE = "zenpyre.data_processors.sort_records"
 

@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 from langchain_core.runnables import RunnableGenerator, RunnableLambda
+from persista.record.store import InMemoryRecordStore
 from pydantic import BaseModel
 
-from zenpyre.record_stores import InMemoryRecordStore
 from zenpyre.runnables import RecordingRunnable
 from zenpyre.runnables.recording import _try_add
 
@@ -20,8 +20,9 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def store() -> InMemoryRecordStore:
-    return InMemoryRecordStore()
+def store() -> Iterator[InMemoryRecordStore]:
+    with InMemoryRecordStore() as store_:
+        yield store_
 
 
 @pytest.fixture
@@ -99,7 +100,7 @@ def test_init_extra_is_not_aliased(
     recorded = RecordingRunnable(upper_runnable, store, extra=original)
     original["experiment_id"] = "MUTATED"
     recorded.invoke("hi")
-    assert store.all()[0].metadata["experiment_id"] == "exp-A"
+    assert next(iter(store.values())).metadata["experiment_id"] == "exp-A"
 
 
 # --- invoke ---
@@ -123,7 +124,7 @@ def test_invoke_records_input_and_output(
 ) -> None:
     recorded = RecordingRunnable(upper_runnable, store)
     recorded.invoke("hello")
-    metadata = store.all()[0].metadata
+    metadata = next(iter(store.values())).metadata
     assert metadata["input"] == "hello"
     assert metadata["output"] == "HELLO"
 
@@ -133,13 +134,13 @@ def test_invoke_records_no_error(
 ) -> None:
     recorded = RecordingRunnable(upper_runnable, store)
     recorded.invoke("hello")
-    assert store.all()[0].metadata["error"] is None
+    assert next(iter(store.values())).metadata["error"] is None
 
 
 def test_invoke_records_run_id(upper_runnable: RunnableLambda, store: InMemoryRecordStore) -> None:
     recorded = RecordingRunnable(upper_runnable, store)
     recorded.invoke("hi", config={"run_id": "abc-123"})
-    assert store.all()[0].metadata["run_id"] == "abc-123"
+    assert next(iter(store.values())).metadata["run_id"] == "abc-123"
 
 
 def test_invoke_run_id_defaults_to_none(
@@ -147,13 +148,13 @@ def test_invoke_run_id_defaults_to_none(
 ) -> None:
     recorded = RecordingRunnable(upper_runnable, store)
     recorded.invoke("hi")
-    assert store.all()[0].metadata["run_id"] is None
+    assert next(iter(store.values())).metadata["run_id"] is None
 
 
 def test_invoke_includes_extra(upper_runnable: RunnableLambda, store: InMemoryRecordStore) -> None:
     recorded = RecordingRunnable(upper_runnable, store, extra={"experiment_id": "exp-42"})
     recorded.invoke("hi")
-    assert store.all()[0].metadata["experiment_id"] == "exp-42"
+    assert next(iter(store.values())).metadata["experiment_id"] == "exp-42"
 
 
 def test_invoke_includes_config_metadata(
@@ -161,7 +162,7 @@ def test_invoke_includes_config_metadata(
 ) -> None:
     recorded = RecordingRunnable(upper_runnable, store)
     recorded.invoke("hi", config={"metadata": {"session_id": "s-1"}})
-    assert store.all()[0].metadata["session_id"] == "s-1"
+    assert next(iter(store.values())).metadata["session_id"] == "s-1"
 
 
 def test_invoke_config_metadata_overrides_extra(
@@ -169,7 +170,7 @@ def test_invoke_config_metadata_overrides_extra(
 ) -> None:
     recorded = RecordingRunnable(upper_runnable, store, extra={"experiment_id": "exp-42"})
     recorded.invoke("hi", config={"metadata": {"experiment_id": "exp-999"}})
-    assert store.all()[0].metadata["experiment_id"] == "exp-999"
+    assert next(iter(store.values())).metadata["experiment_id"] == "exp-999"
 
 
 def test_invoke_config_metadata_reserved_key_raises(
@@ -212,7 +213,7 @@ def test_invoke_two_identical_calls_produce_distinct_ids(
     recorded = RecordingRunnable(upper_runnable, store)
     recorded.invoke("same")
     recorded.invoke("same")
-    ids = [r.id for r in store.all()]
+    ids = [r.id for r in list(store.values())]
     assert len(set(ids)) == 2
 
 
@@ -262,7 +263,7 @@ def test_batch_records_match_inputs(
 ) -> None:
     recorded = RecordingRunnable(upper_runnable, store)
     recorded.batch(["a", "b"])
-    inputs = {r.metadata["input"] for r in store.all()}
+    inputs = {r.metadata["input"] for r in list(store.values())}
     assert inputs == {"a", "b"}
 
 
@@ -271,7 +272,7 @@ def test_batch_with_return_exceptions_records_error(
 ) -> None:
     recorded = RecordingRunnable(failing_runnable, store)
     recorded.batch(["ok", "bad"], return_exceptions=True)
-    bad_record = next(r for r in store.all() if r.metadata["input"] == "bad")
+    bad_record = next(r for r in list(store.values()) if r.metadata["input"] == "bad")
     assert bad_record.metadata["output"] is None
     assert "boom" in bad_record.metadata["error"]
 
@@ -281,7 +282,7 @@ def test_batch_with_return_exceptions_still_records_success(
 ) -> None:
     recorded = RecordingRunnable(failing_runnable, store)
     recorded.batch(["ok", "bad"], return_exceptions=True)
-    ok_record = next(r for r in store.all() if r.metadata["input"] == "ok")
+    ok_record = next(r for r in list(store.values()) if r.metadata["input"] == "ok")
     assert ok_record.metadata["output"] == "OK"
     assert ok_record.metadata["error"] is None
 
@@ -302,7 +303,7 @@ def test_batch_per_item_config_metadata(
         ["a", "b"],
         config=[{"metadata": {"session_id": "s-a"}}, {"metadata": {"session_id": "s-b"}}],
     )
-    session_ids = {r.metadata["input"]: r.metadata["session_id"] for r in store.all()}
+    session_ids = {r.metadata["input"]: r.metadata["session_id"] for r in list(store.values())}
     assert session_ids == {"a": "s-a", "b": "s-b"}
 
 
@@ -333,13 +334,13 @@ def test_stream_yields_chunks_unchanged(store: InMemoryRecordStore) -> None:
 def test_stream_records_accumulated_output(store: InMemoryRecordStore) -> None:
     recorded = RecordingRunnable(RunnableGenerator(_string_chunks), store)
     list(recorded.stream("go"))
-    assert store.all()[0].metadata["output"] == "Hello"
+    assert next(iter(store.values())).metadata["output"] == "Hello"
 
 
 def test_stream_records_original_input(store: InMemoryRecordStore) -> None:
     recorded = RecordingRunnable(RunnableGenerator(_string_chunks), store)
     list(recorded.stream("go"))
-    assert store.all()[0].metadata["input"] == "go"
+    assert next(iter(store.values())).metadata["input"] == "go"
 
 
 def test_stream_writes_exactly_one_record(store: InMemoryRecordStore) -> None:
@@ -383,7 +384,7 @@ def test_astream_records_accumulated_output(store: InMemoryRecordStore) -> None:
             pass
 
     asyncio.run(_consume())
-    assert store.all()[0].metadata["output"] == "Hello"
+    assert next(iter(store.values())).metadata["output"] == "Hello"
 
 
 def test_astream_with_no_chunks_writes_no_record(store: InMemoryRecordStore) -> None:
@@ -443,7 +444,7 @@ def test_default_serializer_applied(store: InMemoryRecordStore) -> None:
 
     recorded = RecordingRunnable(RunnableLambda(lambda x: Answer(value=len(x))), store)
     recorded.invoke("hello")
-    assert store.all()[0].metadata["output"] == {"value": 5}
+    assert next(iter(store.values())).metadata["output"] == {"value": 5}
 
 
 def test_custom_serializer_applied_to_whole_metadata(
@@ -456,7 +457,7 @@ def test_custom_serializer_applied_to_whole_metadata(
 
     recorded = RecordingRunnable(upper_runnable, store, serializer=redact)
     recorded.invoke("secret")
-    assert store.all()[0].metadata["input"] == "<redacted>"
+    assert next(iter(store.values())).metadata["input"] == "<redacted>"
 
 
 # --- repr/str ---
