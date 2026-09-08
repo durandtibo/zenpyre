@@ -12,8 +12,8 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from coola.display import MultilineDisplayMixin
 from langchain_core.runnables import Runnable
+from persista.record import Record
 
-from zenpyre.records import Record
 from zenpyre.utils.run import extract_run_id, extract_run_ids
 from zenpyre.utils.serialization import default_serialize
 
@@ -21,8 +21,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable, Iterator, Sequence
 
     from langchain_core.runnables import RunnableConfig
-
-    from zenpyre.record_stores import BaseRecordStore
+    from persista.record.store import BaseRecordStore
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -38,8 +37,8 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
     ``ainvoke``, ``batch``, or ``abatch`` behaves exactly like calling
     the wrapped ``runnable`` directly (same return value, same
     exceptions), with the side effect of writing one
-    :class:`~zenpyre.records.Record` per invocation to ``record_store``
-    via :meth:`~zenpyre.record_stores.base.BaseRecordStore.add_records`.
+    :class:`~persista.record.Record` per invocation to ``record_store``
+    via :meth:`~persista.record.store.base.BaseRecordStore.set_many`.
     Each record gets a fresh, randomly generated ID (not derived from
     its content), so that two calls with identical input/output/extra
     are still both recorded rather than one silently overwriting the
@@ -108,17 +107,17 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
 
     Example:
         ```pycon
-        >>> from zenpyre.record_stores import DuckDBRecordStore
+        >>> from persista.record.store import DuckDBRecordStore
         >>> from zenpyre.runnables import RecordingRunnable
         >>> store = DuckDBRecordStore(":memory:")
+        >>> store.open()  # doctest: +SKIP
         >>> recorded = RecordingRunnable(
         ...     chat_model, store, extra={"experiment_id": "exp-42"}
         ... )  # doctest: +SKIP
         >>> recorded.invoke("Hello!", config={"metadata": {"session_id": "s-1"}})  # doctest: +SKIP
         AIMessage(content='Hi there!')
-        >>> store.all()[0].metadata["experiment_id"], store.all()[0].metadata[
-        ...     "session_id"
-        ... ]  # doctest: +SKIP
+        >>> record = next(store.values())  # doctest: +SKIP
+        >>> record.metadata["experiment_id"], record.metadata["session_id"]  # doctest: +SKIP
         ('exp-42', 's-1')
 
         ```
@@ -182,7 +181,7 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         """Invoke the wrapped runnable and record the call.
 
         Calls ``self.runnable.invoke(input, config, **kwargs)``,
-        writes one :class:`~zenpyre.records.Record` to the record
+        writes one :class:`~persista.record.Record` to the record
         store capturing ``input``, the returned output, a timestamp,
         and any ``run_id``/``extra`` metadata, then returns that
         output unchanged.
@@ -219,7 +218,7 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
 
         The async counterpart of :meth:`invoke`: calls
         ``self.runnable.ainvoke(input, config, **kwargs)``, writes one
-        :class:`~zenpyre.records.Record` to the record store capturing
+        :class:`~persista.record.Record` to the record store capturing
         ``input``, the returned output, a timestamp, and any
         ``run_id``/``extra`` metadata, then returns that output
         unchanged.
@@ -257,9 +256,9 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         each call.
 
         Calls ``self.runnable.batch(inputs, config, return_exceptions,
-        **kwargs)``, then writes one :class:`~zenpyre.records.Record`
+        **kwargs)``, then writes one :class:`~persista.record.Record`
         per ``(input, result)`` pair to the record store in a single
-        :meth:`~zenpyre.record_stores.base.BaseRecordStore.add_records`
+        :meth:`~persista.record.store.base.BaseRecordStore.set_many`
         call, before returning the results unchanged. Unlike
         :meth:`invoke`, a failed item (when ``return_exceptions=True``)
         is still recorded, with ``"error"`` set to ``str(exception)``
@@ -307,9 +306,9 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
 
         The async counterpart of :meth:`batch`: calls
         ``self.runnable.abatch(inputs, config, return_exceptions,
-        **kwargs)``, then writes one :class:`~zenpyre.records.Record`
+        **kwargs)``, then writes one :class:`~persista.record.Record`
         per ``(input, result)`` pair to the record store in a single
-        :meth:`~zenpyre.record_stores.base.BaseRecordStore.add_records`
+        :meth:`~persista.record.store.base.BaseRecordStore.set_many`
         call, before returning the results unchanged. Unlike
         :meth:`ainvoke`, a failed item (when ``return_exceptions=True``)
         is still recorded, with ``"error"`` set to ``str(exception)``
@@ -359,7 +358,7 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         (see :func:`_try_add`) to reconstruct a final output. Once the
         stream is exhausted (in a ``finally`` block, so this also runs
         if the caller stops iterating early or the stream raises), one
-        :class:`~zenpyre.records.Record` is written for the
+        :class:`~persista.record.Record` is written for the
         accumulated result, unless no chunk could be accumulated at
         all (in which case a warning is logged and nothing is
         recorded for this call).
@@ -407,7 +406,7 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         reconstruct a final output. Once the stream is exhausted (in a
         ``finally`` block, so this also runs if the caller stops
         iterating early or the stream raises), one
-        :class:`~zenpyre.records.Record` is written for the
+        :class:`~persista.record.Record` is written for the
         accumulated result, unless no chunk could be accumulated at
         all (in which case a warning is logged and nothing is
         recorded for this call).
@@ -457,10 +456,10 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         ``"timestamp"``, ``"run_id"``, ``"error"`` fixed at ``None``,
         plus whatever :meth:`_merge_extra` returns for ``config``),
         passes it through ``self._serializer``, wraps it in a
-        :class:`~zenpyre.records.Record` with a fresh random ID (see
+        :class:`~persista.record.Record` with a fresh random ID (see
         the class docstring for why the ID isn't content-derived), and
         writes it via a single-item call to
-        ``self._record_store.add_records``.
+        ``self._record_store.set_many``.
 
         Not called on ``invoke``/``ainvoke`` failure, since those
         methods don't catch exceptions from the wrapped runnable; see
@@ -491,7 +490,7 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         # calls with identical metadata are both recorded rather than
         # one overwriting the other via the store's upsert semantics.
         record = Record(id=str(uuid.uuid4()), metadata=self._serializer(metadata))
-        self._record_store.add_records([record])
+        self._record_store.set_many([record])
 
     def _record_batch(
         self,
@@ -500,7 +499,7 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         config: RunnableConfig | list[RunnableConfig] | None,
     ) -> None:
         """Build and store one Record per (input, result) pair from a
-        batch call, in a single add_records call.
+        batch call, in a single set_many call.
 
         For each ``(input, result)`` pair (paired by position, so
         ``inputs`` and ``results`` must be the same length and in
@@ -516,7 +515,7 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         call's ``config`` may supply a different config per item. All
         resulting records are passed through ``self._serializer``
         individually, then written in a single call to
-        ``self._record_store.add_records`` (one round trip for the
+        ``self._record_store.set_many`` (one round trip for the
         whole batch, rather than one per item).
 
         Args:
@@ -542,7 +541,7 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
                 **extra,
             }
             records.append(Record(id=str(uuid.uuid4()), metadata=self._serializer(metadata)))
-        self._record_store.add_records(records)
+        self._record_store.set_many(records)
 
     def _merge_extra(self, config: RunnableConfig | None) -> dict[str, Any]:
         """Merge constructor-level ``extra`` with one call's

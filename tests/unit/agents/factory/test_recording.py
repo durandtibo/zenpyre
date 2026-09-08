@@ -5,10 +5,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from coola.equality import objects_are_equal
+from persista.record.store import BaseRecordStore, InMemoryRecordStore
+from persista.record.store.factory import BaseRecordStoreFactory
 
 from zenpyre.agents.factory import AgentFactory, BaseAgentFactory, RecordingAgentFactory
-from zenpyre.record_stores import BaseRecordStore, InMemoryRecordStore
-from zenpyre.record_stores.factory import BaseRecordStoreFactory
 from zenpyre.utils.config import Config
 
 MODULE = "zenpyre.agents.factory.recording"

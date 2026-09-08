@@ -8,9 +8,9 @@ import logging
 from typing import Any
 
 from coola.display import InlineDisplayMixin
+from persista.record import Record, sort_by_metadata
 
 from zenpyre.data_processors.base import BaseProcessor
-from zenpyre.records import Record, sort_by_metadata
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class SortRecordsByMetadataProcessor(BaseProcessor[list[Record], list[Record]], 
 
     Example:
         ```pycon
-        >>> from zenpyre.records import Record
+        >>> from persista.record import Record
         >>> from zenpyre.data_processors import SortRecordsByMetadataProcessor
         >>> processor = SortRecordsByMetadataProcessor(metadata_key="source")
         >>> records = [
@@ -64,10 +64,10 @@ class SortRecordsByMetadataProcessor(BaseProcessor[list[Record], list[Record]], 
         result.
 
         Args:
-            data: The list of :class:`~zenpyre.records.Record` instances to sort.
+            data: The list of :class:`~persista.record.Record` instances to sort.
 
         Returns:
-            A new sorted list of :class:`~zenpyre.records.Record` instances.
+            A new sorted list of :class:`~persista.record.Record` instances.
             The original list is not modified.
         """
         return sort_by_metadata(

@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from zenpyre.records.analysis import (
+from persista.record.analysis import (
     compute_metadata_stats,
     print_metadata_stats_report,
 )
-from zenpyre.records.fake import generate_fake_records
+from persista.record.fake import generate_fake_records
 
 
 def main() -> None:

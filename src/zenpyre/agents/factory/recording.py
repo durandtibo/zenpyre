@@ -8,9 +8,9 @@ __all__ = ["RecordingAgentFactory"]
 from typing import TYPE_CHECKING, Any
 
 from coola.display import MultilineDisplayMixin
+from persista.record.store.factory.base import BaseRecordStoreFactory
 
 from zenpyre.agents.factory.base import BaseAgentFactory
-from zenpyre.record_stores.factory.base import BaseRecordStoreFactory
 from zenpyre.runnables import RecordingRunnable
 from zenpyre.utils.resolve import resolve_object
 
@@ -33,10 +33,10 @@ class RecordingAgentFactory(BaseAgentFactory, MultilineDisplayMixin):
     in a :class:`~zenpyre.runnables.RecordingRunnable`, so every call
     to the wrapped agent writes a record of its input and output to
     the resulting record store. This composes with any
-    :class:`~zenpyre.record_stores.factory.base.BaseRecordStoreFactory`
+    :class:`~persista.record.store.factory.base.BaseRecordStoreFactory`
     implementation (e.g.
-    :class:`~zenpyre.record_stores.factory.RecordStoreFactory`,
-    :class:`~zenpyre.record_stores.factory.ConfigurableRecordStoreFactory`),
+    :class:`~persista.record.store.factory.RecordStoreFactory`,
+    :class:`~persista.record.store.factory.ConfigurableRecordStoreFactory`),
     keeping record store creation and agent creation decoupled.
 
     Args:
@@ -60,8 +60,8 @@ class RecordingAgentFactory(BaseAgentFactory, MultilineDisplayMixin):
         >>> from langchain_core.language_models import FakeListChatModel
         >>> from zenpyre.agents import AgentChatModel
         >>> from zenpyre.agents.factory import AgentFactory, RecordingAgentFactory
-        >>> from zenpyre.record_stores import InMemoryRecordStore
-        >>> from zenpyre.record_stores.factory import RecordStoreFactory
+        >>> from persista.record.store import InMemoryRecordStore
+        >>> from persista.record.store.factory import RecordStoreFactory
         >>> inner_agent = AgentChatModel(model=FakeListChatModel(responses=["hello"]))
         >>> factory = RecordingAgentFactory(
         ...     agent_factory=AgentFactory(inner_agent),
