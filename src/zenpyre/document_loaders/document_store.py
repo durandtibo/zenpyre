@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Any
 
 from coola.display import MultilineDisplayMixin
 from langchain_core.document_loaders import BaseLoader
-from persista.store import check_is_opened
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -74,7 +73,6 @@ class DocumentStoreLoader(BaseLoader, MultilineDisplayMixin):
         self._store.close()
 
     def lazy_load(self) -> Iterator[Document]:
-        check_is_opened()
         yield from self._store.values()
 
     def _get_repr_kwargs(self) -> dict[str, Any]:
