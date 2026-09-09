@@ -10,16 +10,16 @@ from typing import TYPE_CHECKING, Any
 from coola.display import MultilineDisplayMixin
 from langchain_core.document_loaders import BaseLoader
 
+from zenpyre.utils.context import DelegatingContextManagerMixin
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from types import TracebackType
-    from typing import Self
 
     from docculus.store.base import BaseDocumentStore
     from langchain_core.documents import Document
 
 
-class DocumentStoreLoader(BaseLoader, MultilineDisplayMixin):
+class DocumentStoreLoader(BaseLoader, MultilineDisplayMixin, DelegatingContextManagerMixin):
     """A loader that yields documents from a :class:`BaseDocumentStore`.
 
     Use this when documents already live in a document store and you
@@ -33,8 +33,11 @@ class DocumentStoreLoader(BaseLoader, MultilineDisplayMixin):
     open it itself. Use ``DocumentStoreLoader`` as a context manager
     (rather than opening/closing ``store`` directly) to be sure it's
     closed once you're done with it: ``__enter__``/``__exit__``
-    delegate to ``store.open()``/``store.close()``, so
-    ``with DocumentStoreLoader(store) as loader: ...`` guarantees
+    (and their async counterparts ``__aenter__``/``__aexit__``)
+    delegate to ``store.open()``/``store.close()`` (or
+    ``aopen()``/``aclose()``), so both
+    ``with DocumentStoreLoader(store) as loader: ...`` and
+    ``async with DocumentStoreLoader(store) as loader: ...`` guarantee
     ``store`` is closed on exit, even if loading raises.
 
     Args:
@@ -57,20 +60,10 @@ class DocumentStoreLoader(BaseLoader, MultilineDisplayMixin):
         ```
     """
 
+    _context_managed_attr = "_store"
+
     def __init__(self, store: BaseDocumentStore) -> None:
         self._store = store
-
-    def __enter__(self) -> Self:
-        self._store.open()
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
-    ) -> None:
-        self._store.close()
 
     def lazy_load(self) -> Iterator[Document]:
         yield from self._store.values()
