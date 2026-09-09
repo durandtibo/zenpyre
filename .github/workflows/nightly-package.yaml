@@ -92,7 +92,6 @@ jobs:
       package-name: rich
       package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).rich) }}
 
-
-  #################################
-  #     Optional dependencies     #
-  #################################
+#################################
+#     Optional dependencies     #
+#################################

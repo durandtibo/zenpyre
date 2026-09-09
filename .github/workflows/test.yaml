@@ -37,26 +37,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
-
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@59716ab8fb83cc7025548b3831c06b6f5c268f4f # ratchet:durandtibo/setup-venv-uv-action@v0.1.0
         with:
           python-version: ${{ matrix.python-version }}
-
       - name: Run unit tests
         run: |
           inv unit-test --cov
-
       - name: Run integration tests
         run: |
           inv integration-test --cov
-
   # Test with minimal dependencies to ensure optional dependencies are truly optional
   min:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
     strategy:
       max-parallel: 8
+
       fail-fast: false
       matrix:
         os:
@@ -72,22 +69,21 @@ jobs:
             macos-14,
             macos-15-intel,
           ]
+
         python-version: ["3.14", "3.13", "3.12", "3.11", "3.10"]
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
 
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
       # Install only required dependencies, not optional ones
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@59716ab8fb83cc7025548b3831c06b6f5c268f4f # ratchet:durandtibo/setup-venv-uv-action@v0.1.0
         with:
           python-version: ${{ matrix.python-version }}
           install-args: "--no-optional-deps"
-
       - name: Run unit tests
         run: |
           inv unit-test --cov
-
       - name: Run integration tests
         run: |
           inv integration-test --cov
