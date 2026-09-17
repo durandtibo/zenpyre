@@ -1,11 +1,12 @@
 # Dependency compatibility testing workflow.
 # Tests the package with different versions of both its required and optional
-# dependencies. The package names tested here (core runtime deps like
-# langchain-core, plus every optional extra) are read from
-# dev/config/package_versions.json's keys; unlike coola, these don't map 1:1
-# onto pyproject.toml's [project.optional-dependencies] (most are core,
-# required dependencies), so each is listed as its own job rather than driven
-# by lib-get-package-extras.yaml.
+# dependencies. The set of packages tested is driven entirely by the keys of
+# dev/config/package_versions.json (kept up to date by
+# bot-generate-package-versions.yaml), not by pyproject.toml's
+# [project.optional-dependencies] - unlike coola, most of the packages tested
+# here are core, required dependencies rather than optional extras, so a
+# single matrix job over lib-get-package-versions.yaml's package_names output
+# covers both required and optional dependencies without hardcoding either.
 
 name: Dependency Compatibility (Source)
 on:
@@ -24,146 +25,17 @@ jobs:
   get-versions:
     uses: ./.github/workflows/lib-get-package-versions.yaml
 
-  ########################
-  #     Dependencies     #
-  ########################
-
-  coola:
+  # One job per package in dev/config/package_versions.json, driven by
+  # get-versions instead of a hardcoded list, so a new dependency only needs
+  # to be added to that config file.
+  test-dep:
     needs: get-versions
+    strategy:
+      fail-fast: false
+      matrix:
+        package-name: ${{ fromJson(needs.get-versions.outputs.package_names) }}
     uses: ./.github/workflows/ci-test-code-dep.yaml
     with:
-      package-name: coola
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).coola) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  langchain-core:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: langchain-core
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-core']) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  langchain:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: langchain
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  langgraph:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: langgraph
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langgraph) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  persista:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: persista
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).persista) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  pydantic:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: pydantic
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).pydantic) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  rich:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: rich
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).rich) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  #################################
-  #     Optional dependencies     #
-  #################################
-
-  faker:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: faker
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).faker) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  langchain-anthropic:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: langchain-anthropic
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-anthropic']) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  langchain-chroma:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: langchain-chroma
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-chroma']) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  langchain-google-genai:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: langchain-google-genai
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-google-genai']) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  langchain-huggingface:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: langchain-huggingface
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-huggingface']) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  langchain-ollama:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: langchain-ollama
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-ollama']) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  langchain-openai:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: langchain-openai
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-openai']) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  langchain-text-splitters:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: langchain-text-splitters
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-text-splitters']) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  polars:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: polars
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).polars) }}
-      test-matrix: ${{ inputs.test-matrix }}
-
-  sentence-transformers:
-    needs: get-versions
-    uses: ./.github/workflows/ci-test-code-dep.yaml
-    with:
-      package-name: sentence-transformers
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['sentence-transformers']) }}
+      package-name: ${{ matrix.package-name }}
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)[matrix.package-name]) }}
       test-matrix: ${{ inputs.test-matrix }}
