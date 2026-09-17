@@ -61,142 +61,17 @@ jobs:
   #     Dependencies     #
   ########################
 
-  coola:
+  # One job per package in dev/config/package_versions.json, driven by
+  # get-versions instead of a hardcoded list, so a new dependency only needs
+  # to be added to that config file.
+  test-dep:
     needs: [get-versions, get-matrix]
+    strategy:
+      fail-fast: false
+      matrix:
+        package-name: ${{ fromJson(needs.get-versions.outputs.package_names) }}
     uses: ./.github/workflows/nightly-test-package-dep.yaml
     with:
-      package-name: coola
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).coola) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  langchain-core:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: langchain-core
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-core']) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  langchain:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: langchain
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langchain) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  langgraph:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: langgraph
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).langgraph) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  persista:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: persista
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).persista) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  pydantic:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: pydantic
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).pydantic) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  rich:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: rich
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).rich) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  #################################
-  #     Optional dependencies     #
-  #################################
-
-  faker:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: faker
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).faker) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  langchain-anthropic:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: langchain-anthropic
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-anthropic']) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  langchain-chroma:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: langchain-chroma
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-chroma']) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  langchain-google-genai:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: langchain-google-genai
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-google-genai']) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  langchain-huggingface:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: langchain-huggingface
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-huggingface']) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  langchain-ollama:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: langchain-ollama
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-ollama']) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  langchain-openai:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: langchain-openai
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-openai']) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  langchain-text-splitters:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: langchain-text-splitters
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['langchain-text-splitters']) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  polars:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: polars
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).polars) }}
-      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
-
-  sentence-transformers:
-    needs: [get-versions, get-matrix]
-    uses: ./.github/workflows/nightly-test-package-dep.yaml
-    with:
-      package-name: sentence-transformers
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)['sentence-transformers']) }}
+      package-name: ${{ matrix.package-name }}
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions)[matrix.package-name]) }}
       test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
