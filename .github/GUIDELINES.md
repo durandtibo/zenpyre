@@ -39,9 +39,10 @@ changes to those paths rather than every PR/push.
   `nightly-test-package*.yaml` workflows).
 - **`.github/workflows/lib-*.yaml`** (reusable workflows called with `uses:
   ./.github/workflows/lib-....yaml`): used when the output needs to feed a
-  matrix, or when the shared logic is naturally a whole job (e.g. reading
-  `../dev/config/test_matrix.json` once and handing the JSON down to several
-  jobs via `needs:`). Currently: `lib-get-test-matrix.yaml`,
+  matrix, or when the shared logic is naturally a whole job (e.g. loading
+  `durandtibo/workflow-config-action`'s shared Python-version/OS config once
+  and handing the JSON down to several jobs via `needs:`). Currently:
+  `lib-get-test-matrix.yaml`,
   `lib-get-package-versions.yaml`, `lib-get-package-extras.yaml` and
   `lib-get-package-deps.yaml` (which combines the last two).
 
@@ -76,11 +77,15 @@ action/reusable workflow over copy-pasting steps.
 
 ## Shared configuration
 
-Values that would otherwise be duplicated across workflows are centralized in
+Supported Python versions and OS matrices are no longer duplicated in this
+repo at all: `lib-get-test-matrix.yaml` loads them from
+[`durandtibo/workflow-config-action`](https://github.com/durandtibo/workflow-config-action)'s
+built-in default config, so that single upstream action is the one place to
+update the version/OS lists across every repo that uses it.
+
+Values that are still specific to this repo are centralized in
 `../dev/config`:
 
-- `../dev/config/test_matrix.json` — supported Python versions / OS matrix,
-  read once per run by `lib-get-test-matrix.yaml`.
 - `../dev/config/package_versions.json` — version ranges to test both required
   and optional dependencies against (e.g. `coola`, `langchain-core`,
   `langchain-anthropic`, `polars`, ...), read by `lib-get-package-versions.yaml`

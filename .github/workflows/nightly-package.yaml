@@ -11,7 +11,7 @@ jobs:
   # Get dependency version bounds from dev/config/package_versions.json.
   get-versions:
     uses: ./.github/workflows/lib-get-package-versions.yaml
-  # Load the shared python-version/OS matrix from dev/config/test_matrix.json
+  # Load the shared python-version/OS matrix from durandtibo/workflow-config-action
   # once, and pass it down to every job below that needs it.
   get-matrix:
     uses: ./.github/workflows/lib-get-test-matrix.yaml
