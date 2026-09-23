@@ -19,6 +19,7 @@ from zenpyre.utils.json_to_structured import (
 
 if TYPE_CHECKING:
     from langchain_core.language_models import BaseChatModel, LanguageModelInput
+    from langchain_core.runnables import RunnableConfig
     from pydantic import BaseModel
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -41,6 +42,7 @@ def structured_output_runnable(
     output_type: type[T],
     *,
     include_raw: Literal[False] = False,
+    max_retries: int = 0,
     **kwargs: Any,
 ) -> Runnable[LanguageModelInput, T]: ...  # pragma: no cover
 
@@ -51,6 +53,7 @@ def structured_output_runnable(
     output_type: type[T],
     *,
     include_raw: Literal[True],
+    max_retries: int = 0,
     **kwargs: Any,
 ) -> Runnable[LanguageModelInput, dict[str, Any]]: ...  # pragma: no cover
 
@@ -60,6 +63,7 @@ def structured_output_runnable(
     output_type: type[T],
     *,
     include_raw: bool = False,
+    max_retries: int = 0,
     **kwargs: Any,
 ) -> Runnable[LanguageModelInput, T] | Runnable[LanguageModelInput, dict[str, Any]]:
     r"""Build a Runnable that returns validated, structured output, with
@@ -93,6 +97,18 @@ def structured_output_runnable(
       the JSON fallback succeeds, and ``"parsing_error"`` is only set
       if both fail.
 
+    If ``max_retries`` is greater than ``0``, an attempt where both
+    native parsing and the JSON fallback fail triggers a fresh call to
+    the chat model, up to ``max_retries`` additional times (so
+    ``max_retries=2`` allows up to 3 total attempts). Each retry is a
+    brand-new invocation -- nothing about a failed attempt is reused --
+    since re-generating is typically more reliable than patching
+    malformed output. Retries stop as soon as an attempt succeeds.
+    With ``include_raw=False`` (default), the
+    :class:`StructuredOutputError` from the *last* attempt is raised
+    if every attempt fails; with ``include_raw=True``, the dict from
+    the last attempt is returned instead.
+
     Because the result is a plain ``|``-composed
     :class:`~langchain_core.runnables.RunnableSequence`, it already
     implements ``invoke``, ``ainvoke``, ``batch``, ``abatch``,
@@ -113,6 +129,11 @@ def structured_output_runnable(
             ``True``, invoking returns a
             ``{"raw", "parsed", "parsing_error", "used_fallback"}``
             dict and never raises on parse failure.
+        max_retries: The number of additional attempts to make (via
+            fresh chat-model calls) if an attempt fails both native
+            parsing and the JSON fallback. ``0`` (default) means no
+            retries -- a single attempt is made, matching prior
+            behavior.
         **kwargs: Additional keyword arguments forwarded to
             ``chat_model.with_structured_output`` (e.g. ``method``,
             ``strict``), letting callers tune the native
@@ -136,11 +157,126 @@ def structured_output_runnable(
 
         ```
     """
+    if max_retries < 0:
+        msg = f"max_retries must be >= 0, got {max_retries}"
+        raise ValueError(msg)
+
     structured = chat_model.with_structured_output(output_type, include_raw=True, **kwargs)
     unwrap = RunnableLambda(
         functools.partial(_unwrap, output_type=output_type, include_raw=include_raw)
     ).with_config(run_name="unwrap_structured_output")
-    return structured | unwrap
+    chain = structured | unwrap
+
+    if max_retries == 0:
+        return chain
+
+    return RunnableLambda(
+        functools.partial(
+            _invoke_with_retry, chain=chain, max_retries=max_retries, include_raw=include_raw
+        ),
+        afunc=functools.partial(
+            _ainvoke_with_retry, chain=chain, max_retries=max_retries, include_raw=include_raw
+        ),
+    ).with_config(run_name="structured_output_with_retry")
+
+
+def _invoke_with_retry(
+    value: LanguageModelInput,
+    config: RunnableConfig | None,
+    *,
+    chain: Runnable[LanguageModelInput, Any],
+    max_retries: int,
+    include_raw: bool,
+) -> Any:
+    """Invoke ``chain``, retrying up to ``max_retries`` additional times
+    on total parse failure.
+
+    Mirrors :func:`~zenpyre.utils.json_to_structured.parse_json_to_structured_with_retry`:
+    each attempt is a brand-new invocation of ``chain`` -- nothing about
+    a failed attempt is reused.
+
+    Args:
+        value: The input forwarded to ``chain`` on each attempt.
+        config: The ``RunnableConfig`` forwarded to ``chain`` on each
+            attempt.
+        chain: The underlying ``with_structured_output`` + unwrap
+            chain to invoke.
+        max_retries: The number of additional attempts allowed beyond
+            the first.
+        include_raw: Controls how failure is detected -- see
+            :func:`structured_output_runnable`'s docstring.
+
+    Returns:
+        The first successful result from ``chain``, or the last
+        attempt's (failed) result if ``include_raw`` is ``True`` and
+        every attempt failed.
+
+    Raises:
+        StructuredOutputError: If ``include_raw`` is ``False`` and
+            every attempt fails.
+    """
+    max_attempts = max_retries + 1
+    last_error: StructuredOutputError | None = None
+    last_result: dict[str, Any] | None = None
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            result = chain.invoke(value, config=config)
+        except StructuredOutputError as e:
+            last_error = e
+        else:
+            if not include_raw or result["parsing_error"] is None:
+                return result
+            last_result = result
+            last_error = result["parsing_error"]
+
+        logger.warning(
+            "Attempt %d/%d failed to produce valid structured output: %s",
+            attempt,
+            max_attempts,
+            last_error,
+        )
+
+    if include_raw:
+        return last_result
+    raise last_error
+
+
+async def _ainvoke_with_retry(
+    value: LanguageModelInput,
+    config: RunnableConfig | None,
+    *,
+    chain: Runnable[LanguageModelInput, Any],
+    max_retries: int,
+    include_raw: bool,
+) -> Any:
+    """Async counterpart of :func:`_invoke_with_retry`; see its
+    docstring for the full contract."""
+    max_attempts = max_retries + 1
+    last_error: StructuredOutputError | None = None
+    last_result: dict[str, Any] | None = None
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            result = await chain.ainvoke(value, config=config)
+        except StructuredOutputError as e:
+            last_error = e
+        else:
+            if not include_raw or result["parsing_error"] is None:
+                return result
+            last_result = result
+            last_error = result["parsing_error"]
+
+        logger.warning(
+            "Attempt %d/%d failed to produce valid structured output: %s",
+            attempt,
+            max_attempts,
+            last_error,
+        )
+
+    if include_raw:
+        return last_result
+    raise last_error
 
 
 def _unwrap(

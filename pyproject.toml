@@ -135,9 +135,6 @@ addopts = ["--color", "yes", "--durations", "10", "-rf"]
 # https://docs.pytest.org/en/stable/usage.html#detailed-summary-report
 anyio_mode = "auto"
 
-[tool.pylint.FORMAT]
-max-line-length = 100
-
 [tool.docformatter]
 recursive = true
 wrap-summaries = 72
