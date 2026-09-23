@@ -247,7 +247,7 @@ def parse_json_to_structured_with_retry(
 
     This provides a bounded retry loop around `parse_json_to_structured` for
     cases where a single generation may occasionally produce invalid or
-    unparseable JSON (e.g. a non-deterministic small local model). Each
+    unparsable JSON (e.g. a non-deterministic small local model). Each
     attempt performs a fresh model invocation via `invoke_fn` -- this function
     does not reuse or repair a previous failed response, since re-generating
     is typically more reliable than patching malformed output.

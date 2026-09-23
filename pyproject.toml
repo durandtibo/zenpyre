@@ -108,6 +108,7 @@ torch-backend = "auto"
 [tool.codespell]
 skip = "*.lock,./.git,./htmlcov,./docs/site,coverage.xml"
 ignore-regex = "re-declared|\\btha\\.\\.\\."
+ignore-words-list = "hel"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
