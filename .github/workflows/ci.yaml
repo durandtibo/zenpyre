@@ -5,6 +5,8 @@
 # separate full test run.
 #
 # Deliberately NOT called from here, each standalone with its own trigger:
+#   - ci-benchmark.yaml: runs nightly on its own schedule instead of gating
+#     every PR/push, since a benchmark regression isn't a merge blocker.
 #   - ci-verify-workflows.yaml: lints .github/workflows/* itself, so it
 #     triggers on workflow-file changes rather than every PR/push.
 # See .github/GUIDELINES.md for the naming/prefix and runs-on/timeout
@@ -21,19 +23,12 @@
 name: CI
 on:
   pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
   schedule:
     - cron: "10 9 * * *" # Run nightly at 9:10 AM UTC to catch issues from external changes
   workflow_dispatch: # to trigger manually
-
-# Cancel stale in-progress runs when a new commit is pushed to the same PR/branch.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
 
 permissions:
   contents: read

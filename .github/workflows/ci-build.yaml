@@ -80,7 +80,7 @@ jobs:
       matrix:
         dist-type: ["sdist", "wheel"]
         # Test at least one full-extras build per supported Python version to
-        # catch version-specific build regressions.
+        # catch version-specific build regressions (e.g. free-threaded 3.13t/3.14t).
         python-version: ${{ fromJson(inputs.test-matrix).python_versions }}
     steps:
       - name: Checkout
