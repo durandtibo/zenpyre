@@ -349,3 +349,244 @@ def test_structured_output_runnable_no_kwargs_forwards_empty_dict() -> None:
     model = _native_ok_model()
     structured_output_runnable(model, Answer)
     assert model.with_structured_output_kwargs == {}
+
+
+##################################################
+#     Tests for max_retries                      #
+##################################################
+
+
+class FlakyChatModel:
+    """Fails native parsing (and produces unparsable raw content) for
+    the first ``fail_times`` calls, then succeeds."""
+
+    def __init__(self, fail_times: int) -> None:
+        self.fail_times = fail_times
+        self.calls = 0
+
+    def with_structured_output(
+        self,
+        output_type: type,  # noqa: ARG002
+        include_raw: bool = True,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002
+    ) -> RunnableLambda:
+        def _call(_input: Any) -> dict[str, Any]:
+            self.calls += 1
+            if self.calls <= self.fail_times:
+                return {
+                    "raw": AIMessage(content="not json"),
+                    "parsed": None,
+                    "parsing_error": ValueError("no tool call"),
+                }
+            return {
+                "raw": AIMessage(content='{"value": 1}'),
+                "parsed": Answer(value=1),
+                "parsing_error": None,
+            }
+
+        return RunnableLambda(_call)
+
+
+def test_structured_output_runnable_max_retries_zero_is_default_no_retry_behavior() -> None:
+    model = FlakyChatModel(fail_times=1)
+    chain = structured_output_runnable(model, Answer)
+    with pytest.raises(StructuredOutputError):
+        chain.invoke("hi")
+    assert model.calls == 1
+
+
+def test_structured_output_runnable_max_retries_succeeds_after_failures() -> None:
+    model = FlakyChatModel(fail_times=2)
+    chain = structured_output_runnable(model, Answer, max_retries=3)
+    assert chain.invoke("hi") == Answer(value=1)
+    assert model.calls == 3
+
+
+def test_structured_output_runnable_max_retries_exhausted_raises() -> None:
+    model = FlakyChatModel(fail_times=10)
+    chain = structured_output_runnable(model, Answer, max_retries=2)
+    with pytest.raises(StructuredOutputError):
+        chain.invoke("hi")
+    assert model.calls == 3
+
+
+def test_structured_output_runnable_max_retries_include_raw_true_exhausted_does_not_raise() -> None:
+    model = FlakyChatModel(fail_times=10)
+    chain = structured_output_runnable(model, Answer, max_retries=2, include_raw=True)
+    result = chain.invoke("hi")
+    assert result["parsed"] is None
+    assert isinstance(result["parsing_error"], StructuredOutputError)
+    assert model.calls == 3
+
+
+def test_structured_output_runnable_max_retries_include_raw_true_succeeds_after_failures() -> None:
+    model = FlakyChatModel(fail_times=1)
+    chain = structured_output_runnable(model, Answer, max_retries=2, include_raw=True)
+    result = chain.invoke("hi")
+    assert result["parsed"] == Answer(value=1)
+    assert result["parsing_error"] is None
+    assert model.calls == 2
+
+
+def test_structured_output_runnable_max_retries_stops_early_on_success() -> None:
+    model = FlakyChatModel(fail_times=1)
+    chain = structured_output_runnable(model, Answer, max_retries=5)
+    assert chain.invoke("hi") == Answer(value=1)
+    assert model.calls == 2
+
+
+def test_structured_output_runnable_max_retries_ainvoke_succeeds_after_failures() -> None:
+    model = FlakyChatModel(fail_times=2)
+    chain = structured_output_runnable(model, Answer, max_retries=3)
+    result = asyncio.run(chain.ainvoke("hi"))
+    assert result == Answer(value=1)
+    assert model.calls == 3
+
+
+def test_structured_output_runnable_max_retries_ainvoke_exhausted_raises() -> None:
+    model = FlakyChatModel(fail_times=10)
+    chain = structured_output_runnable(model, Answer, max_retries=2)
+    with pytest.raises(StructuredOutputError):
+        asyncio.run(chain.ainvoke("hi"))
+    assert model.calls == 3
+
+
+def test_structured_output_runnable_max_retries_ainvoke_include_raw_true_succeeds_after_failures() -> (
+    None
+):
+    model = FlakyChatModel(fail_times=1)
+    chain = structured_output_runnable(model, Answer, max_retries=2, include_raw=True)
+    result = asyncio.run(chain.ainvoke("hi"))
+    assert result["parsed"] == Answer(value=1)
+    assert result["parsing_error"] is None
+    assert model.calls == 2
+
+
+def test_structured_output_runnable_max_retries_ainvoke_include_raw_true_exhausted_does_not_raise() -> (
+    None
+):
+    model = FlakyChatModel(fail_times=10)
+    chain = structured_output_runnable(model, Answer, max_retries=2, include_raw=True)
+    result = asyncio.run(chain.ainvoke("hi"))
+    assert result["parsed"] is None
+    assert isinstance(result["parsing_error"], StructuredOutputError)
+    assert model.calls == 3
+
+
+def test_structured_output_runnable_max_retries_negative_raises_value_error() -> None:
+    with pytest.raises(ValueError, match=r"max_retries must be >= 0"):
+        structured_output_runnable(_native_ok_model(), Answer, max_retries=-1)
+
+
+def test_structured_output_runnable_max_retries_native_success_no_retry_needed() -> None:
+    model = _native_ok_model()
+    chain = structured_output_runnable(model, Answer, max_retries=3)
+    assert chain.invoke("hi") == Answer(value=99)
+
+
+def test_structured_output_runnable_max_retries_explicit_zero_behaves_like_default() -> None:
+    model = FlakyChatModel(fail_times=1)
+    chain = structured_output_runnable(model, Answer, max_retries=0)
+    with pytest.raises(StructuredOutputError):
+        chain.invoke("hi")
+    assert model.calls == 1
+
+
+def test_structured_output_runnable_max_retries_returns_a_runnable() -> None:
+    chain = structured_output_runnable(_native_ok_model(), Answer, max_retries=2)
+    assert hasattr(chain, "invoke")
+    assert hasattr(chain, "ainvoke")
+    assert hasattr(chain, "batch")
+    assert hasattr(chain, "abatch")
+
+
+def test_structured_output_runnable_max_retries_batch() -> None:
+    model = FlakyChatModel(fail_times=2)
+    chain = structured_output_runnable(model, Answer, max_retries=3)
+    assert chain.batch(["x", "y", "z"]) == [Answer(value=1)] * 3
+
+
+def test_structured_output_runnable_max_retries_abatch() -> None:
+    model = FlakyChatModel(fail_times=1)
+    chain = structured_output_runnable(model, Answer, max_retries=2)
+    results = asyncio.run(chain.abatch(["a", "b"]))
+    assert results == [Answer(value=1)] * 2
+
+
+def test_structured_output_runnable_max_retries_batch_return_exceptions_true() -> None:
+    model = FlakyChatModel(fail_times=10)
+    chain = structured_output_runnable(model, Answer, max_retries=1)
+    results = chain.batch(["a", "b"], return_exceptions=True)
+    assert len(results) == 2
+    assert all(isinstance(r, StructuredOutputError) for r in results)
+
+
+def test_structured_output_runnable_max_retries_composable_with_pipe() -> None:
+    chain = RunnableLambda(lambda x: x.upper()) | structured_output_runnable(
+        FlakyChatModel(fail_times=1), Answer, max_retries=2
+    )
+    assert chain.invoke("hi") == Answer(value=1)
+
+
+def test_structured_output_runnable_max_retries_forwards_kwargs_to_with_structured_output() -> None:
+    model = FlakyChatModel(fail_times=1)
+    structured_output_runnable(model, Answer, max_retries=2, method="json_mode", strict=True)
+
+
+def test_structured_output_runnable_max_retries_error_reflects_last_attempt() -> None:
+    class DistinctErrorsModel:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def with_structured_output(
+            self,
+            output_type: type,  # noqa: ARG002
+            include_raw: bool = True,  # noqa: ARG002
+            **kwargs: Any,  # noqa: ARG002
+        ) -> RunnableLambda:
+            def _call(_input: Any) -> dict[str, Any]:
+                self.calls += 1
+                return {
+                    "raw": AIMessage(content="not json"),
+                    "parsed": None,
+                    "parsing_error": ValueError(f"attempt-{self.calls}"),
+                }
+
+            return RunnableLambda(_call)
+
+    model = DistinctErrorsModel()
+    chain = structured_output_runnable(model, Answer, max_retries=2)
+    with pytest.raises(StructuredOutputError, match=r"attempt-3") as exc_info:
+        chain.invoke("hi")
+    assert "attempt-1" not in str(exc_info.value)
+    assert model.calls == 3
+
+
+def test_structured_output_runnable_max_retries_include_raw_true_error_reflects_last_attempt() -> (
+    None
+):
+    class DistinctErrorsModel:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def with_structured_output(
+            self,
+            output_type: type,  # noqa: ARG002
+            include_raw: bool = True,  # noqa: ARG002
+            **kwargs: Any,  # noqa: ARG002
+        ) -> RunnableLambda:
+            def _call(_input: Any) -> dict[str, Any]:
+                self.calls += 1
+                return {
+                    "raw": AIMessage(content="not json"),
+                    "parsed": None,
+                    "parsing_error": ValueError(f"attempt-{self.calls}"),
+                }
+
+            return RunnableLambda(_call)
+
+    model = DistinctErrorsModel()
+    chain = structured_output_runnable(model, Answer, max_retries=2, include_raw=True)
+    result = chain.invoke("hi")
+    assert "attempt-3" in str(result["parsing_error"])
+    assert model.calls == 3
