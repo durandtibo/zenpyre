@@ -74,6 +74,31 @@ def _both_fail_model() -> FakeChatModel:
     return FakeChatModel("not json at all", None, ValueError("no tool call"))
 
 
+class DistinctErrorsModel:
+    """Always fails native parsing and produces unparsable raw content,
+    with a distinct error message per call so tests can tell which
+    attempt a result/error came from."""
+
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def with_structured_output(
+        self,
+        output_type: type,  # noqa: ARG002
+        include_raw: bool = True,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002
+    ) -> RunnableLambda:
+        def _call(_input: Any) -> dict[str, Any]:
+            self.calls += 1
+            return {
+                "raw": AIMessage(content="not json"),
+                "parsed": None,
+                "parsing_error": ValueError(f"attempt-{self.calls}"),
+            }
+
+        return RunnableLambda(_call)
+
+
 ##################################################
 #     Tests for _as_text                        #
 ##################################################
@@ -534,26 +559,6 @@ def test_structured_output_runnable_max_retries_forwards_kwargs_to_with_structur
 
 
 def test_structured_output_runnable_max_retries_error_reflects_last_attempt() -> None:
-    class DistinctErrorsModel:
-        def __init__(self) -> None:
-            self.calls = 0
-
-        def with_structured_output(
-            self,
-            output_type: type,  # noqa: ARG002
-            include_raw: bool = True,  # noqa: ARG002
-            **kwargs: Any,  # noqa: ARG002
-        ) -> RunnableLambda:
-            def _call(_input: Any) -> dict[str, Any]:
-                self.calls += 1
-                return {
-                    "raw": AIMessage(content="not json"),
-                    "parsed": None,
-                    "parsing_error": ValueError(f"attempt-{self.calls}"),
-                }
-
-            return RunnableLambda(_call)
-
     model = DistinctErrorsModel()
     chain = structured_output_runnable(model, Answer, max_retries=2)
     with pytest.raises(StructuredOutputError, match=r"attempt-3") as exc_info:
@@ -565,26 +570,6 @@ def test_structured_output_runnable_max_retries_error_reflects_last_attempt() ->
 def test_structured_output_runnable_max_retries_include_raw_true_error_reflects_last_attempt() -> (
     None
 ):
-    class DistinctErrorsModel:
-        def __init__(self) -> None:
-            self.calls = 0
-
-        def with_structured_output(
-            self,
-            output_type: type,  # noqa: ARG002
-            include_raw: bool = True,  # noqa: ARG002
-            **kwargs: Any,  # noqa: ARG002
-        ) -> RunnableLambda:
-            def _call(_input: Any) -> dict[str, Any]:
-                self.calls += 1
-                return {
-                    "raw": AIMessage(content="not json"),
-                    "parsed": None,
-                    "parsing_error": ValueError(f"attempt-{self.calls}"),
-                }
-
-            return RunnableLambda(_call)
-
     model = DistinctErrorsModel()
     chain = structured_output_runnable(model, Answer, max_retries=2, include_raw=True)
     result = chain.invoke("hi")
