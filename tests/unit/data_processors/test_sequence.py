@@ -59,7 +59,7 @@ def test_sequence_processor_stores_custom_max_workers() -> None:
 
 @pytest.mark.parametrize("max_workers", [-1, -10])
 def test_sequence_processor_negative_max_workers_raises(max_workers: int) -> None:
-    with pytest.raises(ValueError, match="max_workers must be >= 0"):
+    with pytest.raises(ValueError, match="max_workers must be greater than or equal to 0"):
         SequenceProcessor(processor=LambdaProcessor(fn=len), max_workers=max_workers)
 
 

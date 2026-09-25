@@ -9,6 +9,7 @@ from collections.abc import Sequence
 from typing import Any, TypeVar
 
 from coola.display import InlineDisplayMixin
+from coola.validation import validate_ge
 
 from zenpyre.data_processors.base import BaseProcessor
 
@@ -40,9 +41,7 @@ class LastNProcessor(BaseProcessor[Sequence[T], list[T]], InlineDisplayMixin):
     """
 
     def __init__(self, n: int) -> None:
-        if n < 1:
-            msg = f"n must be a positive integer, got {n}"
-            raise ValueError(msg)
+        validate_ge(n, 1, name="n")
         self._n = n
 
     def process(self, data: Sequence[T]) -> list[T]:
