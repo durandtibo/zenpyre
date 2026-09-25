@@ -11,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, TypeVar
 
 from coola.display import MultilineDisplayMixin
+from coola.validation import validate_ge
 
 from zenpyre.data_processors.base import BaseProcessor
 from zenpyre.utils.rich import make_progressbar
@@ -70,9 +71,7 @@ class SequenceProcessor(BaseProcessor[Sequence[U], list[T]], MultilineDisplayMix
         self._processor = processor
         self._progress_description = progress_description
         self._raise_on_error = raise_on_error
-        if max_workers < 0:
-            msg = f"max_workers must be >= 0, got {max_workers}"
-            raise ValueError(msg)
+        validate_ge(max_workers, 0, name="max_workers")
         self._max_workers = max_workers
 
     def process(self, data: Sequence[U]) -> list[T]:

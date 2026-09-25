@@ -9,6 +9,7 @@ import logging
 from typing import TYPE_CHECKING, Any, TypeVar
 
 from coola.display import MultilineDisplayMixin
+from coola.validation import validate_ge
 
 from zenpyre.ingestors.base import BaseIngestor
 
@@ -52,9 +53,7 @@ class FirstNIngestor(BaseIngestor[list[T]], MultilineDisplayMixin):
     """
 
     def __init__(self, source: BaseIngestor[Sequence[T]], n: int) -> None:
-        if n < 1:
-            msg = f"n must be a positive integer, got {n}"
-            raise ValueError(msg)
+        validate_ge(n, 1, name="n")
         self._source = source
         self._n = n
 
