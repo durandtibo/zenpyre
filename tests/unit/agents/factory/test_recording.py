@@ -191,6 +191,33 @@ def test_recording_agent_factory_make_agent_returns_recording_runnable() -> None
         assert result is mock_recording_runnable_cls.return_value
 
 
+def test_recording_agent_factory_make_agent_opens_record_store() -> None:
+    record_store_factory = _make_record_store_factory()
+    factory = _make_factory(record_store_factory=record_store_factory)
+    with patch(f"{MODULE}.RecordingRunnable"):
+        factory.make_agent()
+        record_store_factory.make_record_store.return_value.open.assert_called_once_with()
+
+
+def test_recording_agent_factory_make_agent_returns_a_usable_agent() -> None:
+    """Regression test: the record store must be open before the
+    returned agent is invoked, or invoke() raises (see
+    RecordingRunnable's docstring)."""
+
+    class _EchoAgentFactory(BaseAgentFactory):
+        def make_agent(self) -> Any:
+            from langchain_core.runnables import RunnableLambda
+
+            return RunnableLambda(lambda x: x)
+
+    factory = _make_factory(
+        agent_factory=_EchoAgentFactory(),
+        record_store_factory=MinimalRecordStoreFactory(),
+    )
+    agent = factory.make_agent()
+    assert agent.invoke("hi") == "hi"
+
+
 # --- _get_repr_kwargs ---
 
 

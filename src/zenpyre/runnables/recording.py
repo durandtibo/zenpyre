@@ -14,13 +14,12 @@ from coola.display import MultilineDisplayMixin
 from langchain_core.runnables import Runnable
 from persista.record import Record
 
+from zenpyre.utils.context import DelegatingContextManagerMixin
 from zenpyre.utils.run import extract_run_id, extract_run_ids
 from zenpyre.utils.serialization import default_serialize
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable, Iterator, Sequence
-    from types import TracebackType
-    from typing import Self
 
     from langchain_core.runnables import RunnableConfig
     from persista.record.store import BaseRecordStore
@@ -31,7 +30,12 @@ Input = TypeVar("Input")
 Output = TypeVar("Output")
 
 
-class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[Input, Output]):
+class RecordingRunnable(
+    Runnable[Input, Output],
+    MultilineDisplayMixin,
+    DelegatingContextManagerMixin,
+    Generic[Input, Output],
+):
     r"""Wrap a Runnable to record the input and output of each invocation
     to a record store.
 
@@ -51,9 +55,13 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
     not open it itself. Use ``RecordingRunnable`` as a context manager
     (rather than opening/closing ``record_store`` directly) to be sure
     it's closed once you're done with it: ``__enter__``/``__exit__``
-    delegate to ``record_store.open()``/``record_store.close()``, so
+    (and their async counterparts ``__aenter__``/``__aexit__``)
+    delegate to ``record_store.open()``/``record_store.close()`` (or
+    ``aopen()``/``aclose()``), so both
     ``with RecordingRunnable(runnable, record_store) as recorded: ...``
-    guarantees ``record_store`` is closed on exit, even if a call
+    and
+    ``async with RecordingRunnable(runnable, record_store) as recorded: ...``
+    guarantee ``record_store`` is closed on exit, even if a call
     raises.
 
     Note:
@@ -145,6 +153,8 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         """
         return frozenset({"input", "output", "timestamp", "run_id", "error"})
 
+    _context_managed_attr = "_record_store"
+
     def __init__(
         self,
         runnable: Runnable[Input, Output],
@@ -183,34 +193,6 @@ class RecordingRunnable(Runnable[Input, Output], MultilineDisplayMixin, Generic[
         # doesn't silently leak into every subsequently written record.
         self._extra = dict(extra) if extra else {}
         self._serializer = serializer or default_serialize
-
-    def __enter__(self) -> Self:
-        """Open ``record_store`` and return this wrapper.
-
-        Returns:
-            This wrapper, unchanged.
-        """
-        self._record_store.open()
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
-    ) -> None:
-        """Close ``record_store``, regardless of whether the ``with``
-        block raised.
-
-        Args:
-            exc_type: The exception type, if the ``with`` block
-                raised; otherwise ``None``.
-            exc_value: The exception instance, if the ``with`` block
-                raised; otherwise ``None``.
-            traceback: The exception's traceback, if the ``with``
-                block raised; otherwise ``None``.
-        """
-        self._record_store.close()
 
     def invoke(
         self,

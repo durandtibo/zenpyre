@@ -142,6 +142,59 @@ def test_recording_runnable_context_manager_returns_the_wrapper(
         assert entered is recorded
 
 
+# --- async context manager ---
+
+
+def test_recording_runnable_async_context_manager_opens_store(
+    upper_runnable: RunnableLambda,
+) -> None:
+    async def run() -> None:
+        raw_store = InMemoryRecordStore()
+        async with RecordingRunnable(upper_runnable, raw_store) as recorded:
+            assert await recorded.ainvoke("hi") == "HI"
+
+    asyncio.run(run())
+
+
+def test_recording_runnable_async_context_manager_closes_store_on_exit(
+    upper_runnable: RunnableLambda,
+) -> None:
+    async def run() -> InMemoryRecordStore:
+        raw_store = InMemoryRecordStore()
+        async with RecordingRunnable(upper_runnable, raw_store):
+            pass
+        return raw_store
+
+    raw_store = asyncio.run(run())
+    assert raw_store.closed
+
+
+def test_recording_runnable_async_context_manager_closes_store_on_error(
+    failing_runnable: RunnableLambda,
+) -> None:
+    async def run() -> InMemoryRecordStore:
+        raw_store = InMemoryRecordStore()
+        with pytest.raises(ValueError, match="boom"):
+            async with RecordingRunnable(failing_runnable, raw_store) as recorded:
+                await recorded.ainvoke("bad")
+        return raw_store
+
+    raw_store = asyncio.run(run())
+    assert raw_store.closed
+
+
+def test_recording_runnable_async_context_manager_returns_the_wrapper(
+    upper_runnable: RunnableLambda,
+) -> None:
+    async def run() -> None:
+        raw_store = InMemoryRecordStore()
+        recorded = RecordingRunnable(upper_runnable, raw_store)
+        async with recorded as entered:
+            assert entered is recorded
+
+    asyncio.run(run())
+
+
 # --- invoke ---
 
 

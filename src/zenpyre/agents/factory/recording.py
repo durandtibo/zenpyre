@@ -89,6 +89,14 @@ class RecordingAgentFactory(BaseAgentFactory, MultilineDisplayMixin):
     def make_agent(self) -> Runnable[dict[str, Any], dict[str, Any]]:
         agent = self._agent_factory.make_agent()
         record_store = self._record_store_factory.make_record_store()
+        # RecordingRunnable requires an already-open record_store (see its
+        # docstring), and this factory hands back a ready-to-use agent
+        # rather than a context manager, so it opens the store itself
+        # here. BaseRecordStore.open() is required to be idempotent, so
+        # a caller may still safely use the returned RecordingRunnable
+        # as a `with`/`async with` block to have the store closed for
+        # them once done.
+        record_store.open()
         return RecordingRunnable(
             runnable=agent,
             record_store=record_store,

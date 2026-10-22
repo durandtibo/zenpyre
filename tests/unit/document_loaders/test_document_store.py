@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Iterator
 
 import pytest
@@ -72,6 +73,52 @@ def test_document_store_loader_context_manager_returns_the_loader() -> None:
     loader = DocumentStoreLoader(raw_store)
     with loader as entered:
         assert entered is loader
+
+
+# --- async context manager ---
+
+
+def test_document_store_loader_async_context_manager_opens_store() -> None:
+    async def run() -> None:
+        raw_store = InMemoryDocumentStore()
+        async with DocumentStoreLoader(raw_store) as loader:
+            assert await loader.aload() == []
+
+    asyncio.run(run())
+
+
+def test_document_store_loader_async_context_manager_closes_store_on_exit() -> None:
+    async def run() -> InMemoryDocumentStore:
+        raw_store = InMemoryDocumentStore()
+        async with DocumentStoreLoader(raw_store):
+            pass
+        return raw_store
+
+    raw_store = asyncio.run(run())
+    assert raw_store.closed
+
+
+def test_document_store_loader_async_context_manager_closes_store_on_error() -> None:
+    async def run() -> InMemoryDocumentStore:
+        raw_store = InMemoryDocumentStore()
+        msg = "boom"
+        with pytest.raises(ValueError, match="boom"):
+            async with DocumentStoreLoader(raw_store):
+                raise ValueError(msg)
+        return raw_store
+
+    raw_store = asyncio.run(run())
+    assert raw_store.closed
+
+
+def test_document_store_loader_async_context_manager_returns_the_loader() -> None:
+    async def run() -> None:
+        raw_store = InMemoryDocumentStore()
+        loader = DocumentStoreLoader(raw_store)
+        async with loader as entered:
+            assert entered is loader
+
+    asyncio.run(run())
 
 
 # --- lazy_load ---
