@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Generate GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # ratchet:actions/create-github-app-token@v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # ratchet:actions/create-github-app-token@v3.3.0
         with:
           client-id: ${{ secrets.TIBOT_CLIENT_ID }}
           private-key: ${{ secrets.TIBOT_APP_PRIVATE_KEY }}
@@ -47,17 +47,21 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       # Pin all action references to their commit SHA, keeping the version as a
-      # comment. Covers top-level workflows and the composite actions they
-      # call under .github/actions/*, so neither drifts out of pinning.
+      # comment. Covers top-level workflows, this repo's own action.y(a)ml,
+      # and any composite actions under .github/actions/*, so none drift out
+      # of pinning.
       - name: Pin GitHub Actions
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }} # for API quota and auth
         run: |
           shopt -s nullglob
           ratchet pin .github/workflows/*.yaml .github/workflows/*.yml \
-            .github/actions/*/action.yaml .github/actions/*/action.yml
+            .github/actions/*/action.yaml .github/actions/*/action.yml \
+            action.y*ml
 
       # Reformat the pinned files so ratchet's output matches repo style.
+      # Version pinned so a `prettier` release can't silently change
+      # formatting output on a bot-authored PR.
       - name: Format YAML
         run: |
           make format-yaml
